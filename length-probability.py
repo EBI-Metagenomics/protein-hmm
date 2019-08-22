@@ -1,3 +1,12 @@
+from matplotlib import pyplot as plt
+import numpy as np
+
+plt.rc("font", family="serif")
+plt.rc("xtick", labelsize="x-small")
+plt.rc("ytick", labelsize="x-small")
+plt.rc("text", usetex=True)
+
+
 def prob(f, epsilon):
     e = epsilon
     if f == 1 or f == 5:
@@ -9,10 +18,13 @@ def prob(f, epsilon):
     raise ValueError()
 
 
-if __name__ == "__main__":
-    for epsilon in [1e-3, 1e-2, 1e-1]:
-        print(f"For 𝜀 = {epsilon}")
-        for f in range(1, 6):
-            print("  p(F={}) = {}".format(f, prob(f, epsilon)))
-        print("  p(F=any) = {}".format(sum(prob(f, epsilon) for f in range(1, 6))))
+epsilon = np.linspace(0, 0.5)
 
+fig = plt.figure(figsize=(4, 3))
+plt.plot(epsilon, prob(1, epsilon), label="$p(F=1)$", color="black", ls="-.")
+plt.plot(epsilon, prob(2, epsilon), label="$p(F=2)$", color="black", ls=":")
+plt.plot(epsilon, prob(3, epsilon), label="$p(F=3)$", color="black", ls="-")
+plt.xlabel("$\epsilon$")
+plt.ylabel("$p(\cdot)$")
+plt.legend()
+plt.savefig("seq-len-prob.pdf")
