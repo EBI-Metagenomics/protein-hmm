@@ -1,3 +1,5 @@
+import sys
+from math import exp, log, inf
 from matplotlib import pyplot as plt
 from itertools import product
 from numpy import linspace
@@ -8,6 +10,15 @@ plt.rc("font", family="serif")
 plt.rc("xtick", labelsize="x-small")
 plt.rc("ytick", labelsize="x-small")
 plt.rc("text", usetex=True)
+
+
+def binomial(n, k):
+    """ Choose `k` from `n`. """
+    try:
+        binom = fac(n) // fac(k) // fac(n - k)
+    except ValueError:
+        binom = 0
+    return binom
 
 
 class Prob:
@@ -63,7 +74,15 @@ class Prob:
             return e ** 4 + 4 * e ** 2 * (1 - e) ** 2 + (1 - e) ** 4
         raise ValueError()
 
+    def indel_prob(self, m):
+        """ Probability of `m` base indels. """
+        e = self._epsilon
+        if m not in [0, 1, 2, 3, 4]:
+            raise ValueError()
+        return binomial(4, 4 - m) * (1 - e) ** (4 - m) * e ** m
+
     def prob(self, z):
+        """ p(Z=z1z2...zf, F=f). """
         f = len(z)
         eps = self._epsilon
         _ = None
@@ -143,6 +162,46 @@ class Prob:
 
         return p
 
+    def __str__(self):
+        msg = f"Epsilon = {self._epsilon}\n"
+
+        msg += "\n"
+        for m in range(0, 4):
+            msg += f"p(M={m}) = {self.indel_prob(m):.4f}\n"
+
+        msg += "\n"
+        for f in range(1, 6):
+            msg += f"p(F={f}) = {self.len_prob(f):.4f}\n"
+
+        msg += "\n"
+        msg += "Top codons\n"
+        items = sorted(self._codon_emission.items(), key=lambda x: x[1], reverse=True)
+        for c, v in items[:5]:
+            msg += f"p(X={c}) = {v:.4f}\n"
+
+        sequences = {}
+
+        for f in range(1, 6):
+            msg += "\n"
+            msg += f"Top sequences for F={f}\n"
+            seqs = {"".join(seq): self.prob(seq) for seq in product(*[self._bases] * f)}
+            sequences.update(seqs)
+            items = sorted(seqs.items(), key=lambda x: x[1], reverse=True)
+            norm = self.len_prob(f)
+            for c, v in items[:5]:
+                v /= norm
+                msg += f"p(Z={c} | F={f}) = {v:.4f}\n"
+
+        msg += "\n"
+        msg += f"Top final sequences\n"
+        items = sorted(sequences.items(), key=lambda x: x[1], reverse=True)
+        for c, v in items[:30]:
+            f = len(c)
+            c += " " * (5 - len(c))
+            msg += f"p(Z={c}, F={f}) = {v:.4f}\n"
+
+        return msg
+
 
 def create_codon_emission(bases, random):
     random = RandomState(0)
@@ -153,44 +212,176 @@ def create_codon_emission(bases, random):
     return {k: v / norm for k, v in codon_emission.items()}
 
 
-bases = "ACGT"
-random = RandomState(0)
-codon_emission = create_codon_emission(bases, random)
-p = Prob(bases, codon_emission, 0.1)
+def normalize(emission):
+    norm = sum(emission.values())
+    return {k: v / norm for k, v in emission.items()}
 
 
-total = 0
-for x1 in bases:
-    t = p.prob(x1)
-    total += t
-    print("{}: {}".format(x1, t))
-# print(total / p.len_prob(1))
+gencode = {
+    "F": ["UUU", "UUC"],
+    "L": ["UUA", "UUG", "CUU", "CUC", "CUA", "CUG"],
+    "I": ["AUU", "AUC", "AUA"],
+    "M": ["AUG"],
+    "V": ["GUU", "GUC", "GUA", "GUG"],
+    "S": ["UCU", "UCC", "UCA", "UCG"],
+    "P": ["CCU", "CCC", "CCA", "CCG"],
+    "T": ["ACU", "ACC", "ACA", "ACG"],
+    "A": ["GCU", "GCC", "GCA", "GCG"],
+    "Y": ["UAU", "UAC"],
+    "*": ["UAA", "UAG", "UGA"],
+    "H": ["CAU", "CAC"],
+    "Q": ["CAA", "CAG"],
+    "N": ["AAU", "AAC"],
+    "K": ["AAA", "AAG"],
+    "D": ["GAU", "GAC"],
+    "E": ["GAA", "GAG"],
+    "C": ["UGU", "UGC"],
+    "W": ["UGG"],
+    "R": ["CGU", "CGC", "CGA", "CGG"],
+    "S": ["AGU", "AGC"],
+    "R": ["AGA", "AGG"],
+    "G": ["GGU", "GGC", "GGA", "GGG"],
+}
+
+
+def normalize_nlogspace(values):
+    from numpy import asarray
+    from scipy.special import logsumexp
+
+    values = asarray(values, float)
+    norm = logsumexp(-values)
+    return [norm + v for v in values]
+
+
+def parse_aa_emission(lines):
+
+    aa_emission = {}
+    for line in lines:
+        aa, logp = line.split()
+        logp = float(logp)
+        aa_emission.update({aa: logp})
+
+    return aa_emission
+
+
+def convert_aa_to_codon_emission(aa_emission):
+    codon_emission = {}
+    for aa, nlogp in aa_emission.items():
+        codons = gencode.get(aa, [])
+        norm = log(len(codons))
+        for codon in codons:
+            codon_emission.update({codon: nlogp + norm})
+
+    return codon_emission
+
+
+def fill_remaining_codon_emission(bases, codon_emission):
+    from math import inf
+
+    for a, b, c in product(*[bases] * 3):
+        codon = a + b + c
+        if codon not in codon_emission:
+            codon_emission[codon] = inf
+
+    return codon_emission
+
+
+def normalize_emission(emission):
+    keys = list(emission.keys())
+    nlogp = [emission[a] for a in keys]
+    nlogp = normalize_nlogspace(nlogp)
+    emission.update({a: logp for a, logp in zip(keys, nlogp)})
+
+
+class AA2Codon:
+    def __init__(self, bases, gencode, aa_emission):
+        self._bases = bases
+        self._gencode = gencode
+
+        normalize_emission(aa_emission)
+        self._aa_emission = aa_emission
+
+        self._codon_emission = {}
+        self._generate_codon_emission()
+        normalize_emission(self._codon_emission)
+
+    @property
+    def amino_acids(self):
+        return list(sorted(self._aa_emission.keys()))
+
+    def aa_emission(self, prob_space=True):
+        if prob_space:
+            f = lambda x: exp(-x)
+        else:
+            f = lambda x: x
+        return {k: f(v) for k, v in self._aa_emission.items()}
+
+    def codon_emission(self, prob_space=True):
+        if prob_space:
+            f = lambda x: exp(-x)
+        else:
+            f = lambda x: x
+        return {k: f(v) for k, v in self._codon_emission.items()}
+
+    def _generate_codon_emission(self):
+        for aa, nlogp in self._aa_emission.items():
+            codons = self._gencode.get(aa, [])
+            norm = log(len(codons))
+            for codon in codons:
+                self._codon_emission.update({codon: nlogp + norm})
+
+        for a, b, c in product(*[self._bases] * 3):
+            codon = a + b + c
+            if codon not in self._codon_emission:
+                self._codon_emission[codon] = inf
+
+
+with open("emission.txt", "r") as fp:
+    aa_emission = parse_aa_emission(fp)
+
+bases = "ACGU"
+aa2codon = AA2Codon(bases, gencode, aa_emission)
+print(sum(v for v in aa2codon.aa_emission().values()))
+print(sum(v for v in aa2codon.codon_emission().values()))
+
+p = Prob(bases, aa2codon.codon_emission(True), 0.1)
+
+print(p)
+sys.exit(0)
+
 
 # total = 0
-for x1, x2 in product(*[bases] * 2):
-    t = p.prob(x1 + x2)
-    total += t
-    print("{}{}: {}".format(x1, x2, t))
-# print(total / p.len_prob(2))
+# for x1 in bases:
+#     t = p.prob(x1)
+#     total += t
+#     print("{}: {}".format(x1, t))
+# # print(total / p.len_prob(1))
 
-# total = 0
-for x1, x2, x3 in product(*[bases] * 3):
-    t = p.prob(x1 + x2 + x3)
-    total += t
-    print("{}{}{}: {}".format(x1, x2, x3, t))
-# print(total / p.len_prob(3))
+# # total = 0
+# for x1, x2 in product(*[bases] * 2):
+#     t = p.prob(x1 + x2)
+#     total += t
+#     print("{}{}: {}".format(x1, x2, t))
+# # print(total / p.len_prob(2))
 
-# total = 0
-for x1, x2, x3, x4 in product(*[bases] * 4):
-    t = p.prob(x1 + x2 + x3 + x4)
-    total += t
-    print("{}{}{}{}: {}".format(x1, x2, x3, x4, t))
-# print(total / p.len_prob(4))
+# # total = 0
+# for x1, x2, x3 in product(*[bases] * 3):
+#     t = p.prob(x1 + x2 + x3)
+#     total += t
+#     print("{}{}{}: {}".format(x1, x2, x3, t))
+# # print(total / p.len_prob(3))
 
-# total = 0
-for x1, x2, x3, x4, x5 in product(*[bases] * 5):
-    t = p.prob(x1 + x2 + x3 + x4 + x5)
-    total += t
-    print("{}{}{}{}{}: {}".format(x1, x2, x3, x4, x5, t))
-# print(total / p.len_prob(5))
-print(total)
+# # total = 0
+# for x1, x2, x3, x4 in product(*[bases] * 4):
+#     t = p.prob(x1 + x2 + x3 + x4)
+#     total += t
+#     print("{}{}{}{}: {}".format(x1, x2, x3, x4, t))
+# # print(total / p.len_prob(4))
+
+# # total = 0
+# for x1, x2, x3, x4, x5 in product(*[bases] * 5):
+#     t = p.prob(x1 + x2 + x3 + x4 + x5)
+#     total += t
+#     print("{}{}{}{}{}: {}".format(x1, x2, x3, x4, x5, t))
+# # print(total / p.len_prob(5))
+# print(total)
