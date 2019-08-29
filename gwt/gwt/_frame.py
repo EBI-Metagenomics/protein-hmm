@@ -115,6 +115,18 @@ class FrameEmission:
 
         return p
 
+    def top_emission(self, n=10):
+
+        sequences = {}
+
+        bases = list(self.bases)
+        for f in range(1, 6):
+            seqs = {"".join(seq): self.prob(seq) for seq in product(*[bases] * f)}
+            sequences.update(seqs)
+
+        items = sorted(sequences.items(), key=lambda x: x[1], reverse=True)
+        return [(c, v) for c, v in items[:n]]
+
     def _codon_prob(self, x1, x2, x3):
         p = 0
         if all([x1 is None, x2 is None, x3 is not None]):

@@ -1,3 +1,4 @@
 include LICENSE.md
 include README.md
 include version.py
+include gwt/test/emission.txt

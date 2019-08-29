@@ -25,3 +25,16 @@ GENCODE = {
         "G": ["GGU", "GGC", "GGA", "GGG"],
     }
 }
+
+
+def gencode(aa_or_codon, name="standard"):
+    aa_or_codon = aa_or_codon.upper()
+    if len(aa_or_codon) == 1:
+        return GENCODE[name][aa_or_codon]
+    else:
+        aa_or_codon = aa_or_codon.replace("T", "U")
+        for aa, codons in GENCODE[name].items():
+            if aa_or_codon in codons:
+                return aa
+    raise ValueError("Value not found in the genetic code.")
+
