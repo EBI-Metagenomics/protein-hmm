@@ -1,9 +1,9 @@
-from ._testit import test
 from ._cli import cli
-from ._frame import FrameEmission
 from ._convert import AA2Codon
-from ._molecule import DNA, RNA
+from ._frame import FrameEmission
 from ._gencode import gencode
+from ._molecule import DNA, RNA
+from ._testit import test
 
 __version__ = "0.0.1"
 
@@ -17,4 +17,3 @@ __all__ = [
     "DNA",
     "gencode",
 ]
-
