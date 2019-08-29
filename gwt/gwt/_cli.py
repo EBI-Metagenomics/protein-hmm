@@ -42,14 +42,14 @@ def frame(input, base, show, epsilon, n):
     if show == "codon":
         show_tuples(sort_emission(aa2codon.codon_emission().items())[:n], 3)
     elif show == "frame":
-        frame = FrameEmission(aa2codon.codon_emission(), molecule, epsilon)
+        frame = FrameEmission(aa2codon.codon_emission(False), molecule, epsilon)
         show_tuples(sort_emission(frame.top_emission(n)), 5)
     elif show == "length":
-        frame = FrameEmission(aa2codon.codon_emission(), molecule, epsilon)
+        frame = FrameEmission(aa2codon.codon_emission(False), molecule, epsilon)
         for f in range(1, 6):
             print(f"p(F={f}) = {frame.len_prob(f):.18f}")
     elif show == "indels":
-        frame = FrameEmission(aa2codon.codon_emission(), molecule, epsilon)
+        frame = FrameEmission(aa2codon.codon_emission(False), molecule, epsilon)
         for m in range(0, 5):
             print(f"p(M={m}) = {frame.indel_prob(m):.18f}")
 

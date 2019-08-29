@@ -1,7 +1,8 @@
-from math import exp, log, inf
+from math import exp, inf, log
+
 from ._gencode import GENCODE
-from ._molecule import Molecule
-from ._molecule import convert_to
+from ._molecule import Molecule, convert_to
+from ._norm import normalize_emission
 
 
 class AA2Codon:
@@ -60,32 +61,4 @@ class AA2Codon:
             norm = log(len(codons))
             for codon in codons:
                 self._codon_emission.update({codon: nlogp + norm})
-
-        # for a, b, c in product(*[self.bases] * 3):
-        #     codon = a + b + c
-        #     if codon not in self._codon_emission:
-        #         self._codon_emission[codon] = inf
-
-
-def infer_bases(amino_acids):
-    bases = []
-    for aa in amino_acids:
-        bases += list(aa)
-    return "".join(sorted(list(set(bases))))
-
-
-def normalize_emission(emission):
-    keys = list(emission.keys())
-    nlogp = [emission[a] for a in keys]
-    nlogp = normalize_nlogspace(nlogp)
-    emission.update({a: logp for a, logp in zip(keys, nlogp)})
-
-
-def normalize_nlogspace(values):
-    from numpy import asarray
-    from scipy.special import logsumexp
-
-    values = asarray(values, float)
-    norm = logsumexp(-values)
-    return [norm + v for v in values]
 

@@ -1,23 +1,24 @@
+from math import log
+from numpy.testing import assert_almost_equal
 from gwt import FrameEmission, RNA, DNA
 
 
 def test_frame():
 
-    codon_emission = {"UCU": 0.9, "GUA": 0.1}
+    codon_emission = {"UCU": -log(0.9), "GUA": -log(0.1)}
     fe = FrameEmission(codon_emission, RNA(), 0.0)
 
     assert fe.len_prob(1) == 0.0
     assert fe.indel_prob(1) == 0.0
 
-    assert fe.prob(list("UCU")) == 0.9
-    assert fe.prob(list("GUA")) == 0.1
-    assert fe.prob(list("GGA")) == 0.0
+    assert_almost_equal(fe.prob(list("UCU")), 0.9)
+    assert_almost_equal(fe.prob(list("GUA")), 0.1)
+    assert_almost_equal(fe.prob(list("GGA")), 0.0)
 
-    assert fe.prob("UCU") == 0.9
-    assert fe.prob("GUA") == 0.1
-    assert fe.prob("GGA") == 0.0
+    assert_almost_equal(fe.prob("UCU"), 0.9)
+    assert_almost_equal(fe.prob("GUA"), 0.1)
+    assert_almost_equal(fe.prob("GGA"), 0.0)
 
-    codon_emission = {"UCU": 0.9, "GUA": 0.1}
     fe = FrameEmission(codon_emission, RNA(), 1e-2)
 
     assert abs(fe.len_prob(1) - 9.801e-05) < 1e-4
@@ -27,7 +28,6 @@ def test_frame():
     assert abs(fe.prob("GUA") - 0.09606286814583331) < 1e-5
     assert abs(fe.prob("GGA") - 2.178020833333333e-06) < 1e-5
 
-    codon_emission = {"UCU": 0.9, "GUA": 0.1}
     fe = FrameEmission(codon_emission, RNA(), 0.5)
 
     assert abs(fe.len_prob(1) - 0.0625) < 1e-4
@@ -39,7 +39,7 @@ def test_frame():
 
     assert set(fe.bases) == set(RNA().bases)
 
-    codon_emission = {"TCT": 0.9, "GTA": 0.1}
+    codon_emission = {"TCT": -log(0.9), "GTA": -log(0.1)}
     fe = FrameEmission(codon_emission, DNA(), 0.5)
 
     assert abs(fe.len_prob(1) - 0.0625) < 1e-4

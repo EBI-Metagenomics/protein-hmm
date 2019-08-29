@@ -3,6 +3,7 @@ from math import exp, log, inf
 from itertools import product
 from math import factorial as fac
 from ._molecule import Molecule
+from ._norm import normalize_emission
 
 
 class FrameEmission:
@@ -128,38 +129,40 @@ class FrameEmission:
         return [(c, v) for c, v in items[:n]]
 
     def _codon_prob(self, x1, x2, x3):
-        p = 0
+        from scipy.special import logsumexp
+
+        p = []
         if all([x1 is None, x2 is None, x3 is not None]):
             for x1, x2 in product(self.bases, self.bases):
-                p += self._codon_emission.get(x1 + x2 + x3, 0.0)
+                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
 
         elif all([x1 is None, x2 is not None, x3 is None]):
             for x1, x3 in product(self.bases, self.bases):
-                p += self._codon_emission.get(x1 + x2 + x3, 0.0)
+                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
 
         elif all([x1 is not None, x2 is None, x3 is None]):
             for x2, x3 in product(self.bases, self.bases):
-                p += self._codon_emission.get(x1 + x2 + x3, 0.0)
+                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
 
         elif all([x1 is not None, x2 is not None, x3 is None]):
             for x3 in self.bases:
-                p += self._codon_emission.get(x1 + x2 + x3, 0.0)
+                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
 
         elif all([x1 is not None, x2 is None, x3 is not None]):
             for x2 in self.bases:
-                p += self._codon_emission.get(x1 + x2 + x3, 0.0)
+                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
 
         elif all([x1 is None, x2 is not None, x3 is not None]):
             for x1 in self.bases:
-                p += self._codon_emission.get(x1 + x2 + x3, 0.0)
+                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
 
         elif all([x1 is not None, x2 is not None, x3 is not None]):
-            p = self._codon_emission.get(x1 + x2 + x3, 0.0)
+            p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
 
         else:
             raise ValueError()
 
-        return p
+        return exp(logsumexp(p))
 
     def _base_bg_prob(self, x):
         return 1.0 / 4
@@ -212,11 +215,4 @@ def binomial(n, k):
     except ValueError:
         binom = 0
     return binom
-
-
-def normalize_emission(emission):
-    keys = list(emission.keys())
-    probs = [emission[a] for a in keys]
-    norm = sum(probs)
-    emission.update({a: p / norm for a, p in zip(keys, probs)})
 
