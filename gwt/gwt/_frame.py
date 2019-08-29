@@ -2,14 +2,19 @@ import sys
 from math import exp, log, inf
 from itertools import product
 from math import factorial as fac
+from ._molecule import Molecule
 
 
 class FrameEmission:
-    def __init__(self, codon_emission, epsilon):
+    def __init__(self, codon_emission, molecule: Molecule, epsilon: float):
         normalize_emission(codon_emission)
-        self._bases = infer_bases(codon_emission.keys())
+        self._molecule = molecule
         self._codon_emission = codon_emission
         self._epsilon = epsilon
+
+    @property
+    def bases(self):
+        return self._molecule.bases
 
     def len_prob(self, f):
         """ P(F=f). """
@@ -113,27 +118,27 @@ class FrameEmission:
     def _codon_prob(self, x1, x2, x3):
         p = 0
         if all([x1 is None, x2 is None, x3 is not None]):
-            for x1, x2 in product(self._bases, self._bases):
+            for x1, x2 in product(self.bases, self.bases):
                 p += self._codon_emission.get(x1 + x2 + x3, 0.0)
 
         elif all([x1 is None, x2 is not None, x3 is None]):
-            for x1, x3 in product(self._bases, self._bases):
+            for x1, x3 in product(self.bases, self.bases):
                 p += self._codon_emission.get(x1 + x2 + x3, 0.0)
 
         elif all([x1 is not None, x2 is None, x3 is None]):
-            for x2, x3 in product(self._bases, self._bases):
+            for x2, x3 in product(self.bases, self.bases):
                 p += self._codon_emission.get(x1 + x2 + x3, 0.0)
 
         elif all([x1 is not None, x2 is not None, x3 is None]):
-            for x3 in self._bases:
+            for x3 in self.bases:
                 p += self._codon_emission.get(x1 + x2 + x3, 0.0)
 
         elif all([x1 is not None, x2 is None, x3 is not None]):
-            for x2 in self._bases:
+            for x2 in self.bases:
                 p += self._codon_emission.get(x1 + x2 + x3, 0.0)
 
         elif all([x1 is None, x2 is not None, x3 is not None]):
-            for x1 in self._bases:
+            for x1 in self.bases:
                 p += self._codon_emission.get(x1 + x2 + x3, 0.0)
 
         elif all([x1 is not None, x2 is not None, x3 is not None]):
@@ -180,7 +185,7 @@ class FrameEmission:
         msg += "\n"
         msg += f"Top final sequences\n"
         items = sorted(sequences.items(), key=lambda x: x[1], reverse=True)
-        for c, v in items[:30]:
+        for c, v in items[:100]:
             f = len(c)
             c += " " * (5 - len(c))
             msg += f"p(Z={c}, F={f}) = {v:.4f}\n"
@@ -195,13 +200,6 @@ def binomial(n, k):
     except ValueError:
         binom = 0
     return binom
-
-
-def infer_bases(codons):
-    bases = []
-    for c in codons:
-        bases += list(c)
-    return "".join(sorted(list(set(bases))))
 
 
 def normalize_emission(emission):

@@ -1,19 +1,14 @@
 from math import exp, log, inf
-from itertools import product
 from ._gencode import GENCODE
+from ._molecule import Molecule
+from ._molecule import convert_to
 
 
 class AA2Codon:
-    def __init__(self, aa_emission, gencode="standard", molecule="DNA"):
+    def __init__(self, aa_emission, molecule: Molecule, gencode="standard"):
         self._gencode = GENCODE[gencode]
-        convert_gencode_alphabet(self._gencode, molecule)
-
-        if molecule == "DNA":
-            self._bases = "ACGT"
-        elif molecule == "RNA":
-            self._bases = "ACGU"
-        else:
-            raise ValueError()
+        self._molecule = molecule
+        self._convert_gencode_alphabet()
 
         normalize_emission(aa_emission)
         self._aa_emission = aa_emission
@@ -22,13 +17,26 @@ class AA2Codon:
         self._generate_codon_emission()
         normalize_emission(self._codon_emission)
 
+    def _convert_gencode_alphabet(self):
+
+        for aa in self._gencode.keys():
+            self._gencode[aa] = [
+                convert_to(codon, self._molecule) for codon in self._gencode[aa]
+            ]
+
+        return self._gencode
+
+    @property
+    def gencode(self):
+        return self._gencode
+
     @property
     def amino_acids(self):
         return "".join(sorted(self._aa_emission.keys()))
 
     @property
     def bases(self):
-        return self._bases
+        return self._molecule.bases
 
     def aa_emission(self, prob_space=True):
         if prob_space:
@@ -45,16 +53,18 @@ class AA2Codon:
         return {k: f(v) for k, v in self._codon_emission.items()}
 
     def _generate_codon_emission(self):
+        from itertools import product
+
         for aa, nlogp in self._aa_emission.items():
             codons = self._gencode.get(aa, [])
             norm = log(len(codons))
             for codon in codons:
                 self._codon_emission.update({codon: nlogp + norm})
 
-        for a, b, c in product(*[self._bases] * 3):
-            codon = a + b + c
-            if codon not in self._codon_emission:
-                self._codon_emission[codon] = inf
+        # for a, b, c in product(*[self.bases] * 3):
+        #     codon = a + b + c
+        #     if codon not in self._codon_emission:
+        #         self._codon_emission[codon] = inf
 
 
 def infer_bases(amino_acids):
@@ -79,19 +89,3 @@ def normalize_nlogspace(values):
     norm = logsumexp(-values)
     return [norm + v for v in values]
 
-
-def convert_gencode_alphabet(gencode, molecule):
-    if molecule == "DNA":
-
-        def replace(codon):
-            return codon.replace("U", "T")
-
-    elif molecule == "RNA":
-
-        def replace(codon):
-            return codon.replace("T", "U")
-
-    for aa in gencode.keys():
-        gencode[aa] = [replace(codon) for codon in gencode[aa]]
-
-    return gencode
