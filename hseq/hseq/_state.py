@@ -1,5 +1,5 @@
 from ._norm import normalize_emission
-from math import exp
+from math import exp, inf
 
 
 class State:
@@ -32,6 +32,15 @@ class SilentState(State):
         del random
         return ""
 
+    def prob(self, seq, nlog_space=False):
+        if seq == "":
+            v = 0.0
+        else:
+            v = inf
+        if not nlog_space:
+            v = exp(-v)
+        return v
+
 
 class NormalState(State):
     def __init__(self, name: str, emission: dict):
@@ -45,6 +54,12 @@ class NormalState(State):
         abc = list(self._alphabet)
         probs = [exp(-self._emission[a]) for a in abc]
         return random.choice(abc, p=probs)
+
+    def prob(self, seq, nlog_space=False):
+        v = self._emission.get(seq, inf)
+        if not nlog_space:
+            v = exp(-v)
+        return v
 
 
 class TripletState(State):
@@ -60,3 +75,28 @@ class TripletState(State):
         probs = [exp(-self._emission[t]) for t in triplets]
         return random.choice(triplets, p=probs)
 
+    def prob(self, seq, nlog_space=False):
+        v = self._emission.get(seq, inf)
+        if not nlog_space:
+            v = exp(-v)
+        return v
+
+
+class FrameState(State):
+    def __init__(self, name: str, alphabet: list, emission: dict):
+
+        normalize_emission(emission)
+        self._emission = emission
+
+        super(TripletState, self).__init__(name, False, alphabet)
+
+    def emit(self, random):
+        triplets = list(self._emission.keys())
+        probs = [exp(-self._emission[t]) for t in triplets]
+        return random.choice(triplets, p=probs)
+
+    def prob(self, seq, nlog_space=False):
+        v = self._emission.get(seq, inf)
+        if not nlog_space:
+            v = exp(-v)
+        return v
