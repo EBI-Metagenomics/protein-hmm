@@ -1,3 +1,7 @@
+from ._norm import normalize_emission
+from math import exp
+
+
 class State:
     def __init__(self, name: str, end_state: bool, alphabet: list):
         self._name = name
@@ -28,27 +32,31 @@ class SilentState(State):
         del random
         return ""
 
-    def __str__(self):
-        return f"<{self._name}>"
-
 
 class NormalState(State):
-    def __init__(self, name: str, end_state: bool, emission: dict):
-        from ._norm import normalize_emission
-
+    def __init__(self, name: str, emission: dict):
         alphabet = "".join(list(emission.keys()))
         normalize_emission(emission)
         self._emission = emission
 
-        super(NormalState, self).__init__(name, end_state, alphabet)
+        super(NormalState, self).__init__(name, False, alphabet)
 
     def emit(self, random):
-        from math import exp
-
         abc = list(self._alphabet)
         probs = [exp(-self._emission[a]) for a in abc]
         return random.choice(abc, p=probs)
 
-    def __str__(self):
-        return f"<{self._name}>"
+
+class TripletState(State):
+    def __init__(self, name: str, alphabet: list, emission: dict):
+
+        normalize_emission(emission)
+        self._emission = emission
+
+        super(TripletState, self).__init__(name, False, alphabet)
+
+    def emit(self, random):
+        triplets = list(self._emission.keys())
+        probs = [exp(-self._emission[t]) for t in triplets]
+        return random.choice(triplets, p=probs)
 
