@@ -156,7 +156,12 @@ class FrameState(State):
             return e ** 4 + 4 * e ** 2 * (1 - e) ** 2 + (1 - e) ** 4
         return 0.0
 
-    # def emit(self, random):
-    #     triplets = list(self._emission.keys())
-    #     probs = [exp(-v) for v in self._emission.values()]
-    #     return random.choice(triplets, p=probs)
+    def emit(self, random):
+        lengths = [1, 2, 3, 4, 5]
+        probs = [self._len_prob(f) for f in [1, 2, 3, 4, 5]]
+        f = random.choice(lengths, p=probs)
+
+        abc = self._alphabet
+        emission = {"".join(z): self._prob_z_given_f(z) for z in product(*[abc] * f)}
+        seq = random.choice(list(emission.keys()), p=list(emission.values()))
+        return seq

@@ -79,3 +79,14 @@ def test_states():
     abc = "ACGU"
     for f in range(1, 6):
         assert_allclose(sum(p(x) for x in product(*[abc] * f)), 1.0)
+
+    random = RandomState(0)
+    assert frame_state.emit(random) == "AUG"
+    assert frame_state.emit(random) == "AUG"
+    assert frame_state.emit(random) == "AUG"
+    assert frame_state.emit(random) == "AUU"
+    assert frame_state.emit(random) == "AUGA"
+    assert frame_state.emit(random) == "AUG"
+    assert frame_state.emit(random) == "AUU"
+    assert frame_state.emit(random) == "AG"
+    assert frame_state.emit(random) == "UG"
