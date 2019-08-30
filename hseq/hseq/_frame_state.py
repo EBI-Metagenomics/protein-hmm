@@ -36,12 +36,14 @@ class FrameState(State):
         probs = [-get(a + b + c, inf) for a, b, c in product(x1, x2, x3)]
         return exp(logsumexp(probs))
 
-    def _prob_f1(self, z1):
+    def _joint_z_f1(self, z1):
+        """ p(Z=z1, F=1). """
         e = self._codon_prob
         c = self._epsilon ** 2 * (1 - self._epsilon) ** 2
         return c * (e(z1, _, _) + e(_, z1, _) + e(_, _, z1)) / 3
 
-    def _prob_f2(self, z1, z2):
+    def _joint_z_f2(self, z1, z2):
+        """ p(Z=z1z2, F=2). """
         i = lambda x: exp(-self._base_emission.get(x))
         e = self._codon_prob
 
@@ -54,7 +56,8 @@ class FrameState(State):
 
         return p
 
-    def _prob_f3(self, z1, z2, z3):
+    def _joint_z_f3(self, z1, z2, z3):
+        """ p(Z=z1z2z3, F=3). """
         i = lambda x: exp(-self._base_emission.get(x))
         e = self._codon_prob
 
@@ -72,7 +75,8 @@ class FrameState(State):
 
         return p
 
-    def _prob_f4(self, z1, z2, z3, z4):
+    def _joint_z_f4(self, z1, z2, z3, z4):
+        """ p(Z=z1z2...z4, F=4). """
         i = lambda x: exp(-self._base_emission.get(x))
         e = self._codon_prob
 
@@ -95,7 +99,8 @@ class FrameState(State):
 
         return p
 
-    def _prob_f5(self, z1, z2, z3, z4, z5):
+    def _joint_z_f5(self, z1, z2, z3, z4, z5):
+        """ p(Z=z1z2...z5, F=5). """
         i = lambda x: exp(-self._base_emission.get(x))
         e = self._codon_prob
 
@@ -108,18 +113,50 @@ class FrameState(State):
 
         return p
 
+    def _prob_z_given_f(self, z):
+        """ p(Z=z1z2...zf | F=f). """
+        f = len(z)
+        if f == 1:
+            return self._joint_z_f1(*z) / self._len_prob(1)
+        elif f == 2:
+            return self._joint_z_f2(*z) / self._len_prob(2)
+        elif f == 3:
+            return self._joint_z_f3(*z) / self._len_prob(3)
+        elif f == 4:
+            return self._joint_z_f4(*z) / self._len_prob(4)
+        elif f == 5:
+            return self._joint_z_f5(*z) / self._len_prob(5)
+        else:
+            return 0.0
+
     def prob(self, z):
         """ p(Z=z1z2...zf, F=f). """
         f = len(z)
         if f == 1:
-            return self._prob_f1(*z)
+            return self._joint_z_f1(*z)
         elif f == 2:
-            return self._prob_f2(*z)
+            return self._joint_z_f2(*z)
         elif f == 3:
-            return self._prob_f3(*z)
+            return self._joint_z_f3(*z)
         elif f == 4:
-            return self._prob_f4(*z)
+            return self._joint_z_f4(*z)
         elif f == 5:
-            return self._prob_f5(*z)
+            return self._joint_z_f5(*z)
         else:
             return 0.0
+
+    def _len_prob(self, f):
+        """ P(F=f). """
+        e = self._epsilon
+        if f == 1 or f == 5:
+            return e ** 2 * (1 - e) ** 2
+        elif f == 2 or f == 4:
+            return 2 * e ** 3 * (1 - e) + 2 * e * (1 - e) ** 3
+        elif f == 3:
+            return e ** 4 + 4 * e ** 2 * (1 - e) ** 2 + (1 - e) ** 4
+        return 0.0
+
+    # def emit(self, random):
+    #     triplets = list(self._emission.keys())
+    #     probs = [exp(-v) for v in self._emission.values()]
+    #     return random.choice(triplets, p=probs)

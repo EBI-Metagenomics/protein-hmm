@@ -1,4 +1,5 @@
 from math import log
+from itertools import product
 from numpy.testing import assert_allclose
 from numpy.random import RandomState
 from hseq import SilentState, NormalState, TripletState, FrameState
@@ -73,3 +74,8 @@ def test_states():
     assert_allclose(frame_state.prob("A"), 0.0027000000000000006)
     assert_allclose(frame_state.prob("AUUA"), 0.0010270833333333336)
     assert_allclose(frame_state.prob("AUUAA"), 5.625000000000003e-06, atol=1e-5)
+
+    p = frame_state._prob_z_given_f
+    abc = "ACGU"
+    for f in range(1, 6):
+        assert_allclose(sum(p(x) for x in product(*[abc] * f)), 1.0)

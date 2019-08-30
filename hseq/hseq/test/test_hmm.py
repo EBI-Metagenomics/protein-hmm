@@ -126,3 +126,23 @@ def test_hmm_emit_a():
     states, sequence = hmm.emit(random)
     assert states == "<S><M1><M2><E>"
     assert sequence == "AAGU"
+
+    base_emission = {"A": -log(0.25), "C": -log(0.25), "G": -log(0.25), "U": -log(0.25)}
+    codon_emission = {"AGU": -log(0.8), "AGG": -log(0.2)}
+    epsilon = 0.1
+    M3 = FrameState("M3", base_emission, codon_emission, epsilon)
+    hmm.add_state(M3, inf)
+
+    hmm.set_trans("M2", "E", inf)
+    hmm.set_trans("M2", "M3", 0.0)
+    hmm.set_trans("M3", "E", 0.0)
+    hmm.normalize()
+    assert_allclose(hmm.trans("S", "M1"), 1)
+    assert_allclose(hmm.trans("M1", "M2"), 1)
+    assert_allclose(hmm.trans("M2", "M3"), 1)
+    assert_allclose(hmm.trans("M3", "E"), 1)
+    # breakpoint()
+    # states, sequence = hmm.emit(random)
+    # print(states)
+    # print(sequence)
+    # pass
