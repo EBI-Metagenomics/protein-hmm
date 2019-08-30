@@ -1,7 +1,7 @@
 from math import log
 from numpy.testing import assert_allclose
 from numpy.random import RandomState
-from hseq import SilentState, NormalState, TripletState
+from hseq import SilentState, NormalState, TripletState, FrameState
 
 
 def test_states():
@@ -40,3 +40,16 @@ def test_states():
     assert_allclose(triplet_state.prob("AUG"), 0.5)
     assert_allclose(triplet_state.prob("AUU"), 0.5)
     assert_allclose(triplet_state.prob("AGU"), 0.0, atol=1e-7)
+
+    codon_emission = {"AUG": -log(0.8), "AUU": -log(0.1)}
+    frame_state = FrameState("M3", "ACGU", codon_emission, epsilon=0.1)
+    assert_allclose(frame_state._codon_prob("A", "U", "G"), 0.8888888888888888)
+    assert_allclose(frame_state._codon_prob("A", "U", "U"), 0.11111111111111115)
+    assert_allclose(frame_state._codon_prob("A", "U", None), 1.0)
+    assert_allclose(frame_state._codon_prob("A", None, "U"), 0.11111111111111115)
+    assert_allclose(frame_state._codon_prob(None, "G", "U"), 0.0)
+    assert_allclose(frame_state._codon_prob(None, "U", "U"), 0.11111111111111115)
+    assert_allclose(frame_state._codon_prob(None, None, "U"), 0.11111111111111115)
+    assert_allclose(frame_state._codon_prob(None, None, None), 1.0)
+
+

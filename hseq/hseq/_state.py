@@ -82,21 +82,3 @@ class TripletState(State):
         return v
 
 
-class FrameState(State):
-    def __init__(self, name: str, alphabet: list, emission: dict):
-
-        normalize_emission(emission)
-        self._emission = emission
-
-        super(TripletState, self).__init__(name, False, alphabet)
-
-    def emit(self, random):
-        triplets = list(self._emission.keys())
-        probs = [exp(-self._emission[t]) for t in triplets]
-        return random.choice(triplets, p=probs)
-
-    def prob(self, seq, nlog_space=False):
-        v = self._emission.get(seq, inf)
-        if not nlog_space:
-            v = exp(-v)
-        return v
