@@ -41,8 +41,10 @@ def test_states():
     assert_allclose(triplet_state.prob("AUU"), 0.5)
     assert_allclose(triplet_state.prob("AGU"), 0.0, atol=1e-7)
 
+    base_emission = {"A": -log(0.25), "C": -log(0.25), "G": -log(0.25), "U": -log(0.25)}
     codon_emission = {"AUG": -log(0.8), "AUU": -log(0.1)}
-    frame_state = FrameState("M3", "ACGU", codon_emission, epsilon=0.1)
+    epsilon = 0.1
+    frame_state = FrameState("M3", base_emission, codon_emission, epsilon)
     assert_allclose(frame_state._codon_prob("A", "U", "G"), 0.8888888888888888)
     assert_allclose(frame_state._codon_prob("A", "U", "U"), 0.11111111111111115)
     assert_allclose(frame_state._codon_prob("A", "U", None), 1.0)
@@ -52,4 +54,22 @@ def test_states():
     assert_allclose(frame_state._codon_prob(None, None, "U"), 0.11111111111111115)
     assert_allclose(frame_state._codon_prob(None, None, None), 1.0)
 
+    epsilon = 0.0
+    frame_state = FrameState("M4", base_emission, codon_emission, epsilon)
+    assert_allclose(frame_state.prob("AUA"), 0.0)
+    assert_allclose(frame_state.prob("AUG"), 0.8888888888888888)
+    assert_allclose(frame_state.prob("AUU"), 0.11111111111111115)
+    assert_allclose(frame_state.prob("AU"), 0.0)
+    assert_allclose(frame_state.prob("A"), 0.0)
+    assert_allclose(frame_state.prob("AUUA"), 0.0)
+    assert_allclose(frame_state.prob("AUUAA"), 0.0)
 
+    epsilon = 0.1
+    frame_state = FrameState("M5", base_emission, codon_emission, epsilon)
+    assert_allclose(frame_state.prob("AUA"), 0.0010021604938271608)
+    assert_allclose(frame_state.prob("AUG"), 0.5858020833333333)
+    assert_allclose(frame_state.prob("AUU"), 0.07500223765432103)
+    assert_allclose(frame_state.prob("AU"), 0.054158333333333336)
+    assert_allclose(frame_state.prob("A"), 0.0027000000000000006)
+    assert_allclose(frame_state.prob("AUUA"), 0.0010270833333333336)
+    assert_allclose(frame_state.prob("AUUAA"), 5.625000000000003e-06, atol=1e-5)
