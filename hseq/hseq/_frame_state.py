@@ -123,14 +123,3 @@ class FrameState(State):
             return self._prob_f5(*z)
         else:
             return 0.0
-
-    # def emit(self, random):
-    #     triplets = list(self._emission.keys())
-    #     probs = [exp(-self._emission[t]) for t in triplets]
-    #     return random.choice(triplets, p=probs)
-
-    # def prob(self, seq, nlog_space=False):
-    #     v = self._emission.get(seq, inf)
-    #     if not nlog_space:
-    #         v = exp(-v)
-    #     return v

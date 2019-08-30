@@ -3,7 +3,7 @@ from math import exp, inf
 
 
 class State:
-    def __init__(self, name: str, end_state: bool, alphabet: list):
+    def __init__(self, name: str, end_state: bool, alphabet: str):
         self._name = name
         self._end_state = end_state
         self._alphabet = alphabet
@@ -25,8 +25,8 @@ class State:
 
 
 class SilentState(State):
-    def __init__(self, name: str, end_state: bool):
-        super(SilentState, self).__init__(name, end_state, "")
+    def __init__(self, name: str, alphabet: str, end_state: bool):
+        super(SilentState, self).__init__(name, end_state, alphabet)
 
     def emit(self, random):
         del random
@@ -63,7 +63,7 @@ class NormalState(State):
 
 
 class TripletState(State):
-    def __init__(self, name: str, alphabet: list, emission: dict):
+    def __init__(self, name: str, alphabet: str, emission: dict):
 
         normalize_emission(emission)
         self._emission = emission

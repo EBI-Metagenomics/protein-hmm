@@ -5,19 +5,19 @@ from hseq import SilentState, NormalState, TripletState, FrameState
 
 
 def test_states():
-    start_state = SilentState("S", False)
+    start_state = SilentState("S", "ACGU", False)
     assert start_state.name == "S"
     assert start_state.end_state is False
     assert start_state.emit(RandomState(0)) == ""
-    assert start_state.alphabet == ""
+    assert start_state.alphabet == "ACGU"
     assert_allclose(start_state.prob(""), 1.0)
     assert_allclose(start_state.prob("A"), 0.0, atol=1e-7)
 
-    end_state = SilentState("E", True)
+    end_state = SilentState("E", "ACGU", True)
     assert end_state.name == "E"
     assert end_state.end_state is True
     assert end_state.emit(RandomState(0)) == ""
-    assert start_state.alphabet == ""
+    assert start_state.alphabet == "ACGU"
 
     normal_state = NormalState("M1", {"A": -log(0.99), "B": -log(0.01)})
     assert normal_state.name == "M1"
