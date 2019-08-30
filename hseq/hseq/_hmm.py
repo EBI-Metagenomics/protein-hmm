@@ -32,7 +32,7 @@ class HMM:
     def alphabet(self):
         return self._alphabet
 
-    def add_state(self, state: State, init_prob: float = 0.0):
+    def add_state(self, state: State, init_prob: float = inf):
         if state.name in self._states:
             raise ValueError(f"State {state.name} already exists.")
 
@@ -49,35 +49,33 @@ class HMM:
         self._normalize_trans()
         self._normalize_init_probs()
 
-    # def emit(self, seed=0):
-    #     from numpy.random import RandomState
+    def emit(self, random):
+        initial_state = self._draw_initial_state(random)
 
-    #     random = RandomState(seed)
+        visited_states = [initial_state]
+        curr_state = initial_state
+        sequence = ""
+        while not curr_state.end_state:
+            sequence += curr_state.emit(random)
+            curr_state = self._transition(curr_state, random)
+            visited_states.append(curr_state)
 
-    #     items = list(self._init_probs.items())
-    #     state_names = [i[0] for i in items]
-    #     probs = [i[1] for i in items]
-    #     name = random.choice(state_names, p=probs)
-    #     initial_state = self._states[name]
+        return "".join(str(s) for s in visited_states), sequence
 
-    #     visited_states = [initial_state]
-    #     curr_state = initial_state
-    #     sequence = []
-    #     while not curr_state.end_state:
-    #         if not curr_state.silent:
-    #             sequence.append(curr_state.emit(random))
+    def _draw_initial_state(self, random):
+        names = self._init_probs.keys()
+        probs = [exp(-v) for v in self._init_probs.values()]
 
-    #         curr_state = self._transition(curr_state, random)
-    #         visited_states.append(curr_state)
+        name = random.choice(list(names), p=probs)
+        return self._states[name]
 
-    #     return "".join(str(s) for s in visited_states), "".join(sequence)
+    def _transition(self, state: State, random):
+        trans = self._trans[state.name]
+        names = trans.keys()
+        probs = [exp(-v) for v in trans.values()]
 
-    # def _transition(self, state: State, random):
-    #     items = list(self._trans[state.name].items())
-    #     state_names = [i[0] for i in items]
-    #     probs = [i[1] for i in items]
-    #     name = random.choice(state_names, p=probs)
-    #     return self._states[name]
+        name = random.choice(list(names), p=probs)
+        return self._states[name]
 
     # def _set_all_trans(self):
     #     names = self._states.keys()

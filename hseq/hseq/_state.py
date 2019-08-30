@@ -51,9 +51,8 @@ class NormalState(State):
         super(NormalState, self).__init__(name, False, alphabet)
 
     def emit(self, random):
-        abc = list(self._alphabet)
-        probs = [exp(-self._emission[a]) for a in abc]
-        return random.choice(abc, p=probs)
+        probs = [exp(-self._emission[a]) for a in self._alphabet]
+        return random.choice(list(self._alphabet), p=probs)
 
     def prob(self, seq, nlog_space=False):
         v = self._emission.get(seq, inf)
@@ -72,7 +71,7 @@ class TripletState(State):
 
     def emit(self, random):
         triplets = list(self._emission.keys())
-        probs = [exp(-self._emission[t]) for t in triplets]
+        probs = [exp(-v) for v in self._emission.values()]
         return random.choice(triplets, p=probs)
 
     def prob(self, seq, nlog_space=False):
