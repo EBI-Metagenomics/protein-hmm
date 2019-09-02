@@ -96,9 +96,9 @@ def test_hmm_emit_a():
     hmm.normalize()
 
     random = RandomState(0)
-    states, sequence = hmm.emit(random)
-    assert states == "<S><M1><E>"
-    assert sequence == "A"
+    path = hmm.emit(random)
+    assert "".join(str(s[0]) for s in path) == "<S><M1><E>"
+    assert "".join(s[1] for s in path) == "A"
 
     M2 = TripletState("M2", alphabet, {"AGU": -log(0.8), "AGG": -log(0.2)})
     hmm.add_state(M2, inf)
@@ -107,25 +107,26 @@ def test_hmm_emit_a():
     hmm.set_trans("M1", "E", inf)
     hmm.set_trans("M2", "E", 0.0)
     hmm.normalize()
-    states, sequence = hmm.emit(random)
-    assert states == "<S><M1><M2><E>"
-    assert sequence == "AAGG"
 
-    states, sequence = hmm.emit(random)
-    assert states == "<S><M1><M2><E>"
-    assert sequence == "AAGU"
+    path = hmm.emit(random)
+    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert "".join(s[1] for s in path) == "AAGG"
 
-    states, sequence = hmm.emit(random)
-    assert states == "<S><M1><M2><E>"
-    assert sequence == "AAGG"
+    path = hmm.emit(random)
+    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert "".join(s[1] for s in path) == "AAGU"
 
-    states, sequence = hmm.emit(random)
-    assert states == "<S><M1><M2><E>"
-    assert sequence == "AAGU"
+    path = hmm.emit(random)
+    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert "".join(s[1] for s in path) == "AAGG"
 
-    states, sequence = hmm.emit(random)
-    assert states == "<S><M1><M2><E>"
-    assert sequence == "AAGU"
+    path = hmm.emit(random)
+    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert "".join(s[1] for s in path) == "AAGU"
+
+    path = hmm.emit(random)
+    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert "".join(s[1] for s in path) == "AAGU"
 
     base_emission = {"A": -log(0.25), "C": -log(0.25), "G": -log(0.25), "U": -log(0.25)}
     codon_emission = {"AGU": -log(0.8), "AGG": -log(0.2)}
@@ -141,8 +142,6 @@ def test_hmm_emit_a():
     assert_allclose(hmm.trans("M1", "M2"), 1)
     assert_allclose(hmm.trans("M2", "M3"), 1)
     assert_allclose(hmm.trans("M3", "E"), 1)
-    # breakpoint()
-    # states, sequence = hmm.emit(random)
-    # print(states)
-    # print(sequence)
-    # pass
+    path = hmm.emit(random)
+    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><M3><E>"
+    assert "".join(s[1] for s in path) == "AAGGAGU"

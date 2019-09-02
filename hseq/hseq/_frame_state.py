@@ -165,3 +165,6 @@ class FrameState(State):
         emission = {"".join(z): self._prob_z_given_f(z) for z in product(*[abc] * f)}
         seq = random.choice(list(emission.keys()), p=list(emission.values()))
         return seq
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}:{self._name}>"

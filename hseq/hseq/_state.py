@@ -23,6 +23,9 @@ class State:
     def __str__(self):
         return f"<{self._name}>"
 
+    def __repr__(self):
+        return f"<State:{self._name}>"
+
 
 class SilentState(State):
     def __init__(self, name: str, alphabet: str, end_state: bool):
@@ -40,6 +43,9 @@ class SilentState(State):
         if not nlog_space:
             v = exp(-v)
         return v
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}:{self._name}>"
 
 
 class NormalState(State):
@@ -60,6 +66,9 @@ class NormalState(State):
             v = exp(-v)
         return v
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}:{self._name}>"
+
 
 class TripletState(State):
     def __init__(self, name: str, alphabet: str, emission: dict):
@@ -79,5 +88,8 @@ class TripletState(State):
         if not nlog_space:
             v = exp(-v)
         return v
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}:{self._name}>"
 
 

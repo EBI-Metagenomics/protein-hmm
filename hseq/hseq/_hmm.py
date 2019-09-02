@@ -50,17 +50,13 @@ class HMM:
         self._normalize_init_probs()
 
     def emit(self, random):
-        initial_state = self._draw_initial_state(random)
-
-        visited_states = [initial_state]
-        curr_state = initial_state
-        sequence = ""
+        curr_state = self._draw_initial_state(random)
+        path = []
         while not curr_state.end_state:
-            sequence += curr_state.emit(random)
+            seq = curr_state.emit(random)
+            path.append((curr_state, seq))
             curr_state = self._transition(curr_state, random)
-            visited_states.append(curr_state)
-
-        return "".join(str(s) for s in visited_states), sequence
+        return path + [(curr_state, curr_state.emit(random))]
 
     def _draw_initial_state(self, random):
         names = self._init_probs.keys()
@@ -76,13 +72,6 @@ class HMM:
 
         name = random.choice(list(names), p=probs)
         return self._states[name]
-
-    # def _set_all_trans(self):
-    #     names = self._states.keys()
-    #     for a in names:
-    #         for b in names:
-    #             if b not in self._trans[a]:
-    #                 self.set_trans(a, b, 0.0)
 
     def _normalize_trans(self):
         from scipy.special import logsumexp
