@@ -1,0 +1,105 @@
+\section{Model}
+
+\begin{definition}\label{def:mp}
+  A Markov process is a stochastic process $Q_0, Q_1, \dots$ for which
+  \begin{align*}
+    p(Q_t=q_t \gv Q_0=q_0, Q_1=q_1, \dots, Q_{t-1}=q_{t-1}) = p(Q_t=q_t \gv Q_{t-1}=q_{t-1}).
+  \end{align*}
+  There is one, and only one, initial state $q_0$ such that $p(Q_0=q_0)=1$.
+  The possible values of $Q_t$ form a finite set $\set{Q}$ called the state space.
+\end{definition}
+
+\begin{definition}\label{def:hmm}
+  Let $\set{A}$ be a finite set of symbols.
+  Let $Q_0, Q_1, \dots$ be a Markov process and let $S_0, S_1, \dots$
+  be a stochastic process for which
+  \begin{align*}
+    p(S_t\in\set{A} \gv Q_0=q_0, Q_1=q_1, \dots, Q_t=q_t) = p(S_t\in\set{A} \gv Q_t=q_t),
+  \end{align*}
+  for $t>0$, and $p(S_0=\emptyset \gv Q_0=q_0)=1$.
+  The pair $(Q_t, S_t)$ is a hidden Markov model (HMM) with alphabet $\set{A}$ and $\emptyset$
+  represents an empty sequence.
+\end{definition}
+
+The standard HMM definition is often extended to account for non-initial states that
+do not emit symbols. Those states are referred to as silent states and are useful to
+describe a missing alignment position, for example. This section goes a step further by
+defining a more general hidden Markov model that accounts for states that instead emit
+sequence of symbols of variable length, including zero-length sequences.
+
+% \begin{definition}
+%   Let $\set{A}$ be a finite set of symbols, $k\in\field{N}_0$, and define
+%   $\set{B}=\bigcup_{i=0}^k\set{A}^i$.
+%   Let $Q_0, Q_1, \dots$ be a Markov process.
+%   Let $S_0, S_1$ be a stochastic process for which
+%   \begin{equation*}
+%     p(S_t\in\set{B} \gv Q_0=q_0, Q_1=q_1, \dots, Q_t=q_t)
+%     = p(S_t\in\set{B} \gv Q_t=q_t)
+%   \end{equation*}
+%   for $t>0$, and $p(S_0=\emptyset \gv Q_0=q_0)=1$.
+%   The pair $(Q_t, S_t)$ is an invisible Markov model (IMM) with alphabet $\set{A}$ and
+%   limit $k$.
+% \end{definition}
+
+\begin{definition}
+  Let $\set{A}$ be a finite set of symbols.
+  Let $Q_0, Q_1, \dots$ be a Markov process.
+  Let $F_0, F_1, \dots$ and $V_0, V_1$ be two stochastic processes for which
+  \begin{equation*}
+    p(F_t\in\field{N}, V_t\in\set{A}^{f_t} \gv Q_0=q_0, Q_1=q_1, \dots, Q_t=q_t)
+    = p(F_t\in\field{N}, V_t\in\set{A}^{f_t} \gv Q_t=q_t)
+  \end{equation*}
+  and $p(F_0=0, V_t=\emptyset \gv Q_0=q_0) = 1$.
+  The triplet $(Q_t, F_t, V_t)$ is an invisible Markov model (IMM) with alphabet $\set{A}$.
+\end{definition}
+
+Let $\arr{s}=s_1 .. s_L$ be a sequence emitted from an IMM.
+The marginal likelihood of $\arr{s}$ is given by
+\begin{align}\label{eq:ml}
+  \mathrm{ML}(\arr{s}) = p(V_0=\arr{s}) + p(V_0\neq\arr{s}, V_0||V_1=\arr{s}) +
+  p(V_0\neq\arr{s}, V_0||V_1\neq\arr{s}, V_0||V_1||V_2=\arr{s}) + \dots,
+\end{align}
+where $||$ denotes sequence concatenation.
+Note that
+\begin{align*}
+  p(V_0 \neq \arr{s}, V_0||V_1=\arr{s}) &= p(V_0\neq\arr{s}, V_0||V_1=\arr{s}, F_0=L) +
+  p(V_0\neq\arr{s}, V_0||V_1=\arr{s}, F_0 \neq L)\\
+  &= p(V_0\neq\arr{s}, V_0||V_1=\arr{s}, F_0=L) + p(V_0||V_1=\arr{s}, F_0 \neq L)\\
+  &= p(V_0||V_1=\arr{s}, F_0 \neq L) = p(V_0||V_1=\arr{s}, F_0 < L).
+\end{align*}
+Similarly,
+\begin{align*}
+  p(V_0\neq\arr{s}, V_0||V_1\neq\arr{s}, V_0||V_1||V_2=\arr{s}) =
+  p(V_0||V_1||V_2=\arr{s}, F_0+F_1 < L).
+\end{align*}
+Let $V_{0..t} = V_0||V_1||\dots||V_t$ and $L_t = F_0 + F_1 + \dots + F_{t-1}$.
+The marginal likelihood of $\arr{s}$ is also given by
+\begin{align*}
+  \mathrm{ML}(\arr{s}) = p(V_0=\arr{s}) + \sum_{t=1}^{\infty} p(V_{0..t}=\arr{s}, L_t<L).
+\end{align*}
+
+For computational reasons, it would be useful to have an upper bound on the summation of the
+marginal likelihood.
+We will define a type of IMM that has such a feature.
+
+\begin{definition}
+  A cycle is any probable sequence of states that starts and ends with the same state.
+\end{definition}
+
+\begin{definition}
+  A quiet state is a state that has a non-zero probability of emitting an empty sequence.
+\end{definition}
+
+\begin{definition}
+  A quiet cycle is any cycle having only quiet states.
+\end{definition}
+
+\begin{corollary}
+  Let $M$ be the number of states of the IMM. If it has no quiet cycles, any sequence of $M$ states
+  will have emitted at least one symbol.
+\end{corollary}
+
+If IMM has no quiet cycles, there is always a $N \leq L\cdot M$ such that
+\begin{align*}
+  \mathrm{ML}(\arr{s}) = p(V_0=\arr{s}) + \sum_{t=1}^N p(V_{0..t}=\arr{s}, L_t<L).
+\end{align*}
