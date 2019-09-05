@@ -9,9 +9,8 @@
 \end{definition}
 
 \begin{definition}\label{def:hmm}
-  Let $\set{A}$ be a non-empty finite set of symbols.
-  Let $Q_1, Q_2, \dots$ be a Markov process and let $S_1, S_2, \dots$
-  be a stochastic process for which
+  Let $\set{A}$ be a non-empty finite set of symbols. Let $Q_1, Q_2, \dots$ be a Markov process and
+  let $S_1, S_2, \dots$ be a stochastic process for which
   \begin{align*}
     p(S_t\in\set{A} \gv Q_1=q_1, Q_2=q_2, \dots, Q_t=q_t) = p(S_t\in\set{A} \gv Q_t=q_t).
   \end{align*}
@@ -24,56 +23,40 @@ example. This section goes a step further by defining a more general hidden Mark
 accounts for states that instead emit sequence of symbols of variable length, including zero-length
 sequences.
 
-% \begin{definition}
-%   Let $\set{A}$ be a finite set of symbols, $k\in\field{N}_0$, and define
-%   $\set{B}=\bigcup_{i=0}^k\set{A}^i$.
-%   Let $Q_0, Q_1, \dots$ be a Markov process.
-%   Let $S_0, S_1$ be a stochastic process for which
-%   \begin{equation*}
-%     p(S_t\in\set{B} \gv Q_0=q_0, Q_1=q_1, \dots, Q_t=q_t)
-%     = p(S_t\in\set{B} \gv Q_t=q_t)
-%   \end{equation*}
-%   for $t>0$, and $p(S_0=\emptyset \gv Q_0=q_0)=1$.
-%   The pair $(Q_t, S_t)$ is an invisible Markov model (IMM) with alphabet $\set{A}$ and
-%   limit $k$.
-% \end{definition}
-
 \begin{definition}
-  Let $\set{A}$ be a finite set of symbols.
-  Let $Q_0, Q_1, \dots$ be a Markov process.
-  Let $F_0, F_1, \dots$ and $V_0, V_1$ be two stochastic processes for which
+  Let $\set{A}$ be a non-empty finite set of symbols, $k\in\field{N}_0$, and define
+  $\set{B}=\bigcup_{i=0}^k\set{A}^i$.
+  Let $Q_1, Q_2, \dots$ be a Markov process and let $S_1, S_2, \dots$ be a stochastic process for
+  which
   \begin{equation*}
-    p(F_t\in\field{N}, V_t\in\set{A}^{f_t} \gv Q_0=q_0, Q_1=q_1, \dots, Q_t=q_t)
-    = p(F_t\in\field{N}, V_t\in\set{A}^{f_t} \gv Q_t=q_t)
+    p(S_t\in\set{B} \gv Q_1=q_1, Q_2=q_2, \dots, Q_t=q_t)
+    = p(S_t\in\set{B} \gv Q_t=q_t).
   \end{equation*}
-  and $p(F_0=0, V_t=\emptyset \gv Q_0=q_0) = 1$.
-  The triplet $(Q_t, F_t, V_t)$ is an invisible Markov model (IMM) with alphabet $\set{A}$.
+  The pair $(Q_t, S_t)$ is an invisible Markov model (IMM) with alphabet $\set{A}$ and
+  limit $k$.
 \end{definition}
 
-Let $\arr{s}=s_1 .. s_L$ be a sequence emitted from an IMM.
+Let $\arr{z}=z_1 .. z_L$ be a sequence emitted from an IMM.
 The marginal likelihood of $\arr{s}$ is given by
 \begin{align}\label{eq:ml}
-  \mathrm{ML}(\arr{s}) = p(V_0=\arr{s}) + p(V_0\neq\arr{s}, V_0||V_1=\arr{s}) +
-  p(V_0\neq\arr{s}, V_0||V_1\neq\arr{s}, V_0||V_1||V_2=\arr{s}) + \dots,
+  \mathrm{ML}(\arr{z}) = p(V_1=\arr{z}) + p(V_1\neq\arr{z}, V_1||V_2=\arr{z}) +
+  p(V_1\neq\arr{z}, V_1||V_2\neq\arr{z}, V_1||V_2||V_3=\arr{z}) + \dots,
 \end{align}
 where $||$ denotes sequence concatenation.
-Note that
+
+Let $F_t$ be the sequence length emitted by $S_t$, $L_t = 0+F_1+\dots+F_{t-1}$,
+and $V_{1..t} = V_1||V_2||\dots||V_t$.
+We have
 \begin{align*}
-  p(V_0 \neq \arr{s}, V_0||V_1=\arr{s}) &= p(V_0\neq\arr{s}, V_0||V_1=\arr{s}, F_0=L) +
-  p(V_0\neq\arr{s}, V_0||V_1=\arr{s}, F_0 \neq L)\\
-  &= p(V_0\neq\arr{s}, V_0||V_1=\arr{s}, F_0=L) + p(V_0||V_1=\arr{s}, F_0 \neq L)\\
-  &= p(V_0||V_1=\arr{s}, F_0 \neq L) = p(V_0||V_1=\arr{s}, F_0 < L).
+  p(V_{1..1} \neq \arr{z}, V_{1..2} \neq \arr{z}, \dots, V_{1..{t-1}} \neq \arr{z}, V_{1..t}=\arr{z})
+  = p(V_{1..t}=\arr{z}, L_t<L).
 \end{align*}
-Similarly,
+Therefore, the marginal likelihood is also given by
 \begin{align*}
-  p(V_0\neq\arr{s}, V_0||V_1\neq\arr{s}, V_0||V_1||V_2=\arr{s}) =
-  p(V_0||V_1||V_2=\arr{s}, F_0+F_1 < L).
+  \mathrm{ML}(\arr{z}) = \sum_{t=1}^{\infty} p(V_{1..t}=\arr{z}, L_t<L).
 \end{align*}
-Let $V_{0..t} = V_0||V_1||\dots||V_t$ and $L_t = F_0 + F_1 + \dots + F_{t-1}$.
-The marginal likelihood of $\arr{s}$ is also given by
-\begin{align*}
-  \mathrm{ML}(\arr{s}) = p(V_0=\arr{s}) + \sum_{t=1}^{\infty} p(V_{0..t}=\arr{s}, L_t<L).
-\end{align*}
+
+\subsection{Discussion}
 
 For computational reasons, it would be useful to have an upper bound on the summation of the
 marginal likelihood.
@@ -98,5 +81,5 @@ We will define a type of IMM that has such a feature.
 
 If IMM has no quiet cycles, there is always a $N \leq L\cdot M$ such that
 \begin{align*}
-  \mathrm{ML}(\arr{s}) = p(V_0=\arr{s}) + \sum_{t=1}^N p(V_{0..t}=\arr{s}, L_t<L).
+  \mathrm{ML}(\arr{z}) = \sum_{t=1}^{L\cdot M} p(V_{1..t}=\arr{z}, L_t<L).
 \end{align*}
