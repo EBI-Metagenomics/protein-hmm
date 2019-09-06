@@ -56,6 +56,20 @@ Therefore, the marginal likelihood is also given by
   \mathrm{ML}(\arr{z}) = \sum_{t=1}^{\infty} p(V_{1..t}=\arr{z}, L_t<L).
 \end{align*}
 
+Let $q_{1..t}$ be a sequence of states (also known as state path).
+The likelihood of sequence $\arr{z}$ for state path $q_{1..t}$ is given by
+\begin{align*}
+  \mathrm{L}(\arr{z}, q_{1..t}) = p(V_{1..t}=\arr{z}, Q_{1..t}=q_{1..t}).
+\end{align*}
+Note that
+\begin{align*}
+  \mathrm{L}(\arr{z}, q_{1..t}) &= \sum_{l_t=0}^L p(V_{1..t}=\arr{z}, L_t=l_t,
+  Q_{1..t}=q_{1..t})\\
+  &= \sum_{l_t=0}^L p(V_{1..t-1}=z_{1..l_t}, V_t=z_{l_t+1..L}, Q_{1..t-1}=q_{1..t-1}, Q_t=q_t)\\
+  &= \sum_{l_t=0}^L p(V_t=z_{l_t+1..L} \gv Q_t=q_t) p(Q_t=q_t \gv Q_{t-1}=q_{t-1})
+  \mathrm{L}(z_{1..l_t}, q_{1..t-1})
+\end{align*}
+
 \subsection{Discussion}
 
 For computational reasons, it would be useful to have an upper bound on the summation of the
