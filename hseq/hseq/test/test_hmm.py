@@ -269,6 +269,52 @@ def test_hmm_lik_2():
     assert_allclose(p, 0.0)
 
 
+def test_hmm_lik_3():
+    alphabet = "AC"
+
+    hmm = HMM(alphabet)
+    start_state = SilentState("S", alphabet, False)
+    hmm.add_state(start_state, nlog(1.0))
+
+    M1 = SilentState("M1", alphabet, False)
+    hmm.add_state(M1, nlog(0.0))
+
+    M2 = NormalState("M2", {"A": nlog(0.8), "C": nlog(0.2)})
+    hmm.add_state(M2, nlog(0.0))
+
+    end_state = SilentState("E", alphabet, True)
+    hmm.add_state(end_state, nlog(0.0))
+
+    hmm.set_trans("S", "M1", nlog(1.0))
+    hmm.set_trans("M1", "M2", nlog(1.0))
+    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.normalize()
+
+    p = hmm.likelihood("A", [("S", 1), ("E", 0)])
+    assert_allclose(p, 0.0, atol=1e-7)
+
+    p = hmm.likelihood("A", [("S", 0), ("M1", 0), ("M2", 1), ("E", 0)])
+    assert_allclose(p, 0.8)
+
+    p = hmm.likelihood("C", [("S", 0), ("M1", 0), ("M2", 1), ("E", 0)])
+    assert_allclose(p, 0.2)
+
+    p = hmm.likelihood("C", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
+    assert_allclose(p, 0.0)
+
+    hmm.set_trans("M1", "E", nlog(1.0))
+    hmm.normalize()
+
+    p = hmm.likelihood("A", [("S", 0), ("M1", 0), ("M2", 1), ("E", 0)])
+    assert_allclose(p, 0.4)
+
+    p = hmm.likelihood("C", [("S", 0), ("M1", 0), ("M2", 1), ("E", 0)])
+    assert_allclose(p, 0.1)
+
+    p = hmm.likelihood("", [("S", 0), ("M1", 0), ("E", 0)])
+    assert_allclose(p, 0.5)
+
+
 def test_hmm_viterbi():
     alphabet = "ACGU"
 
