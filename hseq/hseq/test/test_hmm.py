@@ -180,3 +180,6 @@ def test_hmm_viterbi():
     assert path[1][1] == 1
     assert path[2][1] == 1
     assert path[3][1] == 0
+
+    p = hmm.likelihood("AC", ["S", "M1", "M2", "E"], [0, 1, 1, 0])
+    assert_allclose(p, 0.3)

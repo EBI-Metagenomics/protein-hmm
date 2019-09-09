@@ -58,7 +58,22 @@ class HMM:
             curr_state = self._transition(curr_state, random)
         return path + [(curr_state, curr_state.emit(random))]
 
-    def viterbi(self, seq):
+    def likelihood(self, seq: str, states: list, lengths: list):
+        qt = self._states[states.pop(0)]
+        ft = lengths.pop(0)
+        p = self.init_prob(qt.name) * qt.prob(seq[:ft])
+
+        seq = seq[ft:]
+        qt_1 = qt
+        for state_name, ft in zip(states, lengths):
+            qt = self._states[state_name]
+            p *= qt.prob(seq[:ft]) * self.trans(qt_1.name, qt.name)
+            seq = seq[ft:]
+            qt_1 = qt
+
+        return p
+
+    def viterbi(self, seq: str):
         max_prob = 0.0
         best_path = []
         for qt in self._states.values():
@@ -69,7 +84,7 @@ class HMM:
                     best_path = tup[1] + [(qt, ft)]
         return max_prob, best_path
 
-    def _viterbi(self, seq, qt, ft):
+    def _viterbi(self, seq: str, qt: State, ft: int):
         max_prob = 0.0
         best_path = []
         emission_prob = qt.prob(seq[len(seq) - ft :])

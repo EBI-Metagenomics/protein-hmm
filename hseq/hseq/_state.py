@@ -35,7 +35,7 @@ class SilentState(State):
         del random
         return ""
 
-    def prob(self, seq, nlog_space=False):
+    def prob(self, seq: str, nlog_space=False):
         if seq == "":
             v = 0.0
         else:
@@ -68,7 +68,7 @@ class NormalState(State):
         probs = [exp(-self._emission[a]) for a in self._alphabet]
         return random.choice(list(self._alphabet), p=probs)
 
-    def prob(self, seq, nlog_space=False):
+    def prob(self, seq: str, nlog_space=False):
         v = self._emission.get(seq, inf)
         if not nlog_space:
             v = exp(-v)
@@ -99,7 +99,7 @@ class TripletState(State):
         probs = [exp(-v) for v in self._emission.values()]
         return random.choice(triplets, p=probs)
 
-    def prob(self, seq, nlog_space=False):
+    def prob(self, seq: str, nlog_space=False):
         v = self._emission.get(seq, inf)
         if not nlog_space:
             v = exp(-v)
