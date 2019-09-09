@@ -59,7 +59,33 @@ class HMM:
         return path + [(curr_state, curr_state.emit(random))]
 
     def viterbi(self, seq):
-        pass
+        breakpoint()
+        max_prob = -inf
+        best_pair = None
+        for qt in self._states.values():
+            for ft in range(qt.min_len, qt.max_len + 1):
+                v = self.viterbi_rec(seq, qt, ft)
+                if v < max_prob:
+                    best_pair = qt, ft
+        return max_prob, best_pair
+
+    def viterbi_rec(self, seq, qt, ft):
+        max_prob = -inf
+        best_pair = None
+        breakpoint()
+        emission_prob = qt.prob(seq[len(seq) - ft :])
+        for qt_1 in self._states.values():
+            T = self.trans(qt_1.name, qt.name)
+            if T == 0.0:
+                if 0.0 > max_prob:
+                    max_prob = 0.0
+                    best_pair = (qt_1, qt_1.min_len)
+                continue
+            for ft_1 in range(qt_1.min_len, qt_1.max_len + 1):
+                v = self.viterbi_rec(seq[:-ft], qt_1, ft_1) * T * emission_prob
+                if v > max_prob:
+                    max_prob = v
+                    best_pair = (qt_1, ft_1)
 
     def _draw_initial_state(self, random):
         names = self._init_probs.keys()
@@ -79,6 +105,8 @@ class HMM:
     def _normalize_trans(self):
         from scipy.special import logsumexp
 
+        self._normalize_trans_end_states()
+
         names = self._states.keys()
         nstates = len(names)
         for a in names:
@@ -95,6 +123,15 @@ class HMM:
                 else:
                     for b in self._trans[a].keys():
                         self._trans[a][b] += prob_sum
+
+    def _normalize_trans_end_states(self):
+        state_names = self._states.keys()
+        for state in self._states.values():
+            if state.end_state:
+                end_state_name = state.name
+                for state_name in state_names:
+                    self._trans[end_state_name][state_name] = inf
+                self._trans[end_state_name][end_state_name] = 0.0
 
     def _normalize_init_probs(self):
         from scipy.special import logsumexp

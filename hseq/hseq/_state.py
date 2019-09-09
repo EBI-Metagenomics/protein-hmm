@@ -44,6 +44,14 @@ class SilentState(State):
             v = exp(-v)
         return v
 
+    @property
+    def min_len(self):
+        return 0
+
+    @property
+    def max_len(self):
+        return 0
+
     def __repr__(self):
         return f"<{self.__class__.__name__}:{self._name}>"
 
@@ -65,6 +73,14 @@ class NormalState(State):
         if not nlog_space:
             v = exp(-v)
         return v
+
+    @property
+    def min_len(self):
+        return 1
+
+    @property
+    def max_len(self):
+        return 1
 
     def __repr__(self):
         return f"<{self.__class__.__name__}:{self._name}>"
@@ -88,6 +104,14 @@ class TripletState(State):
         if not nlog_space:
             v = exp(-v)
         return v
+
+    @property
+    def min_len(self):
+        return 3
+
+    @property
+    def max_len(self):
+        return 3
 
     def __repr__(self):
         return f"<{self.__class__.__name__}:{self._name}>"
