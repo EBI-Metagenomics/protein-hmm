@@ -1,5 +1,5 @@
 from math import log, exp, isinf
-from ._nlog import NLOG
+from ._nlog import nlog
 from ._state import State
 
 
@@ -11,7 +11,7 @@ class HMM:
         self._alphabet = alphabet
 
     def init_prob(self, name, nlog_space=False):
-        v = self._init_probs.get(name, NLOG(0.0))
+        v = self._init_probs.get(name, nlog(0.0))
         if not nlog_space:
             v = exp(-v)
         return v
@@ -21,7 +21,7 @@ class HMM:
         return self._states
 
     def trans(self, name_a, name_b, nlog_space=False):
-        v = self._trans.get(name_a, {}).get(name_b, NLOG(0.0))
+        v = self._trans.get(name_a, {}).get(name_b, nlog(0.0))
         if not nlog_space:
             v = exp(-v)
         return v
@@ -33,7 +33,7 @@ class HMM:
     def alphabet(self):
         return self._alphabet
 
-    def add_state(self, state: State, init_prob: float = NLOG(0.0)):
+    def add_state(self, state: State, init_prob: float = nlog(0.0)):
         if state.name in self._states:
             raise ValueError(f"State {state.name} already exists.")
 
@@ -165,8 +165,8 @@ class HMM:
             if state.end_state:
                 end_state_name = state.name
                 for state_name in state_names:
-                    self._trans[end_state_name][state_name] = NLOG(0.0)
-                self._trans[end_state_name][end_state_name] = NLOG(1.0)
+                    self._trans[end_state_name][state_name] = nlog(0.0)
+                self._trans[end_state_name][end_state_name] = nlog(1.0)
 
     def _normalize_init_probs(self):
         from scipy.special import logsumexp

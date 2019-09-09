@@ -1,4 +1,4 @@
-def NLOG(probability: float):
+def nlog(probability: float):
     from math import inf, log
 
     if probability == 1.0:
