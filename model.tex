@@ -56,6 +56,42 @@ Therefore, the marginal likelihood is also given by
   \mathrm{ML}(\arr{z}) = \sum_{t=1}^{\infty} p(V_{1..t}=\arr{z}, L_t<L).
 \end{align*}
 
+\subsection{Viterbi}
+
+Let $i \leq L$ indicate the prefix $z_{1:i}$.
+We define
+\begin{align*}
+  \mathcal{V}_{q_t,f_t}(i) =
+  \max_{q_{t-1}, f_{t-1}}
+  \big\{
+    \mathcal{V}_{q_{t-1},f_{t-1}}(i-f_t) p(V_t=z_{i-f_t+1:i} \gv Q_t=q_t) p(Q_t=q_t \gv
+    Q_{t-1}=q_{t-1})
+  \big\},
+\end{align*}
+for $0 < i - f_t$,
+and
+\begin{align*}
+  \mathcal{V}_{q_t,f_t}(i) =
+  \max
+  \Big\{
+    &\max_{q_{t-1}}
+    \big\{
+      \mathcal{V}_{q_{t-1}}(0) p(V_t=z_{1:i} \gv Q_t=q_t) p(Q_t=q_t \gv
+      Q_{t-1}=q_{t-1})
+    \big\},\\
+    &p(V_t=z_{1:i} \gv Q_t=q_t) p(Q_t=q_t)
+  \Big\},
+\end{align*}
+for $0 = i - f_t$.
+
+The maximal probability over all state paths $q_1, q_2, \dots$ and emission lengths $f_1, f_2,
+\dots$ is given by
+\begin{align*}
+  \max_{q_t, f_t}\mathcal{V}_{q_t,f_t}(L).
+\end{align*}
+
+\subsection{Not sure}
+
 Let $q_{1..t}$ be a sequence of states (also known as state path).
 The likelihood of sequence $\arr{z}$ for state path $q_{1..t}$ is given by
 \begin{align*}
@@ -69,6 +105,24 @@ Note that
   &= \sum_{l_t=0}^L p(V_t=z_{l_t+1..L} \gv Q_t=q_t) p(Q_t=q_t \gv Q_{t-1}=q_{t-1})
   \mathrm{L}(z_{1..l_t}, q_{1..t-1})
 \end{align*}
+
+% Let
+% \begin{align*}
+%   \mathrm{L}(z_{1..l_t}, z_{l_t+1..l_t+f_t}, q_{1..t})
+%   &= p(V_t=z_{l_t+1..l_t+f_t} \gv Q_t=q_t) p(Q_t=q_t \gv Q_{t-1}=q_{t-1})\\
+%   &p(V_{1..t-1} = z_{1..l_t}, Q_{1..t-1}=q_{1..t-1}).
+% \end{align*}
+% Let
+% \begin{align*}
+%   g_t(z_{1..l_t}, z_{l_t+1..l_t+f_t}, q_t)
+%   &= \max_{q_{t-1}, f_{t-1}}
+%   \Big\{
+%     p(V_t=z_{l_t+1..l_t+f_t} \gv Q_t=q_t) p(Q_t=q_t \gv Q_{t-1}=q_{t-1}) \\
+%     &g_{t-1}(z_{1..l_{t-1}}, z_{l_{t-1}+1..l_{t-1}+f_{t-1}}, q_{t-1})
+%   \Big\}.\\
+%   g_1(\emptyset, z_{1..f_1}, q_1)
+%   &= p(V_1=z_{1..f_1} \gv Q_1=q_1) p(Q_1=q_1)
+% \end{align*}
 
 \subsection{Discussion}
 
