@@ -1,5 +1,5 @@
 from math import log
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_allclose
 from gwt import FrameEmission, RNA, DNA
 
 
@@ -11,13 +11,13 @@ def test_frame():
     assert fe.len_prob(1) == 0.0
     assert fe.indel_prob(1) == 0.0
 
-    assert_almost_equal(fe.prob(list("UCU")), 0.9)
-    assert_almost_equal(fe.prob(list("GUA")), 0.1)
-    assert_almost_equal(fe.prob(list("GGA")), 0.0)
+    assert_allclose(fe.prob(list("UCU")), 0.9)
+    assert_allclose(fe.prob(list("GUA")), 0.1)
+    assert_allclose(fe.prob(list("GGA")), 0.0)
 
-    assert_almost_equal(fe.prob("UCU"), 0.9)
-    assert_almost_equal(fe.prob("GUA"), 0.1)
-    assert_almost_equal(fe.prob("GGA"), 0.0)
+    assert_allclose(fe.prob("UCU"), 0.9)
+    assert_allclose(fe.prob("GUA"), 0.1)
+    assert_allclose(fe.prob("GGA"), 0.0)
 
     fe = FrameEmission(codon_emission, RNA(), 1e-2)
 
