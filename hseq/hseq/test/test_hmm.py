@@ -5,7 +5,7 @@ from hseq import SilentState, NormalState, TripletState, FrameState
 from hseq import HMM
 
 
-def test_hmm_a():
+def test_hmm_init_prob_trans_a():
     alphabet = "ACGU"
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
@@ -24,7 +24,7 @@ def test_hmm_a():
     assert_allclose(hmm.trans("E", "E"), 0.5)
 
 
-def test_hmm_b():
+def test_hmm_init_prob_trans_b():
     alphabet = "ACGU"
 
     hmm = HMM(alphabet)
@@ -42,7 +42,7 @@ def test_hmm_b():
     assert_allclose(hmm.init_prob("E"), 0.5)
 
 
-def test_hmm_c():
+def test_hmm_init_prob_trans_c():
     alphabet = "ACGU"
 
     hmm = HMM(alphabet)
@@ -61,7 +61,7 @@ def test_hmm_c():
     assert_allclose(hmm.init_prob("E"), 1.0)
 
 
-def test_hmm_d():
+def test_hmm_init_prob_trans_d():
     alphabet = "ACGU"
 
     hmm = HMM(alphabet)
@@ -77,7 +77,7 @@ def test_hmm_d():
     assert_allclose(hmm.trans("S", "S"), 0.0)
 
 
-def test_hmm_emit_a():
+def test_hmm_emit_path():
     alphabet = "ACGU"
 
     hmm = HMM(alphabet)
@@ -145,3 +145,32 @@ def test_hmm_emit_a():
     path = hmm.emit(random)
     assert "".join(str(s[0]) for s in path) == "<S><M1><M2><M3><E>"
     assert "".join(s[1] for s in path) == "AAGGAGU"
+
+
+def test_hmm_viterbi():
+    alphabet = "ACGU"
+
+    hmm = HMM(alphabet)
+    start_state = SilentState("S", alphabet, False)
+    hmm.add_state(start_state, 0.0)
+
+    end_state = SilentState("E", alphabet, True)
+    hmm.add_state(end_state, inf)
+
+    M1 = NormalState("M1", {"A": -log(0.8), "C": -log(0.2), "G": inf, "U": inf})
+    hmm.add_state(M1, inf)
+
+    M2 = NormalState("M2", {"A": -log(0.4), "C": -log(0.6), "G": inf, "U": -log(0.6)})
+    hmm.add_state(M2, inf)
+
+    hmm.set_trans("S", "M1", 0.0)
+    hmm.set_trans("M1", "M2", 0.0)
+    hmm.set_trans("M2", "E", 0.0)
+    hmm.normalize()
+
+    random = RandomState(0)
+    path = hmm.emit(random)
+    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert "".join(s[1] for s in path) == "AC"
+
+    hmm.viterbi("AC")

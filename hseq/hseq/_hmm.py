@@ -58,6 +58,9 @@ class HMM:
             curr_state = self._transition(curr_state, random)
         return path + [(curr_state, curr_state.emit(random))]
 
+    def viterbi(self, seq):
+        pass
+
     def _draw_initial_state(self, random):
         names = self._init_probs.keys()
         probs = [exp(-v) for v in self._init_probs.values()]
@@ -111,5 +114,4 @@ class HMM:
             else:
                 for a in self._init_probs.keys():
                     self._init_probs[a] += prob_sum
-
 
