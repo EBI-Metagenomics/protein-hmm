@@ -59,33 +59,52 @@ class HMM:
         return path + [(curr_state, curr_state.emit(random))]
 
     def viterbi(self, seq):
-        breakpoint()
-        max_prob = -inf
-        best_pair = None
+        max_prob = 0.0
+        best_path = []
         for qt in self._states.values():
             for ft in range(qt.min_len, qt.max_len + 1):
-                v = self.viterbi_rec(seq, qt, ft)
-                if v < max_prob:
-                    best_pair = qt, ft
-        return max_prob, best_pair
+                tup = self._viterbi(seq, qt, ft)
+                if tup[0] > max_prob:
+                    max_prob = tup[0]
+                    best_path = tup[1] + [(qt, ft)]
+        return max_prob, best_path
 
-    def viterbi_rec(self, seq, qt, ft):
-        max_prob = -inf
-        best_pair = None
-        breakpoint()
+    def _viterbi(self, seq, qt, ft):
+        max_prob = 0.0
+        best_path = []
         emission_prob = qt.prob(seq[len(seq) - ft :])
+        if emission_prob == 0.0:
+            return max_prob, best_path
+
         for qt_1 in self._states.values():
+            if qt_1.end_state:
+                continue
+
             T = self.trans(qt_1.name, qt.name)
             if T == 0.0:
-                if 0.0 > max_prob:
-                    max_prob = 0.0
-                    best_pair = (qt_1, qt_1.min_len)
                 continue
+
             for ft_1 in range(qt_1.min_len, qt_1.max_len + 1):
-                v = self.viterbi_rec(seq[:-ft], qt_1, ft_1) * T * emission_prob
-                if v > max_prob:
-                    max_prob = v
-                    best_pair = (qt_1, ft_1)
+                seq_end = len(seq) - ft
+                if seq_end < 0:
+                    continue
+
+                tup = self._viterbi(seq[:seq_end], qt_1, ft_1)
+                tup = (tup[0] * T * emission_prob, tup[1] + [(qt_1, ft_1)])
+
+                if tup[0] > max_prob:
+                    max_prob = tup[0]
+                    best_path = tup[1]
+
+        if len(seq) - ft < 0:
+            raise ValueError("Check this.")
+        elif len(seq) - ft == 0:
+            v = emission_prob * self.init_prob(qt.name)
+            if v > max_prob:
+                max_prob = v
+                best_path = []
+
+        return max_prob, best_path
 
     def _draw_initial_state(self, random):
         names = self._init_probs.keys()
