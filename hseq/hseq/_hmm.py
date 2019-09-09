@@ -59,15 +59,23 @@ class HMM:
             curr_state = self._transition(curr_state, random)
         return path + [(curr_state, curr_state.emit(random))]
 
-    def likelihood(self, seq: str, states: list, lengths: list):
-        qt = self._states[states.pop(0)]
-        ft = lengths.pop(0)
+    def likelihood(self, seq: str, state_path: list):
+        if len(state_path) == 0:
+            if len(seq) == 0:
+                return 1.0
+            return 0.0
+        head = state_path.pop(0)
+        qt = self._states[head[0]]
+        ft = head[1]
+        if ft > len(seq):
+            return 0.0
         p = self.init_prob(qt.name) * qt.prob(seq[:ft])
 
         seq = seq[ft:]
         qt_1 = qt
-        for state_name, ft in zip(states, lengths):
-            qt = self._states[state_name]
+        for head in state_path:
+            qt = self._states[head[0]]
+            ft = head[1]
             p *= qt.prob(seq[:ft]) * self.trans(qt_1.name, qt.name)
             seq = seq[ft:]
             qt_1 = qt
