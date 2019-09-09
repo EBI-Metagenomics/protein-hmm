@@ -1,7 +1,8 @@
 from itertools import product
 from ._state import State
 from ._norm import normalize_emission
-from math import exp, inf
+from math import exp
+from ._nlog import NLOG
 
 _ = None
 
@@ -33,7 +34,7 @@ class FrameState(State):
             x3 = self.alphabet
 
         get = self._cemission.get
-        probs = [-get(a + b + c, inf) for a, b, c in product(x1, x2, x3)]
+        probs = [-get(a + b + c, NLOG(0.0)) for a, b, c in product(x1, x2, x3)]
         return exp(logsumexp(probs))
 
     def _joint_z_f1(self, z1):
