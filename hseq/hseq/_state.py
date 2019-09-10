@@ -1,4 +1,5 @@
 from ._norm import normalize_emission
+from ._nlog import nlog
 from math import exp, inf
 
 
@@ -37,12 +38,17 @@ class SilentState(State):
 
     def prob(self, seq: str, nlog_space=False):
         if seq == "":
-            v = 0.0
+            v = nlog(1.0)
         else:
-            v = inf
+            v = nlog(0.0)
         if not nlog_space:
             v = exp(-v)
         return v
+
+    def emission(self, nlog_space=False):
+        if nlog_space:
+            return [("", nlog(1.0))]
+        return [("", nlog(1.0))]
 
     @property
     def min_len(self):
@@ -69,10 +75,17 @@ class NormalState(State):
         return random.choice(list(self._alphabet), p=probs)
 
     def prob(self, seq: str, nlog_space=False):
-        v = self._emission.get(seq, inf)
+        v = self._emission.get(seq, nlog(0.0))
         if not nlog_space:
             v = exp(-v)
         return v
+
+    def emission(self, nlog_space=False):
+        table = list(self._emission.items())
+        table = sorted(table, key=lambda x: -x[1])
+        if not nlog_space:
+            table = [(row[0], exp(-row[1])) for row in table]
+        return table
 
     @property
     def min_len(self):
@@ -100,10 +113,17 @@ class TripletState(State):
         return random.choice(triplets, p=probs)
 
     def prob(self, seq: str, nlog_space=False):
-        v = self._emission.get(seq, inf)
+        v = self._emission.get(seq, nlog(0.0))
         if not nlog_space:
             v = exp(-v)
         return v
+
+    def emission(self, nlog_space=False):
+        table = list(self._emission.items())
+        table = sorted(table, key=lambda x: -x[1])
+        if not nlog_space:
+            table = [(row[0], exp(-row[1])) for row in table]
+        return table
 
     @property
     def min_len(self):

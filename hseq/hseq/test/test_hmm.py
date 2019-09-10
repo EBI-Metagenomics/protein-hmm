@@ -493,3 +493,41 @@ def test_hmm_viterbi_3():
     assert list(p[1] for p in path) == [0, 1, 0, 0]
     p = hmm.likelihood("A", [("S", 0), ("M1", 1), ("D2", 0), ("E", 0)])
     assert_allclose(p, 0.128)
+
+
+def test_hmm_draw():
+    alphabet = "AC"
+
+    hmm = HMM(alphabet)
+    start_state = SilentState("S", alphabet, False)
+    hmm.add_state(start_state, nlog(1.0))
+
+    end_state = SilentState("E", alphabet, True)
+    hmm.add_state(end_state, nlog(0.0))
+
+    M1 = NormalState("M1", {"A": nlog(0.8), "C": nlog(0.2)})
+    hmm.add_state(M1, nlog(0.0))
+
+    D1 = SilentState("D1", alphabet, False)
+    hmm.add_state(D1, nlog(0.0))
+
+    M2 = NormalState("M2", {"A": nlog(0.4), "C": nlog(0.6)})
+    hmm.add_state(M2, nlog(0.0))
+
+    D2 = SilentState("D2", alphabet, False)
+    hmm.add_state(D2, nlog(0.0))
+
+    hmm.set_trans("S", "M1", nlog(0.8))
+    hmm.set_trans("S", "D1", nlog(0.2))
+
+    hmm.set_trans("M1", "M2", nlog(0.8))
+    hmm.set_trans("M1", "D2", nlog(0.2))
+
+    hmm.set_trans("D1", "D2", nlog(0.2))
+    hmm.set_trans("D1", "M2", nlog(0.8182787382))
+
+    hmm.set_trans("D2", "E", nlog(1.0))
+    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.normalize()
+
+    # hmm.draw("test.pdf", emission=True)

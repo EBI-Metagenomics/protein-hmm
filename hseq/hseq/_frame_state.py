@@ -168,5 +168,18 @@ class FrameState(State):
         seq = random.choice(list(emission.keys()), p=list(emission.values()))
         return seq
 
+    def emission(self, nlog_space=False):
+        abc = self._alphabet
+        emission = {}
+        for f in range(1, 6):
+            combs = product(*[abc] * f)
+            emission.update({"".join(z): self._prob_z_given_f(z) for z in combs})
+
+        table = list(emission.items())
+        table = sorted(table, key=lambda x: -x[1])
+        if not nlog_space:
+            table = [(row[0], exp(-row[1])) for row in table]
+        return table
+
     def __repr__(self):
         return f"<{self.__class__.__name__}:{self._name}>"

@@ -82,6 +82,45 @@ class HMM:
 
         return p
 
+    def draw(self, filepath, emission=False, init_prob=True, digits=3):
+        from graphviz import Digraph
+
+        graph = Digraph()
+
+        for state in self._states.values():
+            if state.end_state:
+                shape = "doublecircle"
+            else:
+                shape = "circle"
+
+            if init_prob:
+                p = self.init_prob(state.name, nlog_space=False)
+                if p > 0:
+                    p = round(p, digits)
+                    state_label = f"{state.name}: {p}"
+                else:
+                    state_label = f"{state.name}"
+            else:
+                state_label = f"{state.name}"
+
+            if emission:
+                tbl_fmt = "BORDER='0' CELLBORDER='1' CELLSPACING='0' CELLPADDING='4'"
+                label = f"<<TABLE {tbl_fmt}>"
+                label += f"<TR><TD COLSPAN='2'>{state_label}</TD></TR>"
+                label += "</TABLE>>"
+            else:
+                label = state_label
+            graph.node(state.name, label, shape=shape)
+
+        for state0, trans in self._trans.items():
+            for state1, nlogp in trans.items():
+                p = exp(-nlogp)
+                if p > 0:
+                    p = round(p, digits)
+                    graph.edge(state0, state1, label=f"{p}")
+
+        graph.render(filepath, view=True)
+
     def viterbi(self, seq: str):
         max_prob = 0.0
         best_path = []
