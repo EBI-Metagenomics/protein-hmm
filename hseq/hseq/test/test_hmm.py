@@ -495,7 +495,7 @@ def test_hmm_viterbi_3():
     assert_allclose(p, 0.128)
 
 
-def test_hmm_draw():
+def test_hmm_draw(tmp_path):
     alphabet = "AC"
 
     hmm = HMM(alphabet)
@@ -530,4 +530,4 @@ def test_hmm_draw():
     hmm.set_trans("M2", "E", nlog(1.0))
     hmm.normalize()
 
-    # hmm.draw("test.pdf", emission=True)
+    hmm.draw(tmp_path / "test.pdf", emission=True)

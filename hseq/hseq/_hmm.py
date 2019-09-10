@@ -82,7 +82,7 @@ class HMM:
 
         return p
 
-    def draw(self, filepath, emission=False, init_prob=True, digits=3):
+    def draw(self, filepath, emission=False, init_prob=True, digits=3, view=False):
         from graphviz import Digraph
 
         graph = Digraph()
@@ -104,12 +104,11 @@ class HMM:
                 state_label = f"{state.name}"
 
             if emission:
-                tbl_fmt = "BORDER='0' CELLBORDER='1' CELLSPACING='0' CELLPADDING='4'"
-                label = f"<<TABLE {tbl_fmt}>"
-                label += f"<TR><TD COLSPAN='2'>{state_label}</TD></TR>"
-                label += "</TABLE>>"
+                emission = state.emission(nlog_space=False)
+                label = _format_emission_table(emission, state_label, digits)
             else:
                 label = state_label
+
             graph.node(state.name, label, shape=shape)
 
         for state0, trans in self._trans.items():
@@ -119,7 +118,7 @@ class HMM:
                     p = round(p, digits)
                     graph.edge(state0, state1, label=f"{p}")
 
-        graph.render(filepath, view=True)
+        graph.render(filepath, view=view)
 
     def viterbi(self, seq: str):
         max_prob = 0.0
@@ -237,3 +236,24 @@ class HMM:
                 for a in self._init_probs.keys():
                     self._init_probs[a] += prob_sum
 
+
+def _format_emission_table(emission, name, digits):
+    rows = ""
+    for row in emission:
+        if row[1] == 0.0:
+            break
+        seq = row[0]
+        p = round(row[1], digits)
+        rows += f"<TR><TD>{seq}</TD><TD>{p}</TD></TR>"
+
+    if len(rows) > 0:
+        tbl_fmt = "BORDER='0' CELLBORDER='1' "
+        tbl_fmt += "CELLSPACING='0' CELLPADDING='4'"
+        tbl_str = f"<<TABLE {tbl_fmt}>"
+        tbl_str += f"<TR><TD COLSPAN='2'>{name}</TD></TR>"
+        tbl_str += rows
+        tbl_str += "</TABLE>>"
+    else:
+        tbl_str = name
+
+    return tbl_str
