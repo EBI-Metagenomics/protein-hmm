@@ -1,8 +1,10 @@
-from math import log
 from itertools import product
-from numpy.testing import assert_allclose
+from math import log
+
 from numpy.random import RandomState
-from hseq import SilentState, NormalState, TripletState, FrameState
+from numpy.testing import assert_allclose
+
+from hseq import FrameState, NormalState, SilentState, TripletState
 
 
 def test_states():
@@ -115,4 +117,3 @@ def test_states():
     assert frame_state.emit(random) == "AUU"
     assert frame_state.emit(random) == "AG"
     assert frame_state.emit(random) == "UG"
-

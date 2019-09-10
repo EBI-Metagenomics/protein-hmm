@@ -81,11 +81,7 @@ class NormalState(State):
         return v
 
     def emission(self, nlog_space=False):
-        table = list(self._emission.items())
-        table = sorted(table, key=lambda x: -x[1])
-        if not nlog_space:
-            table = [(row[0], exp(-row[1])) for row in table]
-        return table
+        return emission_table(self._emission, nlog_space)
 
     @property
     def min_len(self):
@@ -119,11 +115,7 @@ class TripletState(State):
         return v
 
     def emission(self, nlog_space=False):
-        table = list(self._emission.items())
-        table = sorted(table, key=lambda x: -x[1])
-        if not nlog_space:
-            table = [(row[0], exp(-row[1])) for row in table]
-        return table
+        return emission_table(self._emission, nlog_space)
 
     @property
     def min_len(self):
@@ -136,4 +128,11 @@ class TripletState(State):
     def __repr__(self):
         return f"<{self.__class__.__name__}:{self._name}>"
 
+
+def emission_table(emission: dict, nlog_space: bool):
+    table = list(emission.items())
+    table = sorted(table, key=lambda x: -x[1])
+    if not nlog_space:
+        table = [(row[0], exp(-row[1])) for row in table]
+    return table
 

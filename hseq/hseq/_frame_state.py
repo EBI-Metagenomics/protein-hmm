@@ -3,7 +3,7 @@ from math import exp
 
 from ._nlog import nlog
 from ._norm import normalize_emission
-from ._state import State
+from ._state import State, emission_table
 
 _ = None
 
@@ -15,14 +15,48 @@ class FrameState(State):
 
         normalize_emission(base_emission)
         self._base_emission = base_emission
+        alphabet = "".join(base_emission.keys())
 
         normalize_emission(codon_emission)
         self._cemission = codon_emission
 
         self._epsilon = epsilon
 
-        alphabet = "".join(base_emission.keys())
         super(FrameState, self).__init__(name, False, alphabet)
+
+    def prob(self, z):
+        """ p(Z=z1z2...zf, F=f). """
+        f = len(z)
+        if f == 1:
+            return self._joint_z_f1(*z)
+        elif f == 2:
+            return self._joint_z_f2(*z)
+        elif f == 3:
+            return self._joint_z_f3(*z)
+        elif f == 4:
+            return self._joint_z_f4(*z)
+        elif f == 5:
+            return self._joint_z_f5(*z)
+        else:
+            return 0.0
+
+    def emit(self, random):
+        lengths = [1, 2, 3, 4, 5]
+        probs = [self._len_prob(f) for f in [1, 2, 3, 4, 5]]
+        f = random.choice(lengths, p=probs)
+
+        abc = self._alphabet
+        emission = {"".join(z): self._prob_z_given_f(z) for z in product(*[abc] * f)}
+        seq = random.choice(list(emission.keys()), p=list(emission.values()))
+        return seq
+
+    def emission(self, nlog_space=False):
+        abc = self._alphabet
+        emission = {}
+        for f in range(1, 6):
+            combs = product(*[abc] * f)
+            emission.update({"".join(z): self._prob_z_given_f(z) for z in combs})
+        return emission_table(emission, nlog_space)
 
     def _codon_prob(self, x1, x2, x3):
         from scipy.special import logsumexp
@@ -131,22 +165,6 @@ class FrameState(State):
         else:
             return 0.0
 
-    def prob(self, z):
-        """ p(Z=z1z2...zf, F=f). """
-        f = len(z)
-        if f == 1:
-            return self._joint_z_f1(*z)
-        elif f == 2:
-            return self._joint_z_f2(*z)
-        elif f == 3:
-            return self._joint_z_f3(*z)
-        elif f == 4:
-            return self._joint_z_f4(*z)
-        elif f == 5:
-            return self._joint_z_f5(*z)
-        else:
-            return 0.0
-
     def _len_prob(self, f):
         """ P(F=f). """
         e = self._epsilon
@@ -157,29 +175,6 @@ class FrameState(State):
         elif f == 3:
             return e ** 4 + 4 * e ** 2 * (1 - e) ** 2 + (1 - e) ** 4
         return 0.0
-
-    def emit(self, random):
-        lengths = [1, 2, 3, 4, 5]
-        probs = [self._len_prob(f) for f in [1, 2, 3, 4, 5]]
-        f = random.choice(lengths, p=probs)
-
-        abc = self._alphabet
-        emission = {"".join(z): self._prob_z_given_f(z) for z in product(*[abc] * f)}
-        seq = random.choice(list(emission.keys()), p=list(emission.values()))
-        return seq
-
-    def emission(self, nlog_space=False):
-        abc = self._alphabet
-        emission = {}
-        for f in range(1, 6):
-            combs = product(*[abc] * f)
-            emission.update({"".join(z): self._prob_z_given_f(z) for z in combs})
-
-        table = list(emission.items())
-        table = sorted(table, key=lambda x: -x[1])
-        if not nlog_space:
-            table = [(row[0], exp(-row[1])) for row in table]
-        return table
 
     def __repr__(self):
         return f"<{self.__class__.__name__}:{self._name}>"
