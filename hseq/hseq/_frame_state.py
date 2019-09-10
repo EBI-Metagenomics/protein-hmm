@@ -55,7 +55,8 @@ class FrameState(State):
         emission = {}
         for f in range(1, 6):
             combs = product(*[abc] * f)
-            emission.update({"".join(z): self._prob_z_given_f(z) for z in combs})
+            emission.update({"".join(z): self._joint_z_f(z) for z in combs})
+        emission = {a: nlog(b) for a, b in emission.items()}
         return emission_table(emission, nlog_space)
 
     def _codon_prob(self, x1, x2, x3):
@@ -72,6 +73,18 @@ class FrameState(State):
         probs = [-get(a + b + c, nlog(0.0)) for a, b, c in product(x1, x2, x3)]
         return exp(logsumexp(probs))
 
+    def _joint_z_f(self, z):
+        if len(z) == 1:
+            return self._joint_z_f1(*z)
+        elif len(z) == 2:
+            return self._joint_z_f2(*z)
+        elif len(z) == 3:
+            return self._joint_z_f3(*z)
+        elif len(z) == 4:
+            return self._joint_z_f4(*z)
+        elif len(z) == 5:
+            return self._joint_z_f5(*z)
+
     def _joint_z_f1(self, z1):
         """ p(Z=z1, F=1). """
         e = self._codon_prob
@@ -80,7 +93,10 @@ class FrameState(State):
 
     def _joint_z_f2(self, z1, z2):
         """ p(Z=z1z2, F=2). """
-        i = lambda x: exp(-self._base_emission.get(x))
+
+        def i(x):
+            return exp(-self._base_emission.get(x))
+
         e = self._codon_prob
 
         c = 2 * self._epsilon * (1 - self._epsilon) ** 3 / 3
@@ -94,7 +110,10 @@ class FrameState(State):
 
     def _joint_z_f3(self, z1, z2, z3):
         """ p(Z=z1z2z3, F=3). """
-        i = lambda x: exp(-self._base_emission.get(x))
+
+        def i(x):
+            return exp(-self._base_emission.get(x))
+
         e = self._codon_prob
 
         p = (1 - self._epsilon) ** 4 * e(z1, z2, z3)
@@ -113,7 +132,10 @@ class FrameState(State):
 
     def _joint_z_f4(self, z1, z2, z3, z4):
         """ p(Z=z1z2...z4, F=4). """
-        i = lambda x: exp(-self._base_emission.get(x))
+
+        def i(x):
+            return exp(-self._base_emission.get(x))
+
         e = self._codon_prob
 
         c = self._epsilon * (1 - self._epsilon) ** 3 / 2
@@ -137,7 +159,10 @@ class FrameState(State):
 
     def _joint_z_f5(self, z1, z2, z3, z4, z5):
         """ p(Z=z1z2...z5, F=5). """
-        i = lambda x: exp(-self._base_emission.get(x))
+
+        def i(x):
+            return exp(-self._base_emission.get(x))
+
         e = self._codon_prob
 
         c = self._epsilon ** 2 * (1 - self._epsilon) ** 2 / 10
@@ -162,8 +187,6 @@ class FrameState(State):
             return self._joint_z_f4(*z) / self._len_prob(4)
         elif f == 5:
             return self._joint_z_f5(*z) / self._len_prob(5)
-        else:
-            return 0.0
 
     def _len_prob(self, f):
         """ P(F=f). """
@@ -174,7 +197,6 @@ class FrameState(State):
             return 2 * e ** 3 * (1 - e) + 2 * e * (1 - e) ** 3
         elif f == 3:
             return e ** 4 + 4 * e ** 2 * (1 - e) ** 2 + (1 - e) ** 4
-        return 0.0
 
     def __repr__(self):
         return f"<{self.__class__.__name__}:{self._name}>"

@@ -125,7 +125,7 @@ class HMM:
         best_path = []
         end_states = [q for q in self._states.values() if q.end_state]
         if len(end_states) == 0:
-            raise ValueError("There is not ending state to perform Viterbi.")
+            raise ValueError("There is no ending state to perform Viterbi.")
         for qt in end_states:
             for ft in range(qt.min_len, qt.max_len + 1):
                 tup = self._viterbi(seq, qt, ft)
@@ -151,9 +151,6 @@ class HMM:
 
             for ft_1 in range(qt_1.min_len, qt_1.max_len + 1):
                 seq_end = len(seq) - ft
-                if seq_end < 0:
-                    continue
-
                 tup = self._viterbi(seq[:seq_end], qt_1, ft_1)
                 tup = (tup[0] * T * emission_prob, tup[1] + [(qt_1, ft_1)])
 
@@ -240,14 +237,11 @@ def _format_emission_table(emission, name, digits):
         p = round(row[1], digits)
         rows += f"<TR><TD>{seq}</TD><TD>{p}</TD></TR>"
 
-    if len(rows) > 0:
-        tbl_fmt = "BORDER='0' CELLBORDER='1' "
-        tbl_fmt += "CELLSPACING='0' CELLPADDING='4'"
-        tbl_str = f"<<TABLE {tbl_fmt}>"
-        tbl_str += f"<TR><TD COLSPAN='2'>{name}</TD></TR>"
-        tbl_str += rows
-        tbl_str += "</TABLE>>"
-    else:
-        tbl_str = name
+    tbl_fmt = "BORDER='0' CELLBORDER='1' "
+    tbl_fmt += "CELLSPACING='0' CELLPADDING='4'"
+    tbl_str = f"<<TABLE {tbl_fmt}>"
+    tbl_str += f"<TR><TD COLSPAN='2'>{name}</TD></TR>"
+    tbl_str += rows
+    tbl_str += "</TABLE>>"
 
     return tbl_str

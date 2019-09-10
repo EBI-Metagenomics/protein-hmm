@@ -4,7 +4,7 @@ from math import log
 from numpy.random import RandomState
 from numpy.testing import assert_allclose
 
-from hseq import FrameState, NormalState, SilentState, TripletState
+from hseq import FrameState, NormalState, SilentState, TripletState, nlog
 
 
 def test_states():
@@ -21,7 +21,12 @@ def test_states():
     table = start_state.emission()
     assert len(table) == 1
     assert table[0][0] == ""
-    assert table[0][1] == 0.0
+    assert table[0][1] == 1.0
+
+    table = start_state.emission(nlog_space=True)
+    assert len(table) == 1
+    assert table[0][0] == ""
+    assert table[0][1] == nlog(1.0)
 
     end_state = SilentState("E", "ACGU", True)
     assert end_state.name == "E"
@@ -43,10 +48,10 @@ def test_states():
     assert repr(normal_state) == "<NormalState:M1>"
 
     table = normal_state.emission(nlog_space=False)
-    assert table[0][0] == "B"
-    assert_allclose(table[0][1], 0.01)
-    assert table[1][0] == "A"
-    assert_allclose(table[1][1], 0.99)
+    assert table[0][0] == "A"
+    assert_allclose(table[0][1], 0.99)
+    assert table[1][0] == "B"
+    assert_allclose(table[1][1], 0.01)
 
     alphabet = "ACGU"
     triplet_state = TripletState("M2", alphabet, {"AUG": -log(0.8), "AUU": -log(0.8)})
@@ -67,6 +72,9 @@ def test_states():
     assert table[1][0] == "AUU"
     assert_allclose(table[1][1], 0.5)
 
+    assert triplet_state.min_len == 3
+    assert triplet_state.max_len == 3
+
     base_emission = {"A": -log(0.25), "C": -log(0.25), "G": -log(0.25), "U": -log(0.25)}
     codon_emission = {"AUG": -log(0.8), "AUU": -log(0.1)}
     epsilon = 0.1
@@ -82,11 +90,11 @@ def test_states():
 
     table = frame_state.emission(nlog_space=True)
     assert table[0][0] == "AUG"
-    assert_allclose(table[0][1], 0.8507146141930486)
-    assert table[1][0] == "U"
-    assert_allclose(table[1][1], 0.37037037037037035)
+    assert_allclose(table[0][1], 0.5347732882047063)
+    assert table[1][0] == "AUU"
+    assert_allclose(table[1][1], 2.590237330499946)
     assert table[2][0] == "AU"
-    assert_allclose(table[2][1], 0.3669263775971093)
+    assert_allclose(table[2][1], 2.915843423869834)
 
     epsilon = 0.0
     frame_state = FrameState("M4", base_emission, codon_emission, epsilon)

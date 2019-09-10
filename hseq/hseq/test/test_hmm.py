@@ -515,6 +515,18 @@ def test_hmm_viterbi_3():
     assert_allclose(p, 0.128)
 
 
+def test_hmm_viterbi_no_end():
+    alphabet = "AC"
+
+    hmm = HMM(alphabet)
+    start_state = SilentState("S", alphabet, False)
+    hmm.add_state(start_state, nlog(1.0))
+    hmm.normalize()
+
+    with pytest.raises(ValueError):
+        hmm.viterbi("AC")
+
+
 def test_hmm_draw(tmp_path):
     alphabet = "AC"
 
@@ -548,9 +560,16 @@ def test_hmm_draw(tmp_path):
 
     hmm.set_trans("D2", "E", nlog(1.0))
     hmm.set_trans("M2", "E", nlog(1.0))
+
+    base_emission = {"A": nlog(0.5), "C": nlog(0.5)}
+    codon_emission = {"ACC": nlog(0.8), "AAA": nlog(0.2)}
+    epsilon = 0.1
+    M0 = FrameState("M0", base_emission, codon_emission, epsilon)
+    hmm.add_state(M0, nlog(1.0))
+    hmm.set_trans("M0", "E", nlog(1.0))
     hmm.normalize()
 
-    hmm.draw(tmp_path / "test.pdf", emission=True)
-    hmm.draw(tmp_path / "test.pdf", emission=False)
-    hmm.draw(tmp_path / "test.pdf", emission=True, init_prob=True)
-    hmm.draw(tmp_path / "test.pdf", emission=True, init_prob=False)
+    hmm.draw(tmp_path / "test.pdf", emission=True, init_prob=True, view=True)
+    # hmm.draw(tmp_path / "test.pdf", emission=True, init_prob=False)
+    # hmm.draw(tmp_path / "test.pdf", emission=False, init_prob=True)
+    # hmm.draw(tmp_path / "test.pdf", emission=False, init_prob=False)

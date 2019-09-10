@@ -1,6 +1,6 @@
 from ._norm import normalize_emission
 from ._nlog import nlog
-from math import exp, inf
+from math import exp
 
 
 class State:
@@ -24,9 +24,6 @@ class State:
     def __str__(self):
         return f"<{self._name}>"
 
-    def __repr__(self):
-        return f"<State:{self._name}>"
-
 
 class SilentState(State):
     def __init__(self, name: str, alphabet: str, end_state: bool):
@@ -48,7 +45,7 @@ class SilentState(State):
     def emission(self, nlog_space=False):
         if nlog_space:
             return [("", nlog(1.0))]
-        return [("", nlog(1.0))]
+        return [("", 1.0)]
 
     @property
     def min_len(self):
@@ -131,7 +128,7 @@ class TripletState(State):
 
 def emission_table(emission: dict, nlog_space: bool):
     table = list(emission.items())
-    table = sorted(table, key=lambda x: -x[1])
+    table = sorted(table, key=lambda x: x[1])
     if not nlog_space:
         table = [(row[0], exp(-row[1])) for row in table]
     return table
