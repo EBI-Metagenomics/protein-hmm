@@ -569,7 +569,8 @@ def test_hmm_draw(tmp_path):
     hmm.set_trans("M0", "E", nlog(1.0))
     hmm.normalize()
 
-    hmm.draw(tmp_path / "test.pdf", emission=True, init_prob=True, view=True)
-    # hmm.draw(tmp_path / "test.pdf", emission=True, init_prob=False)
-    # hmm.draw(tmp_path / "test.pdf", emission=False, init_prob=True)
-    # hmm.draw(tmp_path / "test.pdf", emission=False, init_prob=False)
+    hmm.draw(tmp_path / "test.pdf", emissions=5, init_prob=True)
+    hmm.draw(tmp_path / "test.pdf", emissions=3, init_prob=False)
+    hmm.draw(tmp_path / "test.pdf", emissions=0, init_prob=True)
+    hmm.draw(tmp_path / "test.pdf", emissions=0, init_prob=False)
+    hmm.draw(tmp_path / "test.pdf", emissions=50, init_prob=True)

@@ -82,7 +82,7 @@ class HMM:
 
         return p
 
-    def draw(self, filepath, emission=False, init_prob=True, digits=3, view=False):
+    def draw(self, filepath, emissions=0, init_prob=True, digits=3, view=False):
         from graphviz import Digraph
 
         graph = Digraph()
@@ -95,16 +95,17 @@ class HMM:
 
             if init_prob:
                 p = self.init_prob(state.name, nlog_space=False)
+                p = round(p, digits)
                 if p > 0:
-                    p = round(p, digits)
                     state_label = f"{state.name}: {p}"
                 else:
                     state_label = f"{state.name}"
             else:
                 state_label = f"{state.name}"
 
-            if emission:
+            if emissions > 0:
                 emission = state.emission(nlog_space=False)
+                emission = emission[:emissions]
                 label = _format_emission_table(emission, state_label, digits)
             else:
                 label = state_label
@@ -114,8 +115,8 @@ class HMM:
         for state0, trans in self._trans.items():
             for state1, nlogp in trans.items():
                 p = exp(-nlogp)
+                p = round(p, digits)
                 if p > 0:
-                    p = round(p, digits)
                     graph.edge(state0, state1, label=f"{p}")
 
         graph.render(filepath, view=view)
@@ -231,10 +232,10 @@ class HMM:
 def _format_emission_table(emission, name, digits):
     rows = ""
     for row in emission:
-        if row[1] == 0.0:
-            break
         seq = row[0]
         p = round(row[1], digits)
+        if p == 0.0:
+            break
         rows += f"<TR><TD>{seq}</TD><TD>{p}</TD></TR>"
 
     tbl_fmt = "BORDER='0' CELLBORDER='1' "
