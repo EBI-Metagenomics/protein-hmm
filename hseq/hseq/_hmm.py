@@ -85,7 +85,10 @@ class HMM:
     def viterbi(self, seq: str):
         max_prob = 0.0
         best_path = []
-        for qt in self._states.values():
+        end_states = [q for q in self._states.values() if q.end_state]
+        if len(end_states) == 0:
+            raise ValueError("There is not ending state to perform Viterbi.")
+        for qt in end_states:
             for ft in range(qt.min_len, qt.max_len + 1):
                 tup = self._viterbi(seq, qt, ft)
                 if tup[0] > max_prob:
