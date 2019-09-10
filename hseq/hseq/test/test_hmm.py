@@ -1,8 +1,28 @@
-from math import log, inf
+import pytest
 from numpy.testing import assert_allclose
 from numpy.random import RandomState
 from hseq import SilentState, NormalState, TripletState, FrameState
 from hseq import HMM, nlog
+
+
+def test_hmm_states():
+    alphabet = "ACGU"
+
+    hmm = HMM(alphabet)
+    hmm.add_state(SilentState("S", alphabet, False))
+    state = TripletState("M2", alphabet, {"AGU": nlog(0.8), "AGG": nlog(0.2)})
+    hmm.add_state(state, nlog(0.0))
+
+    states = hmm.states
+    assert "S" in states
+    assert "M2" in states
+    assert len(states) == 2
+
+    with pytest.raises(ValueError):
+        hmm.add_state(NormalState("S", {a: nlog(1.0) for a in alphabet}))
+
+    with pytest.raises(ValueError):
+        hmm.add_state(NormalState("S2", {a: nlog(1.0) for a in alphabet[:-1]}))
 
 
 def test_hmm_init_prob_trans_a():
@@ -531,3 +551,6 @@ def test_hmm_draw(tmp_path):
     hmm.normalize()
 
     hmm.draw(tmp_path / "test.pdf", emission=True)
+    hmm.draw(tmp_path / "test.pdf", emission=False)
+    hmm.draw(tmp_path / "test.pdf", emission=True, init_prob=True)
+    hmm.draw(tmp_path / "test.pdf", emission=True, init_prob=False)

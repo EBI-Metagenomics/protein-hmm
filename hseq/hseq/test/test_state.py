@@ -15,6 +15,8 @@ def test_states():
     assert start_state.alphabet == "ACGU"
     assert_allclose(start_state.prob(""), 1.0)
     assert_allclose(start_state.prob("A"), 0.0, atol=1e-7)
+    assert str(start_state) == "<S>"
+    assert repr(start_state) == "<SilentState:S>"
 
     table = start_state.emission()
     assert len(table) == 1
@@ -37,6 +39,8 @@ def test_states():
     assert set(normal_state.alphabet) == set("AB")
     assert_allclose(normal_state.prob("A"), 0.99)
     assert_allclose(normal_state.prob("B"), 0.01)
+    assert str(normal_state) == "<M1>"
+    assert repr(normal_state) == "<NormalState:M1>"
 
     table = normal_state.emission(nlog_space=False)
     assert table[0][0] == "B"
@@ -54,6 +58,8 @@ def test_states():
     assert_allclose(triplet_state.prob("AUG"), 0.5)
     assert_allclose(triplet_state.prob("AUU"), 0.5)
     assert_allclose(triplet_state.prob("AGU"), 0.0, atol=1e-7)
+    assert str(triplet_state) == "<M2>"
+    assert repr(triplet_state) == "<TripletState:M2>"
 
     table = triplet_state.emission(nlog_space=False)
     assert table[0][0] == "AUG"
@@ -101,6 +107,9 @@ def test_states():
     assert_allclose(frame_state.prob("A"), 0.0027000000000000006)
     assert_allclose(frame_state.prob("AUUA"), 0.0010270833333333336)
     assert_allclose(frame_state.prob("AUUAA"), 5.625000000000003e-06, atol=1e-5)
+    assert_allclose(frame_state.prob("AUUAAA"), 0.0, atol=1e-7)
+    assert str(frame_state) == "<M5>"
+    assert repr(frame_state) == "<FrameState:M5>"
 
     p = frame_state._prob_z_given_f
     abc = "ACGU"

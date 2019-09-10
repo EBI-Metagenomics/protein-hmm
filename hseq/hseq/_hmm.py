@@ -161,9 +161,7 @@ class HMM:
                     max_prob = tup[0]
                     best_path = tup[1]
 
-        if len(seq) - ft < 0:
-            raise ValueError("Check this.")
-        elif len(seq) - ft == 0:
+        if len(seq) - ft == 0:
             v = emission_prob * self.init_prob(qt.name)
             if v > max_prob:
                 max_prob = v
@@ -224,17 +222,13 @@ class HMM:
         names = self._states.keys()
         nstates = len(names)
 
-        if len(probs) == 0:
+        prob_sum = logsumexp(probs)
+        if isinf(prob_sum):
             for a in names:
                 self._init_probs[a] = log(nstates)
         else:
-            prob_sum = logsumexp(probs)
-            if isinf(prob_sum):
-                for a in names:
-                    self._init_probs[a] = log(nstates)
-            else:
-                for a in self._init_probs.keys():
-                    self._init_probs[a] += prob_sum
+            for a in self._init_probs.keys():
+                self._init_probs[a] += prob_sum
 
 
 def _format_emission_table(emission, name, digits):
