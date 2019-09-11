@@ -1,4 +1,4 @@
-from math import exp, inf, log
+from math import exp, log
 
 from ._gencode import GENCODE
 from ._molecule import Molecule, convert_to
@@ -7,7 +7,7 @@ from ._norm import normalize_emission
 
 class AA2Codon:
     def __init__(self, aa_emission, molecule: Molecule, gencode="standard"):
-        self._gencode = GENCODE[gencode]
+        self._gencode = GENCODE[gencode].copy()
         self._molecule = molecule
         self._convert_gencode_alphabet()
 

@@ -1,4 +1,4 @@
-from gwt import RNA, DNA
+from gwt import DNA, RNA
 
 
 def test_molecule():

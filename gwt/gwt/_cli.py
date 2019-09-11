@@ -16,7 +16,8 @@ def cli():
     "--show",
     type=click.Choice(["codon", "frame", "length", "indels"]),
     default="frame",
-    help="Show codon emission, P(X=𝚡₁𝚡₂𝚡₃), or frame emission, P(Z=𝚣₁𝚣₂..𝚣ₙ, F=n)",
+    help="Show codon emission P(X=𝚡₁𝚡₂𝚡₃), frame emission P(Z=𝚣₁𝚣₂..𝚣ₙ, F=n),"
+    "length probability P(F=f), or indels probability p(M=m).",
 )
 @click.option("--epsilon", type=float, default=1e-3)
 @click.option("--n", "-n", type=int, default=10, help="Number of table lines to show.")
@@ -24,7 +25,7 @@ def frame(input, base, show, epsilon, n):
     """
     Show frame emission information.
 
-    INPUT is the file path of amino acid emission table.
+    INPUT is the file path to the amino acid emission table.
     One can also pass `-` to read from the standard input.
     """
     from ._parse import parse_emission
@@ -66,8 +67,8 @@ def gencode(aa_or_codon, gencode):
     aa_or_codon = aa_or_codon.upper()
     try:
         print(" ".join(_gencode(aa_or_codon.upper(), gencode)))
-    except ValueError:
-        raise click.UsageError(f"{aa_or_codon} was not found in the genetic code.")
+    except ValueError as err:
+        raise click.UsageError(str(err))
 
 
 def sort_emission(emission):
@@ -82,4 +83,3 @@ def show_tuples(d, length):
 
 cli.add_command(frame)
 cli.add_command(gencode)
-

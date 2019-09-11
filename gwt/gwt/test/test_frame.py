@@ -1,6 +1,8 @@
 from math import log
+
 from numpy.testing import assert_allclose
-from gwt import FrameEmission, RNA, DNA
+
+from gwt import DNA, RNA, FrameEmission
 
 
 def test_frame():

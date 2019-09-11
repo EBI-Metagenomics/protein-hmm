@@ -1,6 +1,6 @@
 from math import log
-from gwt import AA2Codon
-from gwt import DNA
+
+from gwt import DNA, AA2Codon
 
 
 def test_aa2codon():

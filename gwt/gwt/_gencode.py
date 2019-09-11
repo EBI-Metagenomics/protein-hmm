@@ -5,7 +5,7 @@ GENCODE = {
         "I": ["AUU", "AUC", "AUA"],
         "M": ["AUG"],
         "V": ["GUU", "GUC", "GUA", "GUG"],
-        "S": ["UCU", "UCC", "UCA", "UCG"],
+        "S": ["UCU", "UCC", "UCA", "UCG", "AGU", "AGC"],
         "P": ["CCU", "CCC", "CCA", "CCG"],
         "T": ["ACU", "ACC", "ACA", "ACG"],
         "A": ["GCU", "GCC", "GCA", "GCG"],
@@ -19,9 +19,7 @@ GENCODE = {
         "E": ["GAA", "GAG"],
         "C": ["UGU", "UGC"],
         "W": ["UGG"],
-        "R": ["CGU", "CGC", "CGA", "CGG"],
-        "S": ["AGU", "AGC"],
-        "R": ["AGA", "AGG"],
+        "R": ["CGU", "CGC", "CGA", "CGG", "AGA", "AGG"],
         "G": ["GGU", "GGC", "GGA", "GGG"],
     }
 }
@@ -30,11 +28,14 @@ GENCODE = {
 def gencode(aa_or_codon, name="standard"):
     aa_or_codon = aa_or_codon.upper()
     if len(aa_or_codon) == 1:
+        if aa_or_codon not in GENCODE[name]:
+            aa = aa_or_codon
+            raise ValueError(f"Amino acid `{aa}` was not found in the genetic code.")
         return GENCODE[name][aa_or_codon]
     else:
         aa_or_codon = aa_or_codon.replace("T", "U")
         for aa, codons in GENCODE[name].items():
             if aa_or_codon in codons:
                 return aa
-    raise ValueError("Value not found in the genetic code.")
-
+    codon = aa_or_codon
+    raise ValueError(f"Codon `{codon}` was not found in the genetic code.")

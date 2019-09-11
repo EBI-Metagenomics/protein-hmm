@@ -8,12 +8,12 @@ from ._testit import test
 __version__ = "0.0.1"
 
 __all__ = [
-    "__version__",
-    "test",
-    "cli",
     "AA2Codon",
+    "DNA",
     "FrameEmission",
     "RNA",
-    "DNA",
+    "__version__",
+    "cli",
     "gencode",
+    "test",
 ]
