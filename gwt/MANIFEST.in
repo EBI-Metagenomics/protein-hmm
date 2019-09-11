@@ -2,3 +2,4 @@ include LICENSE.md
 include README.md
 include version.py
 include gwt/test/emission.txt
+include gwt/test/PF02545.hmm
