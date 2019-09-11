@@ -39,26 +39,19 @@ class AA2Codon:
     def bases(self):
         return self._molecule.bases
 
-    def aa_emission(self, prob_space=True):
-        if prob_space:
-            f = lambda x: exp(-x)
-        else:
-            f = lambda x: x
-        return {k: f(v) for k, v in self._aa_emission.items()}
+    def aa_emission(self, nlog_space=False):
+        if nlog_space:
+            return self._aa_emission
+        return {k: exp(-v) for k, v in self._aa_emission.items()}
 
-    def codon_emission(self, prob_space=True):
-        if prob_space:
-            f = lambda x: exp(-x)
-        else:
-            f = lambda x: x
-        return {k: f(v) for k, v in self._codon_emission.items()}
+    def codon_emission(self, nlog_space=False):
+        if nlog_space:
+            return self._codon_emission
+        return {k: exp(-v) for k, v in self._codon_emission.items()}
 
     def _generate_codon_emission(self):
-        from itertools import product
-
         for aa, nlogp in self._aa_emission.items():
             codons = self._gencode.get(aa, [])
             norm = log(len(codons))
             for codon in codons:
                 self._codon_emission.update({codon: nlogp + norm})
-

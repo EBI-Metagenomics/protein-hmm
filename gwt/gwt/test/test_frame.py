@@ -2,7 +2,7 @@ from math import log
 
 from numpy.testing import assert_allclose
 
-from gwt import DNA, RNA, FrameEmission
+from gwt import DNA, RNA, FrameEmission, AA2Codon
 
 
 def test_frame():
@@ -52,3 +52,37 @@ def test_frame():
     assert abs(fe.prob("GGA") - 0.0015190972222222225) < 1e-5
 
     assert set(fe.bases) == set(DNA().bases)
+
+
+def test_frame_emission():
+    aa_emission = {
+        "K": 1.918460000000000054,
+        "R": 2.154889999999999972,
+        "E": 2.307549999999999990,
+        "S": 2.578129999999999811,
+        "Q": 2.579489999999999839,
+        "T": 2.649999999999999911,
+        "A": 2.759770000000000056,
+        "D": 2.822480000000000100,
+        "N": 2.840310000000000112,
+        "P": 2.971490000000000187,
+        "H": 3.169970000000000176,
+        "G": 3.543489999999999807,
+        "L": 3.608680000000000110,
+        "V": 3.694659999999999833,
+        "I": 4.133429999999999715,
+        "Y": 4.327270000000000394,
+        "M": 4.334719999999999906,
+        "F": 4.648749999999999716,
+        "C": 5.304280000000000328,
+        "W": 5.736670000000000158,
+    }
+    molecule = DNA()
+    aa2codon = AA2Codon(aa_emission, molecule)
+    epsilon = 0.1
+    frame = FrameEmission(aa2codon.codon_emission(True), molecule, epsilon)
+    emission = frame.emission()
+    assert emission[0][0] == "AAA"
+    assert_allclose(emission[0][1], 0.04947252553677521)
+    assert emission[30][0] == "GCT"
+    assert_allclose(emission[30][1], 0.010766873439039608)

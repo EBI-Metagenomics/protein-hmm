@@ -1,7 +1,6 @@
-import sys
-from math import exp, log, inf
 from itertools import product
-from math import factorial as fac
+from math import exp, factorial as fac, inf
+
 from ._molecule import Molecule
 from ._norm import normalize_emission
 
@@ -116,7 +115,7 @@ class FrameEmission:
 
         return p
 
-    def top_emission(self, n=10):
+    def emission(self):
 
         sequences = {}
 
@@ -126,7 +125,7 @@ class FrameEmission:
             sequences.update(seqs)
 
         items = sorted(sequences.items(), key=lambda x: x[1], reverse=True)
-        return [(c, v) for c, v in items[:n]]
+        return list(items)
 
     def _codon_prob(self, x1, x2, x3):
         from scipy.special import logsumexp
@@ -215,4 +214,3 @@ def binomial(n, k):
     except ValueError:
         binom = 0
     return binom
-
