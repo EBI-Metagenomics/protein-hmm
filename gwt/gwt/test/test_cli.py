@@ -167,6 +167,7 @@ def test_cli_gencode():
     assert invoke(gwt.cli, ["gencode", "UGG"]).stdout.strip() == "W"
     assert invoke(gwt.cli, ["gencode", "W"]).stdout.strip() == "UGG"
     assert invoke(gwt.cli, ["gencode", "O"]).exit_code == 2
+    assert invoke(gwt.cli, ["gencode", "ABC"]).exit_code == 2
 
 
 def parse_table(txt, sep=" "):
