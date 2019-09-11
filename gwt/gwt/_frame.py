@@ -1,8 +1,9 @@
 from itertools import product
-from math import exp, factorial as fac, inf
+from math import exp, factorial as fac
 
 from ._molecule import Molecule
 from ._norm import normalize_emission
+from ._nlog import nlog
 
 
 class FrameEmission:
@@ -31,7 +32,7 @@ class FrameEmission:
         """ Probability of `m` base indels. """
         e = self._epsilon
         if m not in [0, 1, 2, 3, 4]:
-            raise ValueError()
+            return 0.0
         return binomial(4, 4 - m) * (1 - e) ** (4 - m) * e ** m
 
     def prob(self, z):
@@ -133,44 +134,44 @@ class FrameEmission:
         p = []
         if all([x1 is None, x2 is None, x3 is not None]):
             for x1, x2 in product(self.bases, self.bases):
-                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
+                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
 
         elif all([x1 is None, x2 is not None, x3 is None]):
             for x1, x3 in product(self.bases, self.bases):
-                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
+                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
 
         elif all([x1 is not None, x2 is None, x3 is None]):
             for x2, x3 in product(self.bases, self.bases):
-                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
+                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
 
         elif all([x1 is not None, x2 is not None, x3 is None]):
             for x3 in self.bases:
-                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
+                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
 
         elif all([x1 is not None, x2 is None, x3 is not None]):
             for x2 in self.bases:
-                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
+                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
 
         elif all([x1 is None, x2 is not None, x3 is not None]):
             for x1 in self.bases:
-                p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
+                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
 
         elif all([x1 is not None, x2 is not None, x3 is not None]):
-            p.append(-self._codon_emission.get(x1 + x2 + x3, inf))
-
-        else:
-            raise ValueError()
+            p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
 
         return exp(logsumexp(p))
 
     def _base_bg_prob(self, x):
         return 1.0 / 4
 
+    def _get_codon_emission(self):
+        return [(k, exp(-v)) for (k, v) in self._codon_emission.items()]
+
     def __str__(self):
         msg = f"Epsilon = {self._epsilon}\n"
 
         msg += "\n"
-        for m in range(0, 4):
+        for m in range(0, 5):
             msg += f"p(M={m}) = {self.indel_prob(m):.4f}\n"
 
         msg += "\n"
@@ -179,16 +180,17 @@ class FrameEmission:
 
         msg += "\n"
         msg += "Top codons\n"
-        items = sorted(self._codon_emission.items(), key=lambda x: x[1], reverse=True)
+        items = sorted(self._get_codon_emission(), key=lambda x: x[1], reverse=True)
         for c, v in items[:5]:
             msg += f"p(X={c}) = {v:.4f}\n"
 
         sequences = {}
 
+        bases = self._molecule.bases
         for f in range(1, 6):
             msg += "\n"
             msg += f"Top sequences for F={f}\n"
-            seqs = {"".join(seq): self.prob(seq) for seq in product(*[self._bases] * f)}
+            seqs = {"".join(seq): self.prob(seq) for seq in product(*[bases] * f)}
             sequences.update(seqs)
             items = sorted(seqs.items(), key=lambda x: x[1], reverse=True)
             norm = self.len_prob(f)
@@ -209,8 +211,4 @@ class FrameEmission:
 
 def binomial(n, k):
     """ Choose `k` from `n`. """
-    try:
-        binom = fac(n) // fac(k) // fac(n - k)
-    except ValueError:
-        binom = 0
-    return binom
+    return fac(n) // fac(k) // fac(n - k)

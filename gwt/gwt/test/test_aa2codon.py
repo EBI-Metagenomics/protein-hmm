@@ -15,3 +15,5 @@ def test_aa2codon():
         "GCG": 0.25,
     }
     assert aa2codon.aa_emission() == {"A": 1.0}
+    assert aa2codon.aa_emission(True) == {"A": 0.0}
+    assert set(aa2codon.gencode["L"]) == set(["TTA", "TTG", "CTT", "CTC", "CTA", "CTG"])

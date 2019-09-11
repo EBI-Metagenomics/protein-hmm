@@ -1,9 +1,4 @@
-try:
-    import importlib.resources as pkg_resources
-except ImportError:
-    import importlib
-
-    pkg_resources = importlib.import_module("importlib_resources")
+import importlib_resources as pkg_resources
 
 from click.testing import CliRunner
 

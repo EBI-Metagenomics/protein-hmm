@@ -53,6 +53,18 @@ def test_frame():
 
     assert set(fe.bases) == set(DNA().bases)
 
+    assert fe.len_prob(0) == 0.0
+    assert fe.len_prob(6) == 0.0
+
+    assert fe.indel_prob(5) == 0.0
+
+    fe = FrameEmission(codon_emission, DNA(), 0.1)
+    output = str(fe)
+    assert "Epsilon = 0.1" in output
+    assert "p(X=TCT) = 0.9000" in output
+    assert "p(Z=C | F=1) = 0.3000" in output
+    assert "p(Z=TCT  , F=3) = 0.5929" in output
+
 
 def test_frame_emission():
     aa_emission = {

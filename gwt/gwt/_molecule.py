@@ -1,7 +1,6 @@
 class Molecule:
-    def __init__(self):
-        self._bases = ""
-        super(Molecule).__init__()
+    def __init__(self, bases):
+        self._bases = bases
 
     @property
     def bases(self):
@@ -10,7 +9,7 @@ class Molecule:
 
 class RNA(Molecule):
     def __init__(self):
-        self._bases = "ACGU"
+        super().__init__("ACGU")
 
     @property
     def name(self):
@@ -19,7 +18,7 @@ class RNA(Molecule):
 
 class DNA(Molecule):
     def __init__(self):
-        self._bases = "ACGT"
+        super().__init__("ACGT")
 
     @property
     def name(self):
@@ -31,5 +30,3 @@ def convert_to(sequence: str, molecule: Molecule):
         return sequence.replace("U", "T")
     elif molecule.name == "RNA":
         return sequence.replace("T", "U")
-    else:
-        raise ValueError()

@@ -14,9 +14,9 @@ def test(verbose=True):
     """
 
     args = ["--doctest-modules"]
+    args += ["-k", "not test_testit"]
     if not verbose:
         args += ["--quiet"]
 
     args += ["--pyargs", __name__.split(".")[0]]
-
     return __import__("pytest").main(args)
