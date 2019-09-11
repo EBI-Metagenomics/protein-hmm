@@ -132,41 +132,41 @@ def test_cli_length():
 
         cmd = ["frame", "emission.txt", "--epsilon", "1e-1", "--show", "length"]
         r = invoke(gwt.cli, cmd)
-        # tbl = parse_table(r.stdout, " = ")
-        # assert abs(tbl["p(F=1)"] - 0.0081) < 1e-6
-        # assert abs(tbl["p(F=2)"] - 0.1476) < 1e-6
-        # assert abs(tbl["p(F=3)"] - 0.6886) < 1e-6
-        # assert abs(tbl["p(F=4)"] - 0.1476) < 1e-6
-        # assert abs(tbl["p(F=5)"] - 0.0081) < 1e-6
+        tbl = parse_table(r.stdout, " = ")
+        assert abs(tbl["p(F=1)"] - 0.0081) < 1e-6
+        assert abs(tbl["p(F=2)"] - 0.1476) < 1e-6
+        assert abs(tbl["p(F=3)"] - 0.6886) < 1e-6
+        assert abs(tbl["p(F=4)"] - 0.1476) < 1e-6
+        assert abs(tbl["p(F=5)"] - 0.0081) < 1e-6
 
 
-# def test_cli_indels():
+def test_cli_indels():
 
-#     text = pkg_resources.read_text(gwt.test, "emission.txt")
-#     runner = CliRunner()
-#     with runner.isolated_filesystem():
+    text = pkg_resources.read_text(gwt.test, "emission.txt")
+    runner = CliRunner()
+    with runner.isolated_filesystem():
 
-#         invoke = runner.invoke
-#         with open("emission.txt", "w") as f:
-#             f.write(text)
+        invoke = runner.invoke
+        with open("emission.txt", "w") as f:
+            f.write(text)
 
-#         cmd = ["frame", "emission.txt", "--epsilon", "1e-1", "--show", "indels"]
-#         r = invoke(gwt.cli, cmd)
-#         tbl = parse_table(r.stdout, " = ")
-#         assert abs(tbl["p(M=0)"] - 0.6561) < 1e-6
-#         assert abs(tbl["p(M=1)"] - 0.2916) < 1e-6
-#         assert abs(tbl["p(M=2)"] - 0.0486) < 1e-6
-#         assert abs(tbl["p(M=3)"] - 0.0036) < 1e-6
-#         assert abs(tbl["p(M=4)"] - 0.0001) < 1e-6
+        cmd = ["frame", "emission.txt", "--epsilon", "1e-1", "--show", "indels"]
+        r = invoke(gwt.cli, cmd)
+        tbl = parse_table(r.stdout, " = ")
+        assert abs(tbl["p(M=0)"] - 0.6561) < 1e-6
+        assert abs(tbl["p(M=1)"] - 0.2916) < 1e-6
+        assert abs(tbl["p(M=2)"] - 0.0486) < 1e-6
+        assert abs(tbl["p(M=3)"] - 0.0036) < 1e-6
+        assert abs(tbl["p(M=4)"] - 0.0001) < 1e-6
 
 
 def test_cli_gencode():
     invoke = CliRunner().invoke
 
     assert invoke(gwt.cli, ["gencode", "TGG"]).stdout.strip() == "W"
-    # assert invoke(gwt.cli, ["gencode", "UGG"]).stdout.strip() == "W"
-    # assert invoke(gwt.cli, ["gencode", "W"]).stdout.strip() == "UGG"
-    # assert invoke(gwt.cli, ["gencode", "O"])
+    assert invoke(gwt.cli, ["gencode", "UGG"]).stdout.strip() == "W"
+    assert invoke(gwt.cli, ["gencode", "W"]).stdout.strip() == "UGG"
+    assert invoke(gwt.cli, ["gencode", "O"]).exit_code == 2
 
 
 def parse_table(txt, sep=" "):
