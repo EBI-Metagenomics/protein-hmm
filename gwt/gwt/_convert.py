@@ -120,6 +120,8 @@ def create_frame_hmm(
     hmm.set_trans(f"I{M}", f"I{M}", trans["II"])
     hmm.set_trans(f"D{M}", f"E", trans["DM"])
 
+    hmm.rename_state("M0", "B")
+    hmm.delete_state("D0")
     hmm.normalize()
     return hmm
 
