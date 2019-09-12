@@ -83,7 +83,7 @@ def create_frame_hmm(
 
     gcode = GENCODE[gencode].copy()
     _convert_gencode_alphabet(gcode, molecule)
-    base_emission = _infer_base_compo(hmmfile.compo, molecule, gcode)
+    base_compo = _infer_base_compo(_infer_codon_compo(hmmfile.compo, gencode), molecule)
 
     hmm.add_state(SilentState("S", alphabet, False), nlog(1.0))
     hmm.add_state(SilentState("M0", alphabet, False))
@@ -93,12 +93,12 @@ def create_frame_hmm(
         convert = AA2Codon(dict(phmm.states[state].emission(True)), molecule)
         return convert.codon_emission(True)
 
-    hmm.add_state(FrameState("I0", base_emission, aa2codon("I0"), epsilon))
+    hmm.add_state(FrameState("I0", base_compo, aa2codon("I0"), epsilon))
     hmm.add_state(SilentState("D0", alphabet, False))
 
     for m in range(1, hmmfile.M + 1):
-        hmm.add_state(FrameState(f"M{m}", base_emission, aa2codon(f"M{m}"), epsilon))
-        hmm.add_state(FrameState(f"I{m}", base_emission, aa2codon(f"I{m}"), epsilon))
+        hmm.add_state(FrameState(f"M{m}", base_compo, aa2codon(f"M{m}"), epsilon))
+        hmm.add_state(FrameState(f"I{m}", base_compo, aa2codon(f"I{m}"), epsilon))
         hmm.add_state(SilentState(f"D{m}", alphabet, False))
 
         trans = hmmfile.trans(m - 1, False)
@@ -135,12 +135,10 @@ def _infer_codon_compo(aa_compo, gencode):
     return codon_compo
 
 
-def _infer_base_compo(aa_compo, molecule: Molecule, gencode: dict):
+def _infer_base_compo(codon_compo, molecule: Molecule):
     from ._norm import normalize_emission
     from numpy import asarray
     from scipy.special import logsumexp
-
-    codon_compo = _infer_codon_compo(aa_compo, gencode)
 
     base_compo = {base: [] for base in molecule.bases}
     nlog_norm = log(3)
