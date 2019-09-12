@@ -574,3 +574,47 @@ def test_hmm_draw(tmp_path):
     hmm.draw(tmp_path / "test.pdf", emissions=0, init_prob=True)
     hmm.draw(tmp_path / "test.pdf", emissions=0, init_prob=False)
     hmm.draw(tmp_path / "test.pdf", emissions=50, init_prob=True)
+
+
+def test_hmm_rename():
+    alphabet = "AC"
+
+    hmm = HMM(alphabet)
+    start_state = SilentState("S", alphabet, False)
+    hmm.add_state(start_state, nlog(1.0))
+
+    end_state = SilentState("E", alphabet, True)
+    hmm.add_state(end_state, nlog(0.0))
+
+    M1 = NormalState("M1", {"A": nlog(0.8), "C": nlog(0.2)})
+    hmm.add_state(M1, nlog(0.0))
+
+    D1 = SilentState("D1", alphabet, False)
+    hmm.add_state(D1, nlog(0.0))
+
+    M2 = NormalState("M2", {"A": nlog(0.4), "C": nlog(0.6)})
+    hmm.add_state(M2, nlog(0.0))
+
+    D2 = SilentState("D2", alphabet, False)
+    hmm.add_state(D2, nlog(0.0))
+
+    hmm.set_trans("S", "M1", nlog(0.8))
+    hmm.set_trans("S", "D1", nlog(0.2))
+
+    hmm.set_trans("M1", "M2", nlog(0.8))
+    hmm.set_trans("M1", "D2", nlog(0.2))
+
+    hmm.set_trans("D1", "D2", nlog(0.2))
+    hmm.set_trans("D1", "M2", nlog(0.8182787382))
+
+    hmm.set_trans("D2", "E", nlog(1.0))
+    hmm.set_trans("M2", "E", nlog(1.0))
+
+    p = hmm.trans("D1", "D2")
+    hmm.rename_state("S", "B")
+    hmm.rename_state("D2", "DD")
+    assert "B" in hmm.states
+    assert "S" not in hmm.states
+    assert "DD" in hmm.states
+    assert "D2" not in hmm.states
+    assert hmm.trans("D1", "DD") == p

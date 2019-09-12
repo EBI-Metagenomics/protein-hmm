@@ -23,6 +23,10 @@ class State:
     def name(self):
         return self._name
 
+    @name.setter
+    def name(self, v: str):
+        self._name = v
+
     @property
     def alphabet(self):
         return self._alphabet

@@ -74,6 +74,18 @@ class HMM:
 
         return state
 
+    def rename_state(self, old_name: str, new_name: str):
+        if new_name in self._states:
+            raise ValueError(f"State name `{new_name}` already exists.")
+
+        self._states[new_name] = self._states.pop(old_name)
+        self._states[new_name].name = new_name
+
+        for k, v in self._trans.items():
+            if old_name in v:
+                v[new_name] = v.pop(old_name)
+        self._trans[new_name] = self._trans.pop(old_name)
+
     def normalize(self):
         self._normalize_trans()
         self._normalize_init_nlogps()
