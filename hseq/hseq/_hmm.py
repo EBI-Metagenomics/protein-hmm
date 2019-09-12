@@ -83,6 +83,7 @@ class HMM:
 
         self._states[new_name] = self._states.pop(old_name)
         self._states[new_name].name = new_name
+        self._init_nlogps[new_name] = self._init_nlogps.pop(old_name)
 
         for k, v in self._trans.items():
             if old_name in v:
@@ -94,6 +95,7 @@ class HMM:
             raise ValueError(f"State name `{name}` does not exist.")
 
         del self._states[name]
+        del self._init_nlogps[name]
         del self._trans[name]
         for v in self._trans.values():
             if name in v:
