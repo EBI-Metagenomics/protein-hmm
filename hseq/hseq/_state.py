@@ -4,7 +4,17 @@ from math import exp
 
 
 class State:
-    def __init__(self, name: str, end_state: bool, alphabet: str):
+    def __init__(self, name: str, alphabet: str, end_state: bool):
+        """
+        Parameters
+        ----------
+        name : str
+            Name.
+        alphabet : str
+            Alphabet.
+        end_state : bool
+            End state.
+        """
         self._name = name
         self._end_state = end_state
         self._alphabet = alphabet
@@ -27,13 +37,31 @@ class State:
 
 class SilentState(State):
     def __init__(self, name: str, alphabet: str, end_state: bool):
-        super(SilentState, self).__init__(name, end_state, alphabet)
+        """
+        Parameters
+        ----------
+        name : str
+            Name.
+        alphabet : str
+            Alphabet.
+        end_state : bool
+            End state.
+        """
+        super(SilentState, self).__init__(name, alphabet, end_state)
 
     def emit(self, random):
         del random
         return ""
 
-    def prob(self, seq: str, nlog_space=False):
+    def prob(self, seq: str, nlog_space: bool = False):
+        """
+        Parameters
+        ----------
+        seq : str
+            Sequence.
+        nlog_space : bool
+            ``True`` to return in negative log space. Defaults to ``False``.
+        """
         if seq == "":
             v = nlog(1.0)
         else:
@@ -61,17 +89,32 @@ class SilentState(State):
 
 class NormalState(State):
     def __init__(self, name: str, emission: dict):
+        """
+        Parameters
+        ----------
+        name : str
+            Name.
+        emission : dict
+            Emission probabilities in negative log space.
+        """
         alphabet = "".join(list(emission.keys()))
         normalize_emission(emission)
         self._emission = emission
-
-        super(NormalState, self).__init__(name, False, alphabet)
+        super(NormalState, self).__init__(name, alphabet, False)
 
     def emit(self, random):
         probs = [exp(-self._emission[a]) for a in self._alphabet]
         return random.choice(list(self._alphabet), p=probs)
 
-    def prob(self, seq: str, nlog_space=False):
+    def prob(self, seq: str, nlog_space: bool = False):
+        """
+        Parameters
+        ----------
+        seq : str
+            Sequence.
+        nlog_space : bool
+            ``True`` to return in negative log space. Defaults to ``False``.
+        """
         v = self._emission.get(seq, nlog(0.0))
         if not nlog_space:
             v = exp(-v)
@@ -94,24 +137,46 @@ class NormalState(State):
 
 class TripletState(State):
     def __init__(self, name: str, alphabet: str, emission: dict):
-
+        """
+        Parameters
+        ----------
+        name : str
+            Name.
+        alphabet : str
+            Alphabet.
+        emission : dict
+            Emission probabilities in negative log space.
+        """
         normalize_emission(emission)
         self._emission = emission
-
-        super(TripletState, self).__init__(name, False, alphabet)
+        super(TripletState, self).__init__(name, alphabet, False)
 
     def emit(self, random):
         triplets = list(self._emission.keys())
         probs = [exp(-v) for v in self._emission.values()]
         return random.choice(triplets, p=probs)
 
-    def prob(self, seq: str, nlog_space=False):
+    def prob(self, seq: str, nlog_space: bool = False):
+        """
+        Parameters
+        ----------
+        seq : str
+            Sequence.
+        nlog_space : bool
+            ``True`` to return in negative log space. Defaults to ``False``.
+        """
         v = self._emission.get(seq, nlog(0.0))
         if not nlog_space:
             v = exp(-v)
         return v
 
-    def emission(self, nlog_space=False):
+    def emission(self, nlog_space: bool = False):
+        """
+        Parameters
+        ----------
+        nlog_space : bool
+            ``True`` to return in negative log space. Defaults to ``False``.
+        """
         return emission_table(self._emission, nlog_space)
 
     @property
@@ -127,6 +192,14 @@ class TripletState(State):
 
 
 def emission_table(emission: dict, nlog_space: bool):
+    """
+    Parameters
+    ----------
+    emission : dict
+        Emission probabilities in negative log space.
+    nlog_space : bool
+        ``True`` to return the probabilities in negative log space.
+    """
     table = list(emission.items())
     table = sorted(table, key=lambda x: x[1])
     if not nlog_space:

@@ -12,7 +12,6 @@ class FrameState(State):
     def __init__(
         self, name: str, base_emission: dict, codon_emission: dict, epsilon: float
     ):
-
         normalize_emission(base_emission)
         self._base_emission = base_emission
         alphabet = "".join(base_emission.keys())
@@ -21,8 +20,7 @@ class FrameState(State):
         self._cemission = codon_emission
 
         self._epsilon = epsilon
-
-        super(FrameState, self).__init__(name, False, alphabet)
+        super(FrameState, self).__init__(name, alphabet, False)
 
     def prob(self, z):
         """ p(Z=z1z2...zf, F=f). """
@@ -50,7 +48,13 @@ class FrameState(State):
         seq = random.choice(list(emission.keys()), p=list(emission.values()))
         return seq
 
-    def emission(self, nlog_space=False):
+    def emission(self, nlog_space: bool = False):
+        """
+        Parameters
+        ----------
+        nlog_space : bool
+            ``True`` to return in negative log space. Defaults to ``False``.
+        """
         abc = self._alphabet
         emission = {}
         for f in range(1, 6):
