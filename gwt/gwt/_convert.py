@@ -85,9 +85,7 @@ def create_frame_hmm(
     _convert_gencode_alphabet(gcode, molecule)
     base_compo = _infer_base_compo(_infer_codon_compo(hmmfile.compo, gcode), molecule)
 
-    hmm.add_state(SilentState("S", alphabet, False), nlog(1.0))
-    hmm.add_state(SilentState("M0", alphabet, False))
-    hmm.set_trans("S", "M0", nlog(1.0))
+    hmm.add_state(SilentState("M0", alphabet, False), nlog(1.0))
 
     def aa2codon(state):
         convert = AA2Codon(dict(phmm.states[state].emission(True)), molecule)

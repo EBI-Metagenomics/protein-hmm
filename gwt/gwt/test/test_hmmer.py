@@ -14,7 +14,7 @@ def test_read_hmmer_1(tmp_path):
     hmmfile = gwt.read_hmmer_file(tmp_path / "PF02545.hmm")
     hmm = gwt.create_hmmer_profile(hmmfile)
 
-    assert hmm.init_prob("S") == 1.0
+    assert hmm.init_prob("M0") == 1.0
     assert hmm.init_prob("E") == 0.0
     assert "I166" in hmm.states
     assert "ACDEFGHIKLMNPQRSTVWY" == hmm.alphabet
@@ -25,12 +25,12 @@ def test_read_hmmer_1(tmp_path):
     path = hmm.emit(random)
     seq = "".join(i[1] for i in path)
     states = "".join(str(i[0]) for i in path)
-    iseq = "NLVLASASSSRQTLLNQMKARDKIDLLEPESVYWRIAHAKIMTREAAGVNNVSGKNQLPPF"
-    iseq += "ILIGMDNVVVYTLRKAKTSEDAAEVCQEMQGEVIELTGALVFGVKSTSVFRFAKLNDDKEL"
-    iseq += "VRLVFAQGAWLGVQFMKVKFSKAYVELDQRCNKSGAIPIEASGGEAFEVAKGDYT"
-    iseq += "NTLGLPGVNLNTELKSW"
+    iseq = "PLKVHSAARYRDDLLKAMVIPQIIPYDQGEPESVYWRIAHAKIMTREAAGVNNVSGKNQLP"
+    iseq += "PFILIGMDNVVVYTLRKAKTSEDAAEVCQEMQGEVIELTGALVFGVKSTSVFRFAKLNDD"
+    iseq += "KELVRLVFAQGAWLGVQFMKVKFSKAYVELDQRCNKSGAIPIEASGGEAFEVAKGDYTNT"
+    iseq += "LGLPGVNLNTELKSW"
     assert seq == iseq
-    assert len(states) == 1068
+    assert len(states) == 1060
 
 
 def test_read_hmmer_2(tmp_path):
@@ -46,8 +46,8 @@ def test_read_hmmer_2(tmp_path):
     seq = "".join(i[1] for i in path)
     states = "".join(str(i[0]) for i in path)
     assert abs(hmm.trans("M0", "M1") - 0.9892313034087644) < 1e-7
-    assert seq == "PKREDRKM"
-    assert len(states) == 42
+    assert seq == "PGKRDNGA"
+    assert len(states) == 39
 
 
 def test_create_frame_hmm(tmp_path):
@@ -64,8 +64,8 @@ def test_create_frame_hmm(tmp_path):
     seq = "".join(i[1] for i in path)
     states = "".join(str(i[0]) for i in path)
     assert abs(hmm.trans("M0", "M1") - 0.9892313034087644) < 1e-7
-    assert seq == "CCCGGUGAGGAGAAUGGGAAUGAA"
-    assert len(states) == 42
+    assert seq == "CCGGAAAAGGAGGACGGCAAUAAA"
+    assert len(states) == 39
 
     hmm = gwt.create_frame_hmm(hmmfile, phmm, 0.5)
 
@@ -74,8 +74,9 @@ def test_create_frame_hmm(tmp_path):
     seq = "".join(i[1] for i in path)
     states = "".join(str(i[0]) for i in path)
     assert abs(hmm.trans("M0", "M1") - 0.9892313034087644) < 1e-7
-    assert seq == "CCCGGUGAGGGUAAGGGGAAUUGA"
-    assert len(states) == 42
+    assert seq == "CCGCCUAGAGAGAAACGGAAGAAACAAAG"
+    assert len(states) == 39
+    hmm.draw("example.dot", view=True)
 
 
 def test_create_frame_hmm_exceptions(tmp_path):
@@ -95,9 +96,8 @@ def test_create_frame_hmm_likelihood(tmp_path):
     phmm = gwt.create_hmmer_profile(hmmfile)
     hmm = gwt.create_frame_hmm(hmmfile, phmm, 0.0)
 
-    states_path = (
-        [("S", 0), ("M0", 0)] + [(f"M{i}", 1) for i in range(1, 9)] + [("E", 0)]
-    )
+    states_path = [("M0", 0)] + [(f"M{i}", 1) for i in range(1, 9)] + [("E", 0)]
+
     most_likely_seq = "PGKEDNNK"
     lik = phmm.likelihood(most_likely_seq, states_path)
     assert abs(lik - 0.02003508133944584) < 1e-7

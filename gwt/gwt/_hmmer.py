@@ -24,11 +24,9 @@ def create_hmmer_profile(hmmfile: hmmer_reader.HMMEReader):
 
     hmm = hseq.HMM(alphabet)
 
-    hmm.add_state(hseq.SilentState("S", alphabet, False), nlog(1.0))
-    hmm.add_state(hseq.SilentState("M0", alphabet, False))
+    hmm.add_state(hseq.SilentState("M0", alphabet, False), nlog(1.0))
     hmm.add_state(hseq.NormalState("I0", hmmfile.insert(0, False)))
     hmm.add_state(hseq.SilentState("D0", alphabet, False))
-    hmm.set_trans("S", "M0", nlog(1.0))
 
     for m in range(1, hmmfile.M + 1):
         hmm.add_state(hseq.NormalState(f"M{m}", hmmfile.match(m, False)))
