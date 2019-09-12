@@ -548,7 +548,6 @@ def test_hmm_draw(tmp_path):
 def test_hmm_rename_state():
     hmm = _create_hmm()
 
-    breakpoint()
     with pytest.raises(ValueError):
         hmm.rename_state("DD", "D1")
         hmm.rename_state("D1", "D1")
