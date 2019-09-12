@@ -25,16 +25,16 @@ def test_read_hmmer_1(tmp_path):
     path = hmm.emit(random)
     seq = "".join(i[1] for i in path)
     states = "".join(str(i[0]) for i in path)
-    assert (
-        seq
-        == "NLVLASASSSRQTLLNQMKARDKIDLLEPESVYWRIAHAKIMTREAAGVNNVSGKNQLPPFILIGMDNVVVYTLRKAKTSEDAAEVCQEMQGEVIELTGALVFGVKSTSVFRFAKLNDDKELVRLVFAQGAWLGVQFMKVKFSKAYVELDQRCNKSGAIPIEASGGEAFEVAKGDYTNTLGLPGVNLNTELKSW"
-    )
+    iseq = "NLVLASASSSRQTLLNQMKARDKIDLLEPESVYWRIAHAKIMTREAAGVNNVSGKNQLPPF"
+    iseq += "ILIGMDNVVVYTLRKAKTSEDAAEVCQEMQGEVIELTGALVFGVKSTSVFRFAKLNDDKEL"
+    iseq += "VRLVFAQGAWLGVQFMKVKFSKAYVELDQRCNKSGAIPIEASGGEAFEVAKGDYT"
+    iseq += "NTLGLPGVNLNTELKSW"
+    assert seq == iseq
     assert len(states) == 1068
 
 
 def test_read_hmmer_2(tmp_path):
     text = pkg_resources.read_text(gwt.test, "PF03373.hmm")
-
     with open(tmp_path / "PF03373.hmm", "w") as f:
         f.write(text)
 
@@ -52,7 +52,6 @@ def test_read_hmmer_2(tmp_path):
 
 def test_create_frame_hmm(tmp_path):
     text = pkg_resources.read_text(gwt.test, "PF03373.hmm")
-
     with open(tmp_path / "PF03373.hmm", "w") as f:
         f.write(text)
 
@@ -85,3 +84,21 @@ def test_create_frame_hmm_exceptions(tmp_path):
 
     with pytest.raises(ValueError):
         hmmfile = gwt.read_hmmer_file(tmp_path / "this_doesnt_exist.file")
+
+
+def test_create_frame_hmm_likelihood(tmp_path):
+    text = pkg_resources.read_text(gwt.test, "PF03373.hmm")
+    with open(tmp_path / "PF03373.hmm", "w") as f:
+        f.write(text)
+
+    hmmfile = gwt.read_hmmer_file(str(tmp_path / "PF03373.hmm"))
+    phmm = gwt.create_hmmer_profile(hmmfile)
+    hmm = gwt.create_frame_hmm(hmmfile, phmm, 0.0)
+
+    states_path = (
+        [("S", 0), ("M0", 0)] + [(f"M{i}", 1) for i in range(1, 9)] + [("E", 0)]
+    )
+    most_likely_seq = "PGKEDNNK"
+    lik = phmm.likelihood(most_likely_seq, states_path)
+    assert abs(lik - 0.02003508133944584) < 1e-7
+

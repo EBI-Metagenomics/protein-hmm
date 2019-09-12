@@ -4,6 +4,9 @@ import hmmer_reader
 
 def read_hmmer_file(filepath: Path):
 
+    if not isinstance(filepath, Path):
+        filepath = Path(filepath)
+
     if not filepath.exists():
         raise ValueError(f"`{filepath}` does not exist.")
 
