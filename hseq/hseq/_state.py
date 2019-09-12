@@ -132,4 +132,3 @@ def emission_table(emission: dict, nlog_space: bool):
     if not nlog_space:
         table = [(row[0], exp(-row[1])) for row in table]
     return table
-

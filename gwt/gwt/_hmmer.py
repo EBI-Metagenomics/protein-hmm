@@ -1,10 +1,8 @@
 from pathlib import Path
+import hmmer_reader
 
 
-def read_hmmer(filepath: Path):
-    import hmmer_reader
-    import hseq
-    from hseq import nlog
+def read_hmmer_file(filepath: Path):
 
     if not filepath.exists():
         raise ValueError(f"`{filepath}` does not exist.")
@@ -12,7 +10,13 @@ def read_hmmer(filepath: Path):
     if not filepath.is_file():
         raise ValueError(f"`{filepath}` is not a file.")
 
-    hmmfile = hmmer_reader.read(filepath)
+    return hmmer_reader.read(filepath)
+
+
+def create_hmmer_profile(hmmfile: hmmer_reader.HMMEReader):
+    import hseq
+    from hseq import nlog
+
     alphabet = hmmfile.alphabet
 
     hmm = hseq.HMM(alphabet)
@@ -20,7 +24,6 @@ def read_hmmer(filepath: Path):
     start_state = hseq.SilentState("S", alphabet, False)
     hmm.add_state(start_state, nlog(1.0))
 
-    # mat_state = hseq.NormalState("M0", hmmfile.match(0, False))
     mat_state = hseq.SilentState("M0", alphabet, False)
     hmm.add_state(mat_state)
     ins_state = hseq.NormalState("I0", hmmfile.insert(0, False))

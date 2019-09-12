@@ -2,7 +2,11 @@ from math import exp, log
 
 from ._gencode import GENCODE
 from ._molecule import Molecule, convert_to
+from ._nlog import nlog
+from ._molecule import RNA
 from ._norm import normalize_emission
+from hmmer_reader import HMMEReader
+from hseq import HMM, SilentState, FrameState
 
 
 class AA2Codon:
@@ -55,3 +59,67 @@ class AA2Codon:
             norm = log(len(codons))
             for codon in codons:
                 self._codon_emission.update({codon: nlogp + norm})
+
+
+def create_frame_hmm(hmmfile: HMMEReader, phmm: HMM, epsilon: float):
+    molecule = RNA()
+    alphabet = molecule.bases
+    base_emission = {a: nlog(1.0 / len(alphabet)) for a in alphabet}
+    hmm = HMM(alphabet)
+
+    start_state = SilentState("S", alphabet, False)
+    hmm.add_state(start_state, nlog(1.0))
+
+    mat_state = SilentState("M0", alphabet, False)
+    hmm.add_state(mat_state)
+    aa_emission = {i[0]: i[1] for i in phmm.states["I0"].emission(nlog_space=True)}
+    aa2codon = AA2Codon(aa_emission, molecule)
+    codon_emission = aa2codon.codon_emission(nlog_space=True)
+    ins_state = FrameState("I0", base_emission, codon_emission, epsilon)
+    hmm.add_state(ins_state)
+    del_state = SilentState("D0", alphabet, False)
+    hmm.add_state(del_state)
+    hmm.set_trans("S", "M0", nlog(1.0))
+
+    for m in range(1, hmmfile.M + 1):
+        aa_emission = phmm.states[f"M{m}"].emission(nlog_space=True)
+        aa_emission = {i[0]: i[1] for i in aa_emission}
+        aa2codon = AA2Codon(aa_emission, molecule)
+        codon_emission = aa2codon.codon_emission(nlog_space=True)
+        mat_state = FrameState(f"M{m}", base_emission, codon_emission, epsilon)
+        hmm.add_state(mat_state)
+
+        aa_emission = phmm.states[f"I{m}"].emission(nlog_space=True)
+        aa_emission = {i[0]: i[1] for i in aa_emission}
+        aa2codon = AA2Codon(aa_emission, molecule)
+        codon_emission = aa2codon.codon_emission(nlog_space=True)
+        ins_state = FrameState(f"I{m}", base_emission, codon_emission, epsilon)
+        hmm.add_state(ins_state)
+
+        del_state = SilentState(f"D{m}", alphabet, False)
+        hmm.add_state(del_state)
+
+        trans = hmmfile.trans(m - 1, False)
+
+        hmm.set_trans(f"M{m-1}", f"M{m}", trans["MM"])
+        hmm.set_trans(f"M{m-1}", f"I{m-1}", trans["MI"])
+        hmm.set_trans(f"M{m-1}", f"D{m}", trans["MD"])
+        hmm.set_trans(f"I{m-1}", f"M{m}", trans["IM"])
+        hmm.set_trans(f"I{m-1}", f"I{m-1}", trans["II"])
+        hmm.set_trans(f"D{m-1}", f"M{m}", trans["DM"])
+        hmm.set_trans(f"D{m-1}", f"D{m}", trans["DD"])
+
+    end_state = SilentState("E", alphabet, True)
+    hmm.add_state(end_state)
+    hmm.set_trans("E", "E", nlog(1.0))
+
+    m = hmmfile.M
+    trans = hmmfile.trans(m, False)
+    hmm.set_trans(f"M{m}", f"E", trans["MM"])
+    hmm.set_trans(f"M{m}", f"I{m}", trans["MI"])
+    hmm.set_trans(f"I{m}", f"E", trans["IM"])
+    hmm.set_trans(f"I{m}", f"I{m}", trans["II"])
+    hmm.set_trans(f"D{m}", f"E", trans["DM"])
+
+    hmm.normalize()
+    return hmm
