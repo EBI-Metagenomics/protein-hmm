@@ -83,7 +83,7 @@ def create_frame_hmm(
 
     gcode = GENCODE[gencode].copy()
     _convert_gencode_alphabet(gcode, molecule)
-    base_compo = _infer_base_compo(_infer_codon_compo(hmmfile.compo, gencode), molecule)
+    base_compo = _infer_base_compo(_infer_codon_compo(hmmfile.compo, gcode), molecule)
 
     hmm.add_state(SilentState("S", alphabet, False), nlog(1.0))
     hmm.add_state(SilentState("M0", alphabet, False))
