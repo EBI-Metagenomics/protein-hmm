@@ -75,6 +75,9 @@ class HMM:
         return state
 
     def rename_state(self, old_name: str, new_name: str):
+        if old_name not in self._states:
+            raise ValueError(f"State name `{old_name}` does not exist.")
+
         if new_name in self._states:
             raise ValueError(f"State name `{new_name}` already exists.")
 
@@ -85,6 +88,16 @@ class HMM:
             if old_name in v:
                 v[new_name] = v.pop(old_name)
         self._trans[new_name] = self._trans.pop(old_name)
+
+    def delete_state(self, name):
+        if name not in self._states:
+            raise ValueError(f"State name `{name}` does not exist.")
+
+        del self._states[name]
+        del self._trans[name]
+        for v in self._trans.values():
+            if name in v:
+                del v[name]
 
     def normalize(self):
         self._normalize_trans()

@@ -528,38 +528,7 @@ def test_hmm_viterbi_no_end():
 
 
 def test_hmm_draw(tmp_path):
-    alphabet = "AC"
-
-    hmm = HMM(alphabet)
-    start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
-
-    end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
-
-    M1 = NormalState("M1", {"A": nlog(0.8), "C": nlog(0.2)})
-    hmm.add_state(M1, nlog(0.0))
-
-    D1 = SilentState("D1", alphabet, False)
-    hmm.add_state(D1, nlog(0.0))
-
-    M2 = NormalState("M2", {"A": nlog(0.4), "C": nlog(0.6)})
-    hmm.add_state(M2, nlog(0.0))
-
-    D2 = SilentState("D2", alphabet, False)
-    hmm.add_state(D2, nlog(0.0))
-
-    hmm.set_trans("S", "M1", nlog(0.8))
-    hmm.set_trans("S", "D1", nlog(0.2))
-
-    hmm.set_trans("M1", "M2", nlog(0.8))
-    hmm.set_trans("M1", "D2", nlog(0.2))
-
-    hmm.set_trans("D1", "D2", nlog(0.2))
-    hmm.set_trans("D1", "M2", nlog(0.8182787382))
-
-    hmm.set_trans("D2", "E", nlog(1.0))
-    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm = _create_hmm()
 
     base_emission = {"A": nlog(0.5), "C": nlog(0.5)}
     codon_emission = {"ACC": nlog(0.8), "AAA": nlog(0.2)}
@@ -576,7 +545,35 @@ def test_hmm_draw(tmp_path):
     hmm.draw(tmp_path / "test.pdf", emissions=50, init_prob=True)
 
 
-def test_hmm_rename():
+def test_hmm_rename_state():
+    hmm = _create_hmm()
+
+    breakpoint()
+    with pytest.raises(ValueError):
+        hmm.rename_state("DD", "D1")
+        hmm.rename_state("D1", "D1")
+
+    p = hmm.trans("D1", "D2")
+    hmm.rename_state("S", "B")
+    hmm.rename_state("D2", "DD")
+    assert "B" in hmm.states
+    assert "S" not in hmm.states
+    assert "DD" in hmm.states
+    assert "D2" not in hmm.states
+    assert hmm.trans("D1", "DD") == p
+
+
+def test_hmm_delete_state():
+    hmm = _create_hmm()
+
+    with pytest.raises(ValueError):
+        hmm.delete_state("D22")
+
+    hmm.delete_state("D2")
+    assert "D2" not in hmm.states
+
+
+def _create_hmm():
     alphabet = "AC"
 
     hmm = HMM(alphabet)
@@ -610,11 +607,4 @@ def test_hmm_rename():
     hmm.set_trans("D2", "E", nlog(1.0))
     hmm.set_trans("M2", "E", nlog(1.0))
 
-    p = hmm.trans("D1", "D2")
-    hmm.rename_state("S", "B")
-    hmm.rename_state("D2", "DD")
-    assert "B" in hmm.states
-    assert "S" not in hmm.states
-    assert "DD" in hmm.states
-    assert "D2" not in hmm.states
-    assert hmm.trans("D1", "DD") == p
+    return hmm
