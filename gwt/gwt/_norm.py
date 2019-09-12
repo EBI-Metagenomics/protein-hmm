@@ -1,4 +1,4 @@
-def normalize_emission(emission):
+def normalize_emission(emission: dict):
     keys = list(emission.keys())
     nlogp = [emission[a] for a in keys]
     nlogp = _normalize_nlogspace(nlogp)
@@ -12,4 +12,3 @@ def _normalize_nlogspace(values):
     values = asarray(values, float)
     norm = logsumexp(-values)
     return [norm + v for v in values]
-

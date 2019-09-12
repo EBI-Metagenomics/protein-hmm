@@ -26,6 +26,14 @@ GENCODE = {
 
 
 def gencode(aa_or_codon, name="standard"):
+    """
+    Parameters
+    ----------
+    aa_or_codon : str
+        Amino acid or codon.
+    name : str
+        Genetic code table name.
+    """
     aa_or_codon = aa_or_codon.upper()
     if len(aa_or_codon) == 1:
         if aa_or_codon not in GENCODE[name]:

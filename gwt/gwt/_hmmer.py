@@ -21,24 +21,16 @@ def create_hmmer_profile(hmmfile: hmmer_reader.HMMEReader):
 
     hmm = hseq.HMM(alphabet)
 
-    start_state = hseq.SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
-
-    mat_state = hseq.SilentState("M0", alphabet, False)
-    hmm.add_state(mat_state)
-    ins_state = hseq.NormalState("I0", hmmfile.insert(0, False))
-    hmm.add_state(ins_state)
-    del_state = hseq.SilentState("D0", alphabet, False)
-    hmm.add_state(del_state)
+    hmm.add_state(hseq.SilentState("S", alphabet, False), nlog(1.0))
+    hmm.add_state(hseq.SilentState("M0", alphabet, False))
+    hmm.add_state(hseq.NormalState("I0", hmmfile.insert(0, False)))
+    hmm.add_state(hseq.SilentState("D0", alphabet, False))
     hmm.set_trans("S", "M0", nlog(1.0))
 
     for m in range(1, hmmfile.M + 1):
-        mat_state = hseq.NormalState(f"M{m}", hmmfile.match(m, False))
-        hmm.add_state(mat_state)
-        ins_state = hseq.NormalState(f"I{m}", hmmfile.insert(m, False))
-        hmm.add_state(ins_state)
-        del_state = hseq.SilentState(f"D{m}", alphabet, False)
-        hmm.add_state(del_state)
+        hmm.add_state(hseq.NormalState(f"M{m}", hmmfile.match(m, False)))
+        hmm.add_state(hseq.NormalState(f"I{m}", hmmfile.insert(m, False)))
+        hmm.add_state(hseq.SilentState(f"D{m}", alphabet, False))
 
         trans = hmmfile.trans(m - 1, False)
 
@@ -50,17 +42,16 @@ def create_hmmer_profile(hmmfile: hmmer_reader.HMMEReader):
         hmm.set_trans(f"D{m-1}", f"M{m}", trans["DM"])
         hmm.set_trans(f"D{m-1}", f"D{m}", trans["DD"])
 
-    end_state = hseq.SilentState("E", alphabet, True)
-    hmm.add_state(end_state)
+    hmm.add_state(hseq.SilentState("E", alphabet, True))
     hmm.set_trans("E", "E", nlog(1.0))
 
-    m = hmmfile.M
-    trans = hmmfile.trans(m, False)
-    hmm.set_trans(f"M{m}", f"E", trans["MM"])
-    hmm.set_trans(f"M{m}", f"I{m}", trans["MI"])
-    hmm.set_trans(f"I{m}", f"E", trans["IM"])
-    hmm.set_trans(f"I{m}", f"I{m}", trans["II"])
-    hmm.set_trans(f"D{m}", f"E", trans["DM"])
+    M = hmmfile.M
+    trans = hmmfile.trans(M, False)
+    hmm.set_trans(f"M{M}", f"E", trans["MM"])
+    hmm.set_trans(f"M{M}", f"I{M}", trans["MI"])
+    hmm.set_trans(f"I{M}", f"E", trans["IM"])
+    hmm.set_trans(f"I{M}", f"I{M}", trans["II"])
+    hmm.set_trans(f"D{M}", f"E", trans["DM"])
 
     hmm.normalize()
     return hmm

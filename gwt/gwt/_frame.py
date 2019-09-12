@@ -7,7 +7,17 @@ from ._nlog import nlog
 
 
 class FrameEmission:
-    def __init__(self, codon_emission, molecule: Molecule, epsilon: float):
+    def __init__(self, codon_emission: dict, molecule: Molecule, epsilon: float):
+        """
+        Parameters
+        ----------
+        codon_emission : dict
+            Codon emission probabilities in negative log space.
+        molecule : Molecule
+            RNA or DNA molecule.
+        epsilon : float
+            Transition probability of indel.
+        """
         normalize_emission(codon_emission)
         self._molecule = molecule
         self._codon_emission = codon_emission

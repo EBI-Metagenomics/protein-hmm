@@ -57,12 +57,22 @@ def test_create_frame_hmm(tmp_path):
 
     hmmfile = gwt.read_hmmer_file(tmp_path / "PF03373.hmm")
     phmm = gwt.create_hmmer_profile(hmmfile)
-
     hmm = gwt.create_frame_hmm(hmmfile, phmm, 1e-3)
+
     random = RandomState(0)
     path = hmm.emit(random)
     seq = "".join(i[1] for i in path)
     states = "".join(str(i[0]) for i in path)
     assert abs(hmm.trans("M0", "M1") - 0.9892313034087644) < 1e-7
     assert seq == "CCCGGUGAGGAGAAUGGGAAUGAA"
+    assert len(states) == 42
+
+    hmm = gwt.create_frame_hmm(hmmfile, phmm, 0.5)
+
+    random = RandomState(0)
+    path = hmm.emit(random)
+    seq = "".join(i[1] for i in path)
+    states = "".join(str(i[0]) for i in path)
+    assert abs(hmm.trans("M0", "M1") - 0.9892313034087644) < 1e-7
+    assert seq == "CCCGGUGAGGGUAAGGGGAAUUGA"
     assert len(states) == 42
