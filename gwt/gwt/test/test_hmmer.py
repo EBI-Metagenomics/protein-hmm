@@ -1,3 +1,4 @@
+import pytest
 import importlib_resources as pkg_resources
 from numpy.random import RandomState
 
@@ -76,3 +77,11 @@ def test_create_frame_hmm(tmp_path):
     assert abs(hmm.trans("M0", "M1") - 0.9892313034087644) < 1e-7
     assert seq == "CCCGGUGAGGGUAAGGGGAAUUGA"
     assert len(states) == 42
+
+
+def test_create_frame_hmm_exceptions(tmp_path):
+    with pytest.raises(ValueError):
+        hmmfile = gwt.read_hmmer_file(tmp_path)
+
+    with pytest.raises(ValueError):
+        hmmfile = gwt.read_hmmer_file(tmp_path / "this_doesnt_exist.file")
