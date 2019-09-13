@@ -7,7 +7,13 @@ from ._log import LOG
 
 
 class FrameEmission:
-    def __init__(self, codon_emission: dict, molecule: Molecule, epsilon: float):
+    def __init__(
+        self,
+        codon_emission: dict,
+        molecule: Molecule,
+        epsilon: float,
+        base_emission: dict = None,
+    ):
         """
         Parameters
         ----------
@@ -22,6 +28,11 @@ class FrameEmission:
         self._molecule = molecule
         self._codon_emission = codon_emission
         self._epsilon = epsilon
+        if base_emission is None:
+            logp = -LOG(len(molecule.bases))
+            base_emission = {base: logp for base in molecule.bases}
+        normalize_emission(base_emission)
+        self._base_emission = base_emission
 
     @property
     def bases(self):
@@ -172,7 +183,7 @@ class FrameEmission:
         return exp(logsumexp(p))
 
     def _base_bg_prob(self, x):
-        return 1.0 / 4
+        return exp(self._base_emission[x])
 
     def _get_codon_emission(self):
         return [(k, exp(v)) for (k, v) in self._codon_emission.items()]

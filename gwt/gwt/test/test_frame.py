@@ -65,6 +65,16 @@ def test_frame():
     assert "p(Z=C | F=1) = 0.3000" in output
     assert "p(Z=TCT  , F=3) = 0.5929" in output
 
+    compo = {"A": log(0.7), "C": log(0.1), "G": log(0.1), "T": log(0.1)}
+    fe = FrameEmission(codon_emission, DNA(), 0.5, compo)
+
+    assert abs(fe.len_prob(1) - 0.0625) < 1e-4
+    assert abs(fe.indel_prob(1) - 0.25) < 1e-5
+
+    assert abs(fe.prob("TCT") - 0.06407638888888889) < 1e-5
+    assert abs(fe.prob("GTA") - 0.009729166666666667) < 1e-5
+    assert abs(fe.prob("GGA") - 0.0006597222222222225) < 1e-5
+
 
 def test_frame_emission():
     aa_emission = {
