@@ -328,8 +328,10 @@ def test_hmm_lik_3():
     p = hmm.likelihood("C", [("S", 0), ("M1", 0), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.1)
 
-    p = hmm.likelihood("", [("S", 0), ("M1", 0), ("E", 0)])
+    states_path = [("S", 0), ("M1", 0), ("E", 0)]
+    p = hmm.likelihood("", states_path)
     assert_allclose(p, 0.5)
+    assert states_path == [("S", 0), ("M1", 0), ("E", 0)]
 
 
 def test_hmm_viterbi_1():

@@ -122,7 +122,7 @@ class HMM:
             return 0.0
 
         self._assure_states_exist([i[0] for i in state_path])
-        head = state_path.pop(0)
+        head = state_path[0]
         qt = self._states[head[0]]
         ft = head[1]
         if ft > len(seq):
@@ -131,7 +131,7 @@ class HMM:
 
         seq = seq[ft:]
         qt_1 = qt
-        for head in state_path:
+        for head in state_path[1:]:
             qt = self._states[head[0]]
             ft = head[1]
             p *= qt.prob(seq[:ft]) * self.trans(qt_1.name, qt.name)
