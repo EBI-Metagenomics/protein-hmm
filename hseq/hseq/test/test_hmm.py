@@ -247,6 +247,9 @@ def test_hmm_lik_1():
     p = hmm.likelihood("UU", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.0, atol=1e-7)
 
+    with pytest.raises(ValueError):
+        hmm.likelihood("UU", [("S", 0), ("M1", 1), ("M22", 1), ("E", 0)])
+
 
 def test_hmm_lik_2():
     alphabet = "AC"

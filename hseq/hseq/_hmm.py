@@ -119,6 +119,8 @@ class HMM:
             if len(seq) == 0:
                 return 1.0
             return 0.0
+
+        self._assure_states_exist([i[0] for i in state_path])
         head = state_path.pop(0)
         qt = self._states[head[0]]
         ft = head[1]
@@ -282,6 +284,11 @@ class HMM:
         else:
             for a in self._init_nlogps.keys():
                 self._init_nlogps[a] += prob_sum
+
+    def _assure_states_exist(self, states):
+        for state in states:
+            if state not in self._states:
+                raise ValueError(f"State `{state}` does not exist.")
 
 
 def _format_emission_table(emission, name, digits):
