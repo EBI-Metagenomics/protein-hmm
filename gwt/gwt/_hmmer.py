@@ -54,5 +54,7 @@ def create_hmmer_profile(hmmfile: hmmer_reader.HMMEReader):
     hmm.set_trans(f"I{M}", f"I{M}", trans["II"])
     hmm.set_trans(f"D{M}", f"E", trans["DM"])
 
+    hmm.delete_state("D0")
+    hmm.rename_state("M0", "B")
     hmm.normalize()
     return hmm
