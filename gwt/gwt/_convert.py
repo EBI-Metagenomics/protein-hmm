@@ -1,8 +1,8 @@
-from math import exp, log
+from math import exp
 
 from ._gencode import GENCODE
 from ._molecule import Molecule, convert_to
-from ._nlog import nlog
+from ._log import LOG
 from ._molecule import RNA
 from ._norm import normalize_emission
 from hmmer_reader import HMMEReader
@@ -15,7 +15,7 @@ class AA2Codon:
         Parameters
         ----------
         aa_emission : dict
-            Amino acid emission probabilities in negative log space.
+            Amino acid emission probabilities in log space.
         molecule : Molecule
             Molecule.
         """
@@ -42,36 +42,36 @@ class AA2Codon:
     def bases(self):
         return self._molecule.bases
 
-    def aa_emission(self, nlog_space: bool = False):
+    def aa_emission(self, log_space: bool = False):
         """
         Parameters
         ----------
-        nlog_space : bool
-            ``True`` to return the amino acid emission probabilities in negative log
-            space. Defaults to ``False``.
+        log_space : bool
+            ``True`` to return the amino acid emission probabilities in log space.
+            Defaults to ``False``.
         """
-        if nlog_space:
+        if log_space:
             return self._aa_emission
-        return {k: exp(-v) for k, v in self._aa_emission.items()}
+        return {k: exp(v) for k, v in self._aa_emission.items()}
 
-    def codon_emission(self, nlog_space: bool = False):
+    def codon_emission(self, log_space: bool = False):
         """
         Parameters
         ----------
-        nlog_space : bool
-            ``True`` to return the codon emission probabilities in negative log
-            space. Defaults to ``False``.
+        log_space : bool
+            ``True`` to return the codon emission probabilities in log space.
+            Defaults to ``False``.
         """
-        if nlog_space:
+        if log_space:
             return self._codon_emission
-        return {k: exp(-v) for k, v in self._codon_emission.items()}
+        return {k: exp(v) for k, v in self._codon_emission.items()}
 
     def _generate_codon_emission(self):
-        for aa, nlogp in self._aa_emission.items():
+        for aa, logp in self._aa_emission.items():
             codons = self._gencode.get(aa, [])
-            norm = log(len(codons))
+            logp_norm = LOG(len(codons))
             for codon in codons:
-                self._codon_emission.update({codon: nlogp + norm})
+                self._codon_emission.update({codon: logp - logp_norm})
 
 
 def create_frame_hmm(
@@ -85,7 +85,7 @@ def create_frame_hmm(
     _convert_gencode_alphabet(gcode, molecule)
     base_compo = _infer_base_compo(_infer_codon_compo(hmmfile.compo, gcode), molecule)
 
-    hmm.add_state(SilentState("M0", alphabet, False), nlog(1.0))
+    hmm.add_state(SilentState("M0", alphabet, False), LOG(1.0))
 
     def aa2codon(state):
         convert = AA2Codon(dict(phmm.states[state].emission(True)), molecule)
@@ -99,7 +99,7 @@ def create_frame_hmm(
         hmm.add_state(FrameState(f"I{m}", base_compo, aa2codon(f"I{m}"), epsilon))
         hmm.add_state(SilentState(f"D{m}", alphabet, False))
 
-        trans = hmmfile.trans(m - 1, False)
+        trans = hmmfile.trans(m - 1, True)
 
         hmm.set_trans(f"M{m-1}", f"M{m}", trans["MM"])
         hmm.set_trans(f"M{m-1}", f"I{m-1}", trans["MI"])
@@ -110,10 +110,10 @@ def create_frame_hmm(
         hmm.set_trans(f"D{m-1}", f"D{m}", trans["DD"])
 
     hmm.add_state(SilentState("E", alphabet, True))
-    hmm.set_trans("E", "E", nlog(1.0))
+    hmm.set_trans("E", "E", LOG(1.0))
 
     M = hmmfile.M
-    trans = hmmfile.trans(M, False)
+    trans = hmmfile.trans(M, True)
     hmm.set_trans(f"M{M}", f"E", trans["MM"])
     hmm.set_trans(f"M{M}", f"I{M}", trans["MI"])
     hmm.set_trans(f"I{M}", f"E", trans["IM"])
@@ -128,10 +128,10 @@ def create_frame_hmm(
 
 def _infer_codon_compo(aa_compo, gencode):
     codon_compo = []
-    for aa, nlogp in aa_compo.items():
-        nlog_norm = log(len(gencode[aa]))
+    for aa, logp in aa_compo.items():
+        logp_norm = LOG(len(gencode[aa]))
         for codon in gencode[aa]:
-            codon_compo.append((codon, nlogp + nlog_norm))
+            codon_compo.append((codon, logp - logp_norm))
     return codon_compo
 
 
@@ -141,14 +141,14 @@ def _infer_base_compo(codon_compo, molecule: Molecule):
     from scipy.special import logsumexp
 
     base_compo = {base: [] for base in molecule.bases}
-    nlog_norm = log(3)
-    for codon, nlogp in codon_compo:
-        base_compo[codon[0]] += [nlogp + nlog_norm]
-        base_compo[codon[1]] += [nlogp + nlog_norm]
-        base_compo[codon[2]] += [nlogp + nlog_norm]
+    logp_norm = LOG(3)
+    for codon, logp in codon_compo:
+        base_compo[codon[0]] += [logp - logp_norm]
+        base_compo[codon[1]] += [logp - logp_norm]
+        base_compo[codon[2]] += [logp - logp_norm]
 
     for base in base_compo.keys():
-        base_compo[base] = -logsumexp(-asarray(base_compo[base], float))
+        base_compo[base] = logsumexp(asarray(base_compo[base], float))
 
     normalize_emission(base_compo)
     return base_compo

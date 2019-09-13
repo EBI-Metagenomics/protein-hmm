@@ -3,7 +3,7 @@ from math import exp, factorial as fac
 
 from ._molecule import Molecule
 from ._norm import normalize_emission
-from ._nlog import nlog
+from ._log import LOG
 
 
 class FrameEmission:
@@ -12,7 +12,7 @@ class FrameEmission:
         Parameters
         ----------
         codon_emission : dict
-            Codon emission probabilities in negative log space.
+            Codon emission probabilities in log space.
         molecule : Molecule
             RNA or DNA molecule.
         epsilon : float
@@ -144,30 +144,30 @@ class FrameEmission:
         p = []
         if all([x1 is None, x2 is None, x3 is not None]):
             for x1, x2 in product(self.bases, self.bases):
-                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
+                p.append(self._codon_emission.get(x1 + x2 + x3, LOG(0.0)))
 
         elif all([x1 is None, x2 is not None, x3 is None]):
             for x1, x3 in product(self.bases, self.bases):
-                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
+                p.append(self._codon_emission.get(x1 + x2 + x3, LOG(0.0)))
 
         elif all([x1 is not None, x2 is None, x3 is None]):
             for x2, x3 in product(self.bases, self.bases):
-                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
+                p.append(self._codon_emission.get(x1 + x2 + x3, LOG(0.0)))
 
         elif all([x1 is not None, x2 is not None, x3 is None]):
             for x3 in self.bases:
-                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
+                p.append(self._codon_emission.get(x1 + x2 + x3, LOG(0.0)))
 
         elif all([x1 is not None, x2 is None, x3 is not None]):
             for x2 in self.bases:
-                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
+                p.append(self._codon_emission.get(x1 + x2 + x3, LOG(0.0)))
 
         elif all([x1 is None, x2 is not None, x3 is not None]):
             for x1 in self.bases:
-                p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
+                p.append(self._codon_emission.get(x1 + x2 + x3, LOG(0.0)))
 
         elif all([x1 is not None, x2 is not None, x3 is not None]):
-            p.append(-self._codon_emission.get(x1 + x2 + x3, nlog(0.0)))
+            p.append(self._codon_emission.get(x1 + x2 + x3, LOG(0.0)))
 
         return exp(logsumexp(p))
 
@@ -175,7 +175,7 @@ class FrameEmission:
         return 1.0 / 4
 
     def _get_codon_emission(self):
-        return [(k, exp(-v)) for (k, v) in self._codon_emission.items()]
+        return [(k, exp(v)) for (k, v) in self._codon_emission.items()]
 
     def __str__(self):
         msg = f"Epsilon = {self._epsilon}\n"

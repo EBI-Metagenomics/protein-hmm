@@ -80,10 +80,10 @@ def test_create_frame_hmm(tmp_path):
 
 def test_create_frame_hmm_exceptions(tmp_path):
     with pytest.raises(ValueError):
-        hmmfile = gwt.read_hmmer_file(tmp_path)
+        gwt.read_hmmer_file(tmp_path)
 
     with pytest.raises(ValueError):
-        hmmfile = gwt.read_hmmer_file(tmp_path / "this_doesnt_exist.file")
+        gwt.read_hmmer_file(tmp_path / "this_doesnt_exist.file")
 
 
 def test_create_frame_hmm_likelihood(tmp_path):

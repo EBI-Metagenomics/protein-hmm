@@ -1,14 +1,12 @@
 def normalize_emission(emission: dict):
     keys = list(emission.keys())
-    nlogp = [emission[a] for a in keys]
-    nlogp = _normalize_nlogspace(nlogp)
-    emission.update({a: logp for a, logp in zip(keys, nlogp)})
+    logprobs = _normalize_logspace([emission[a] for a in keys])
+    emission.update({a: logp for a, logp in zip(keys, logprobs)})
 
 
-def _normalize_nlogspace(values):
+def _normalize_logspace(values):
     from numpy import asarray
     from scipy.special import logsumexp
 
     values = asarray(values, float)
-    norm = logsumexp(-values)
-    return [norm + v for v in values]
+    return [v - logsumexp(values) for v in values]

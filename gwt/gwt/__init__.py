@@ -4,7 +4,7 @@ from ._frame import FrameEmission
 from ._gencode import gencode
 from ._hmmer import create_hmmer_profile, read_hmmer_file
 from ._molecule import DNA, RNA
-from ._nlog import nlog
+from ._log import LOG
 from ._testit import test
 
 __version__ = "0.0.1"
@@ -19,7 +19,7 @@ __all__ = [
     "create_frame_hmm",
     "create_hmmer_profile",
     "gencode",
-    "nlog",
+    "LOG",
     "read_hmmer_file",
     "test",
 ]
