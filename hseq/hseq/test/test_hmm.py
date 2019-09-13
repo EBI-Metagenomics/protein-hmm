@@ -553,7 +553,9 @@ def test_hmm_rename_state():
 
     with pytest.raises(ValueError):
         hmm.rename_state("DD", "D1")
-        hmm.rename_state("D1", "D1")
+
+    with pytest.raises(ValueError):
+        hmm.rename_state("E", "M1")
 
     p = hmm.trans("D1", "D2")
     hmm.rename_state("S", "B")
