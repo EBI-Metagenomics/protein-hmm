@@ -24,13 +24,13 @@ def test_read_hmmer_1(tmp_path):
     random = RandomState(0)
     path = hmm.emit(random)
     seq = "".join(i[1] for i in path)
-    states = "".join(str(i[0]) for i in path)
+    states = [i[0] for i in path]
     iseq = "PLKVHSAARYRDDLLKAMVIPQIIPYDQGEPESVYWRIAHAKIMTREAAGVNNVSGKNQLP"
     iseq += "PFILIGMDNVVVYTLRKAKTSEDAAEVCQEMQGEVIELTGALVFGVKSTSVFRFAKLNDD"
     iseq += "KELVRLVFAQGAWLGVQFMKVKFSKAYVELDQRCNKSGAIPIEASGGEAFEVAKGDYTNT"
     iseq += "LGLPGVNLNTELKSW"
     assert seq == iseq
-    assert len(states) == 1059
+    assert len(states) == 201
 
 
 def test_read_hmmer_2(tmp_path):
@@ -44,10 +44,10 @@ def test_read_hmmer_2(tmp_path):
     random = RandomState(0)
     path = hmm.emit(random)
     seq = "".join(i[1] for i in path)
-    states = "".join(str(i[0]) for i in path)
+    states = [i[0] for i in path]
     assert abs(hmm.trans("B", "M1") - 0.9892313034087644) < 1e-7
     assert seq == "PGKRDNGA"
-    assert len(states) == 38
+    assert len(states) == 10
 
 
 def test_create_frame_hmm(tmp_path):
@@ -62,20 +62,20 @@ def test_create_frame_hmm(tmp_path):
     random = RandomState(0)
     path = hmm.emit(random)
     seq = "".join(i[1] for i in path)
-    states = "".join(str(i[0]) for i in path)
+    states = [i[0] for i in path]
     assert abs(hmm.trans("B", "M1") - 0.9892313034087644) < 1e-7
     assert seq == "CCGGAAAAGGAGGACGGCAAUAAA"
-    assert len(states) == 38
+    assert len(states) == 10
 
     hmm = gwt.create_frame_hmm(hmmfile, phmm, 0.5)
 
     random = RandomState(0)
     path = hmm.emit(random)
     seq = "".join(i[1] for i in path)
-    states = "".join(str(i[0]) for i in path)
+    states = [i[0] for i in path]
     assert abs(hmm.trans("B", "M1") - 0.9892313034087644) < 1e-7
     assert seq == "CCGCCUAGAGAGAAACGGAAGAAACAAAG"
-    assert len(states) == 38
+    assert len(states) == 10
 
 
 def test_create_frame_hmm_exceptions(tmp_path):
