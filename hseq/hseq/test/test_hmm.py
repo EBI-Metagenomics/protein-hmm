@@ -119,7 +119,7 @@ def test_hmm_emit_path():
 
     random = RandomState(0)
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><E>"
+    assert [p[0] for p in path] == ["S", "M1", "E"]
     assert "".join(s[1] for s in path) == "A"
 
     M2 = TripletState("M2", alphabet, {"AGU": nlog(0.8), "AGG": nlog(0.2)})
@@ -131,23 +131,23 @@ def test_hmm_emit_path():
     hmm.normalize()
 
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert "".join(s[1] for s in path) == "AAGG"
 
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert "".join(s[1] for s in path) == "AAGU"
 
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert "".join(s[1] for s in path) == "AAGG"
 
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert "".join(s[1] for s in path) == "AAGU"
 
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert "".join(s[1] for s in path) == "AAGU"
 
     base_emission = {"A": nlog(0.25), "C": nlog(0.25), "G": nlog(0.25), "U": nlog(0.25)}
@@ -165,7 +165,7 @@ def test_hmm_emit_path():
     assert_allclose(hmm.trans("M2", "M3"), 1)
     assert_allclose(hmm.trans("M3", "E"), 1)
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><M3><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "M3", "E"]
     assert "".join(s[1] for s in path) == "AAGGAGU"
 
 
@@ -196,7 +196,7 @@ def test_hmm_lik_1():
 
     random = RandomState(0)
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert "".join(s[1] for s in path) == "AC"
 
     p = hmm.likelihood("AC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
@@ -365,12 +365,12 @@ def test_hmm_viterbi_1():
 
     random = RandomState(0)
     path = hmm.emit(random)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
-    assert "".join(s[1] for s in path) == "AC"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
+    assert "".join(p[1] for p in path) == "AC"
 
     lik, path = hmm.viterbi("AC")
     assert_allclose(lik, 0.3)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert path[0][1] == 0
     assert path[1][1] == 1
     assert path[2][1] == 1
@@ -403,28 +403,28 @@ def test_hmm_viterbi_2():
 
     lik, path = hmm.viterbi("AC")
     assert_allclose(lik, 0.48)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("AC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.48)
 
     lik, path = hmm.viterbi("AA")
     assert_allclose(lik, 0.32)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("AA", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.32)
 
     lik, path = hmm.viterbi("CA")
     assert_allclose(lik, 0.08)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("CA", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.08)
 
     lik, path = hmm.viterbi("CC")
     assert_allclose(lik, 0.12)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("CC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.12)
@@ -434,28 +434,28 @@ def test_hmm_viterbi_2():
 
     lik, path = hmm.viterbi("AC")
     assert_allclose(lik, 0.24)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("AC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.24)
 
     lik, path = hmm.viterbi("AA")
     assert_allclose(lik, 0.16)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("AA", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.16)
 
     lik, path = hmm.viterbi("CA")
     assert_allclose(lik, 0.04)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("CA", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.04)
 
     lik, path = hmm.viterbi("CC")
     assert_allclose(lik, 0.06)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("CC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.06)
@@ -498,21 +498,21 @@ def test_hmm_viterbi_3():
 
     lik, path = hmm.viterbi("AC")
     assert_allclose(lik, 0.3072)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("AC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.3072)
 
     lik, path = hmm.viterbi("AA")
     assert_allclose(lik, 0.2048)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><M2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert list(p[1] for p in path) == [0, 1, 1, 0]
     p = hmm.likelihood("AA", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.2048)
 
     lik, path = hmm.viterbi("A")
     assert_allclose(lik, 0.128)
-    assert "".join(str(s[0]) for s in path) == "<S><M1><D2><E>"
+    assert [p[0] for p in path] == ["S", "M1", "D2", "E"]
     assert list(p[1] for p in path) == [0, 1, 0, 0]
     p = hmm.likelihood("A", [("S", 0), ("M1", 1), ("D2", 0), ("E", 0)])
     assert_allclose(p, 0.128)

@@ -112,7 +112,8 @@ class HMM:
             seq = curr_state.emit(random)
             path.append((curr_state, seq))
             curr_state = self._transition(curr_state, random)
-        return path + [(curr_state, curr_state.emit(random))]
+        path += [(curr_state, curr_state.emit(random))]
+        return [(p[0].name, p[1]) for p in path]
 
     def likelihood(self, seq: str, state_path: list):
         if len(state_path) == 0:
@@ -190,6 +191,7 @@ class HMM:
                 if tup[0] > max_prob:
                     max_prob = tup[0]
                     best_path = tup[1] + [(qt, ft)]
+        best_path = [(qt.name, ft) for qt, ft in best_path]
         return max_prob, best_path
 
     def _viterbi(self, seq: str, qt: State, ft: int):
