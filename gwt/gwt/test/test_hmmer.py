@@ -103,3 +103,19 @@ def test_create_frame_hmm_likelihood(tmp_path):
     (lik, path) = phmm.viterbi(most_likely_seq)
     assert abs(lik - 0.02003508133944584) < 1e-7
     assert len(path) == 10
+
+    states_path = [
+        ("B", 0),
+        ("M1", 1),
+        ("M2", 1),
+        ("M3", 1),
+        ("M4", 1),
+        ("M5", 1),
+        ("M6", 1),
+        ("M7", 1),
+        ("I7", 1),
+        ("M8", 1),
+        ("E", 0),
+    ]
+    seq = "PGKEDNNSQ"
+    assert abs(phmm.likelihood(seq, states_path) - 4.004833899558836e-07) < 1e-6
