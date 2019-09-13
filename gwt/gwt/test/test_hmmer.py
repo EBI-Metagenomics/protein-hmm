@@ -107,8 +107,9 @@ def test_create_frame_hmm_likelihood(tmp_path):
     seq = ""
     for aa in most_likely_seq:
         seq += gwt.gencode(aa)[0]
-    breakpoint()
+    states_path = [("B", 0)] + [(f"M{i}", 3) for i in range(1, 9)] + [("E", 0)]
     lik = hmm.likelihood(seq, states_path)
+    assert abs(lik - 1.9565509120552557e-05) < 1e-6
 
     states_path = [
         ("B", 0),
