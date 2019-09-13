@@ -2,7 +2,7 @@ import pytest
 from numpy.testing import assert_allclose
 from numpy.random import RandomState
 from hseq import SilentState, NormalState, TripletState, FrameState
-from hseq import HMM, nlog
+from hseq import HMM, LOG
 
 
 def test_hmm_states():
@@ -10,8 +10,8 @@ def test_hmm_states():
 
     hmm = HMM(alphabet)
     hmm.add_state(SilentState("S", alphabet, False))
-    state = TripletState("M2", alphabet, {"AGU": nlog(0.8), "AGG": nlog(0.2)})
-    hmm.add_state(state, nlog(0.0))
+    state = TripletState("M2", alphabet, {"AGU": LOG(0.8), "AGG": LOG(0.2)})
+    hmm.add_state(state, LOG(0.0))
 
     states = hmm.states
     assert "S" in states
@@ -19,10 +19,10 @@ def test_hmm_states():
     assert len(states) == 2
 
     with pytest.raises(ValueError):
-        hmm.add_state(NormalState("S", {a: nlog(1.0) for a in alphabet}))
+        hmm.add_state(NormalState("S", {a: LOG(1.0) for a in alphabet}))
 
     with pytest.raises(ValueError):
-        hmm.add_state(NormalState("S2", {a: nlog(1.0) for a in alphabet[:-1]}))
+        hmm.add_state(NormalState("S2", {a: LOG(1.0) for a in alphabet[:-1]}))
 
 
 def test_hmm_init_prob_trans_a():
@@ -49,12 +49,12 @@ def test_hmm_init_prob_trans_b():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(0.0))
+    hmm.add_state(start_state, LOG(0.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
+    hmm.add_state(end_state, LOG(0.0))
 
-    hmm.set_trans("S", "E", nlog(0.1))
+    hmm.set_trans("S", "E", LOG(0.1))
     hmm.normalize()
     assert_allclose(hmm.trans("S", "E"), 1.0)
     assert_allclose(hmm.trans("S", "S"), 0.0)
@@ -67,12 +67,12 @@ def test_hmm_init_prob_trans_c():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(0.0))
+    hmm.add_state(start_state, LOG(0.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(1.0))
+    hmm.add_state(end_state, LOG(1.0))
 
-    hmm.set_trans("S", "E", nlog(0.0))
+    hmm.set_trans("S", "E", LOG(0.0))
     hmm.normalize()
 
     assert_allclose(hmm.trans("S", "E"), 0.5)
@@ -91,7 +91,7 @@ def test_hmm_init_prob_trans_d():
     end_state = SilentState("E", alphabet, True)
     hmm.add_state(end_state)
 
-    hmm.set_trans("S", "E", nlog(1.0))
+    hmm.set_trans("S", "E", LOG(1.0))
     hmm.normalize()
     assert_allclose(hmm.trans("S", "E"), 1.0)
     assert_allclose(hmm.trans("S", "S"), 0.0)
@@ -102,19 +102,17 @@ def test_hmm_emit_path():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
+    hmm.add_state(start_state, LOG(1.0))
 
     end_state = SilentState("E", alphabet, True)
     hmm.add_state(end_state)
 
-    M1 = NormalState(
-        "M1", {"A": nlog(0.8), "C": nlog(0.2), "G": nlog(0.0), "U": nlog(0.0)}
-    )
-    hmm.add_state(M1, nlog(0.0))
+    M1 = NormalState("M1", {"A": LOG(0.8), "C": LOG(0.2), "G": LOG(0.0), "U": LOG(0.0)})
+    hmm.add_state(M1, LOG(0.0))
 
-    hmm.set_trans("S", "E", nlog(0.0))
-    hmm.set_trans("S", "M1", nlog(1.0))
-    hmm.set_trans("M1", "E", nlog(1.0))
+    hmm.set_trans("S", "E", LOG(0.0))
+    hmm.set_trans("S", "M1", LOG(1.0))
+    hmm.set_trans("M1", "E", LOG(1.0))
     hmm.normalize()
 
     random = RandomState(0)
@@ -122,12 +120,12 @@ def test_hmm_emit_path():
     assert [p[0] for p in path] == ["S", "M1", "E"]
     assert "".join(s[1] for s in path) == "A"
 
-    M2 = TripletState("M2", alphabet, {"AGU": nlog(0.8), "AGG": nlog(0.2)})
-    hmm.add_state(M2, nlog(0.0))
+    M2 = TripletState("M2", alphabet, {"AGU": LOG(0.8), "AGG": LOG(0.2)})
+    hmm.add_state(M2, LOG(0.0))
 
-    hmm.set_trans("M1", "M2", nlog(1.0))
-    hmm.set_trans("M1", "E", nlog(0.0))
-    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.set_trans("M1", "M2", LOG(1.0))
+    hmm.set_trans("M1", "E", LOG(0.0))
+    hmm.set_trans("M2", "E", LOG(1.0))
     hmm.normalize()
 
     path = hmm.emit(random)
@@ -150,15 +148,15 @@ def test_hmm_emit_path():
     assert [p[0] for p in path] == ["S", "M1", "M2", "E"]
     assert "".join(s[1] for s in path) == "AAGU"
 
-    base_emission = {"A": nlog(0.25), "C": nlog(0.25), "G": nlog(0.25), "U": nlog(0.25)}
-    codon_emission = {"AGU": nlog(0.8), "AGG": nlog(0.2)}
+    base_emission = {"A": LOG(0.25), "C": LOG(0.25), "G": LOG(0.25), "U": LOG(0.25)}
+    codon_emission = {"AGU": LOG(0.8), "AGG": LOG(0.2)}
     epsilon = 0.1
     M3 = FrameState("M3", base_emission, codon_emission, epsilon)
-    hmm.add_state(M3, nlog(0.0))
+    hmm.add_state(M3, LOG(0.0))
 
-    hmm.set_trans("M2", "E", nlog(0.0))
-    hmm.set_trans("M2", "M3", nlog(1.0))
-    hmm.set_trans("M3", "E", nlog(1.0))
+    hmm.set_trans("M2", "E", LOG(0.0))
+    hmm.set_trans("M2", "M3", LOG(1.0))
+    hmm.set_trans("M3", "E", LOG(1.0))
     hmm.normalize()
     assert_allclose(hmm.trans("S", "M1"), 1)
     assert_allclose(hmm.trans("M1", "M2"), 1)
@@ -174,24 +172,20 @@ def test_hmm_lik_1():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
+    hmm.add_state(start_state, LOG(1.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
+    hmm.add_state(end_state, LOG(0.0))
 
-    M1 = NormalState(
-        "M1", {"A": nlog(0.8), "C": nlog(0.2), "G": nlog(0.0), "U": nlog(0.0)}
-    )
-    hmm.add_state(M1, nlog(0.0))
+    M1 = NormalState("M1", {"A": LOG(0.8), "C": LOG(0.2), "G": LOG(0.0), "U": LOG(0.0)})
+    hmm.add_state(M1, LOG(0.0))
 
-    M2 = NormalState(
-        "M2", {"A": nlog(0.4), "C": nlog(0.6), "G": nlog(0.0), "U": nlog(0.6)}
-    )
-    hmm.add_state(M2, nlog(0.0))
+    M2 = NormalState("M2", {"A": LOG(0.4), "C": LOG(0.6), "G": LOG(0.0), "U": LOG(0.6)})
+    hmm.add_state(M2, LOG(0.0))
 
-    hmm.set_trans("S", "M1", nlog(1.0))
-    hmm.set_trans("M1", "M2", nlog(1.0))
-    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.set_trans("S", "M1", LOG(1.0))
+    hmm.set_trans("M1", "M2", LOG(1.0))
+    hmm.set_trans("M2", "E", LOG(1.0))
     hmm.normalize()
 
     random = RandomState(0)
@@ -255,13 +249,13 @@ def test_hmm_lik_2():
     alphabet = "AC"
 
     hmm = HMM(alphabet)
-    start_state = NormalState("S", {"A": nlog(0.8), "C": nlog(0.2)})
-    hmm.add_state(start_state, nlog(1.0))
+    start_state = NormalState("S", {"A": LOG(0.8), "C": LOG(0.2)})
+    hmm.add_state(start_state, LOG(1.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
+    hmm.add_state(end_state, LOG(0.0))
 
-    hmm.set_trans("S", "E", nlog(1.0))
+    hmm.set_trans("S", "E", LOG(1.0))
     hmm.normalize()
 
     p = hmm.likelihood("A", [("S", 1), ("E", 0)])
@@ -297,20 +291,20 @@ def test_hmm_lik_3():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
+    hmm.add_state(start_state, LOG(1.0))
 
     M1 = SilentState("M1", alphabet, False)
-    hmm.add_state(M1, nlog(0.0))
+    hmm.add_state(M1, LOG(0.0))
 
-    M2 = NormalState("M2", {"A": nlog(0.8), "C": nlog(0.2)})
-    hmm.add_state(M2, nlog(0.0))
+    M2 = NormalState("M2", {"A": LOG(0.8), "C": LOG(0.2)})
+    hmm.add_state(M2, LOG(0.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
+    hmm.add_state(end_state, LOG(0.0))
 
-    hmm.set_trans("S", "M1", nlog(1.0))
-    hmm.set_trans("M1", "M2", nlog(1.0))
-    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.set_trans("S", "M1", LOG(1.0))
+    hmm.set_trans("M1", "M2", LOG(1.0))
+    hmm.set_trans("M2", "E", LOG(1.0))
     hmm.normalize()
 
     p = hmm.likelihood("A", [("S", 1), ("E", 0)])
@@ -325,7 +319,7 @@ def test_hmm_lik_3():
     p = hmm.likelihood("C", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.0)
 
-    hmm.set_trans("M1", "E", nlog(1.0))
+    hmm.set_trans("M1", "E", LOG(1.0))
     hmm.normalize()
 
     p = hmm.likelihood("A", [("S", 0), ("M1", 0), ("M2", 1), ("E", 0)])
@@ -343,24 +337,20 @@ def test_hmm_viterbi_1():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
+    hmm.add_state(start_state, LOG(1.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
+    hmm.add_state(end_state, LOG(0.0))
 
-    M1 = NormalState(
-        "M1", {"A": nlog(0.8), "C": nlog(0.2), "G": nlog(0.0), "U": nlog(0.0)}
-    )
-    hmm.add_state(M1, nlog(0.0))
+    M1 = NormalState("M1", {"A": LOG(0.8), "C": LOG(0.2), "G": LOG(0.0), "U": LOG(0.0)})
+    hmm.add_state(M1, LOG(0.0))
 
-    M2 = NormalState(
-        "M2", {"A": nlog(0.4), "C": nlog(0.6), "G": nlog(0.0), "U": nlog(0.6)}
-    )
-    hmm.add_state(M2, nlog(0.0))
+    M2 = NormalState("M2", {"A": LOG(0.4), "C": LOG(0.6), "G": LOG(0.0), "U": LOG(0.6)})
+    hmm.add_state(M2, LOG(0.0))
 
-    hmm.set_trans("S", "M1", nlog(1.0))
-    hmm.set_trans("M1", "M2", nlog(1.0))
-    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.set_trans("S", "M1", LOG(1.0))
+    hmm.set_trans("M1", "M2", LOG(1.0))
+    hmm.set_trans("M2", "E", LOG(1.0))
     hmm.normalize()
 
     random = RandomState(0)
@@ -385,20 +375,20 @@ def test_hmm_viterbi_2():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
+    hmm.add_state(start_state, LOG(1.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
+    hmm.add_state(end_state, LOG(0.0))
 
-    M1 = NormalState("M1", {"A": nlog(0.8), "C": nlog(0.2)})
-    hmm.add_state(M1, nlog(0.0))
+    M1 = NormalState("M1", {"A": LOG(0.8), "C": LOG(0.2)})
+    hmm.add_state(M1, LOG(0.0))
 
-    M2 = NormalState("M2", {"A": nlog(0.4), "C": nlog(0.6)})
-    hmm.add_state(M2, nlog(0.0))
+    M2 = NormalState("M2", {"A": LOG(0.4), "C": LOG(0.6)})
+    hmm.add_state(M2, LOG(0.0))
 
-    hmm.set_trans("S", "M1", nlog(1.0))
-    hmm.set_trans("M1", "M2", nlog(1.0))
-    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.set_trans("S", "M1", LOG(1.0))
+    hmm.set_trans("M1", "M2", LOG(1.0))
+    hmm.set_trans("M2", "E", LOG(1.0))
     hmm.normalize()
 
     lik, path = hmm.viterbi("AC")
@@ -429,7 +419,7 @@ def test_hmm_viterbi_2():
     p = hmm.likelihood("CC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.12)
 
-    hmm.set_trans("M1", "E", nlog(1.0))
+    hmm.set_trans("M1", "E", LOG(1.0))
     hmm.normalize()
 
     lik, path = hmm.viterbi("AC")
@@ -466,34 +456,34 @@ def test_hmm_viterbi_3():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
+    hmm.add_state(start_state, LOG(1.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
+    hmm.add_state(end_state, LOG(0.0))
 
-    M1 = NormalState("M1", {"A": nlog(0.8), "C": nlog(0.2)})
-    hmm.add_state(M1, nlog(0.0))
+    M1 = NormalState("M1", {"A": LOG(0.8), "C": LOG(0.2)})
+    hmm.add_state(M1, LOG(0.0))
 
     D1 = SilentState("D1", alphabet, False)
-    hmm.add_state(D1, nlog(0.0))
+    hmm.add_state(D1, LOG(0.0))
 
-    M2 = NormalState("M2", {"A": nlog(0.4), "C": nlog(0.6)})
-    hmm.add_state(M2, nlog(0.0))
+    M2 = NormalState("M2", {"A": LOG(0.4), "C": LOG(0.6)})
+    hmm.add_state(M2, LOG(0.0))
 
     D2 = SilentState("D2", alphabet, False)
-    hmm.add_state(D2, nlog(0.0))
+    hmm.add_state(D2, LOG(0.0))
 
-    hmm.set_trans("S", "M1", nlog(0.8))
-    hmm.set_trans("S", "D1", nlog(0.2))
+    hmm.set_trans("S", "M1", LOG(0.8))
+    hmm.set_trans("S", "D1", LOG(0.2))
 
-    hmm.set_trans("M1", "M2", nlog(0.8))
-    hmm.set_trans("M1", "D2", nlog(0.2))
+    hmm.set_trans("M1", "M2", LOG(0.8))
+    hmm.set_trans("M1", "D2", LOG(0.2))
 
-    hmm.set_trans("D1", "D2", nlog(0.2))
-    hmm.set_trans("D1", "M2", nlog(0.8))
+    hmm.set_trans("D1", "D2", LOG(0.2))
+    hmm.set_trans("D1", "M2", LOG(0.8))
 
-    hmm.set_trans("D2", "E", nlog(1.0))
-    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.set_trans("D2", "E", LOG(1.0))
+    hmm.set_trans("M2", "E", LOG(1.0))
     hmm.normalize()
 
     lik, path = hmm.viterbi("AC")
@@ -523,7 +513,7 @@ def test_hmm_viterbi_no_end():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
+    hmm.add_state(start_state, LOG(1.0))
     hmm.normalize()
 
     with pytest.raises(ValueError):
@@ -533,12 +523,12 @@ def test_hmm_viterbi_no_end():
 def test_hmm_draw(tmp_path):
     hmm = _create_hmm()
 
-    base_emission = {"A": nlog(0.5), "C": nlog(0.5)}
-    codon_emission = {"ACC": nlog(0.8), "AAA": nlog(0.2)}
+    base_emission = {"A": LOG(0.5), "C": LOG(0.5)}
+    codon_emission = {"ACC": LOG(0.8), "AAA": LOG(0.2)}
     epsilon = 0.1
     M0 = FrameState("M0", base_emission, codon_emission, epsilon)
-    hmm.add_state(M0, nlog(1.0))
-    hmm.set_trans("M0", "E", nlog(1.0))
+    hmm.add_state(M0, LOG(1.0))
+    hmm.set_trans("M0", "E", LOG(1.0))
     hmm.normalize()
 
     hmm.draw(tmp_path / "test.pdf", emissions=5, init_prob=True)
@@ -582,33 +572,33 @@ def _create_hmm():
 
     hmm = HMM(alphabet)
     start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, nlog(1.0))
+    hmm.add_state(start_state, LOG(1.0))
 
     end_state = SilentState("E", alphabet, True)
-    hmm.add_state(end_state, nlog(0.0))
+    hmm.add_state(end_state, LOG(0.0))
 
-    M1 = NormalState("M1", {"A": nlog(0.8), "C": nlog(0.2)})
-    hmm.add_state(M1, nlog(0.0))
+    M1 = NormalState("M1", {"A": LOG(0.8), "C": LOG(0.2)})
+    hmm.add_state(M1, LOG(0.0))
 
     D1 = SilentState("D1", alphabet, False)
-    hmm.add_state(D1, nlog(0.0))
+    hmm.add_state(D1, LOG(0.0))
 
-    M2 = NormalState("M2", {"A": nlog(0.4), "C": nlog(0.6)})
-    hmm.add_state(M2, nlog(0.0))
+    M2 = NormalState("M2", {"A": LOG(0.4), "C": LOG(0.6)})
+    hmm.add_state(M2, LOG(0.0))
 
     D2 = SilentState("D2", alphabet, False)
-    hmm.add_state(D2, nlog(0.0))
+    hmm.add_state(D2, LOG(0.0))
 
-    hmm.set_trans("S", "M1", nlog(0.8))
-    hmm.set_trans("S", "D1", nlog(0.2))
+    hmm.set_trans("S", "M1", LOG(0.8))
+    hmm.set_trans("S", "D1", LOG(0.2))
 
-    hmm.set_trans("M1", "M2", nlog(0.8))
-    hmm.set_trans("M1", "D2", nlog(0.2))
+    hmm.set_trans("M1", "M2", LOG(0.8))
+    hmm.set_trans("M1", "D2", LOG(0.2))
 
-    hmm.set_trans("D1", "D2", nlog(0.2))
-    hmm.set_trans("D1", "M2", nlog(0.8182787382))
+    hmm.set_trans("D1", "D2", LOG(0.2))
+    hmm.set_trans("D1", "M2", LOG(0.8182787382))
 
-    hmm.set_trans("D2", "E", nlog(1.0))
-    hmm.set_trans("M2", "E", nlog(1.0))
+    hmm.set_trans("D2", "E", LOG(1.0))
+    hmm.set_trans("M2", "E", LOG(1.0))
 
     return hmm

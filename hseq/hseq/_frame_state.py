@@ -1,7 +1,7 @@
 from itertools import product
 from math import exp
 
-from ._nlog import nlog
+from ._log import LOG
 from ._norm import normalize_emission
 from ._state import State, emission_table
 
@@ -48,20 +48,20 @@ class FrameState(State):
         seq = random.choice(list(emission.keys()), p=list(emission.values()))
         return seq
 
-    def emission(self, nlog_space: bool = False):
+    def emission(self, log_space: bool = False):
         """
         Parameters
         ----------
-        nlog_space : bool
-            ``True`` to return in negative log space. Defaults to ``False``.
+        log_space : bool
+            ``True`` to return in log space. Defaults to ``False``.
         """
         abc = self._alphabet
         emission = {}
         for f in range(1, 6):
             combs = product(*[abc] * f)
             emission.update({"".join(z): self._joint_z_f(z) for z in combs})
-        emission = {a: nlog(b) for a, b in emission.items()}
-        return emission_table(emission, nlog_space)
+        emission = {a: LOG(b) for a, b in emission.items()}
+        return emission_table(emission, log_space)
 
     def _codon_prob(self, x1, x2, x3):
         from scipy.special import logsumexp
@@ -74,7 +74,7 @@ class FrameState(State):
             x3 = self.alphabet
 
         get = self._cemission.get
-        probs = [-get(a + b + c, nlog(0.0)) for a, b, c in product(x1, x2, x3)]
+        probs = [get(a + b + c, LOG(0.0)) for a, b, c in product(x1, x2, x3)]
         return exp(logsumexp(probs))
 
     def _joint_z_f(self, z):
@@ -99,7 +99,7 @@ class FrameState(State):
         """ p(Z=z1z2, F=2). """
 
         def i(x):
-            return exp(-self._base_emission.get(x))
+            return exp(self._base_emission.get(x))
 
         e = self._codon_prob
 
@@ -116,7 +116,7 @@ class FrameState(State):
         """ p(Z=z1z2z3, F=3). """
 
         def i(x):
-            return exp(-self._base_emission.get(x))
+            return exp(self._base_emission.get(x))
 
         e = self._codon_prob
 
@@ -138,7 +138,7 @@ class FrameState(State):
         """ p(Z=z1z2...z4, F=4). """
 
         def i(x):
-            return exp(-self._base_emission.get(x))
+            return exp(self._base_emission.get(x))
 
         e = self._codon_prob
 
@@ -165,7 +165,7 @@ class FrameState(State):
         """ p(Z=z1z2...z5, F=5). """
 
         def i(x):
-            return exp(-self._base_emission.get(x))
+            return exp(self._base_emission.get(x))
 
         e = self._codon_prob
 

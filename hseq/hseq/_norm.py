@@ -1,16 +1,16 @@
 def normalize_emission(emission: dict):
     """
-    Normalize probabilities given in negative log space.
+    Normalize probabilities given in log space.
     """
     keys = list(emission.keys())
-    nlogp = [emission[a] for a in keys]
-    nlogp = _normalize_nlogspace(nlogp)
-    emission.update({a: logp for a, logp in zip(keys, nlogp)})
+    logp = [emission[a] for a in keys]
+    logp = _normalize_logspace(logp)
+    emission.update({a: logp for a, logp in zip(keys, logp)})
 
 
-def _normalize_nlogspace(values):
+def _normalize_logspace(values):
     from numpy import asarray
     from scipy.special import logsumexp
 
     values = asarray(values, float)
-    return logsumexp(-values) + values
+    return values - logsumexp(values)

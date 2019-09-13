@@ -1,6 +1,6 @@
 from ._frame_state import FrameState
 from ._hmm import HMM
-from ._nlog import nlog
+from ._log import LOG
 from ._state import NormalState, SilentState, TripletState
 
 __version__ = "0.0.1"
@@ -12,5 +12,5 @@ __all__ = [
     "NormalState",
     "TripletState",
     "FrameState",
-    "nlog",
+    "LOG",
 ]

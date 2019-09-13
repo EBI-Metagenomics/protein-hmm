@@ -4,7 +4,7 @@ from math import log
 from numpy.random import RandomState
 from numpy.testing import assert_allclose
 
-from hseq import FrameState, NormalState, SilentState, TripletState, nlog
+from hseq import FrameState, NormalState, SilentState, TripletState, LOG
 
 
 def test_states():
@@ -23,10 +23,10 @@ def test_states():
     assert table[0][0] == ""
     assert table[0][1] == 1.0
 
-    table = start_state.emission(nlog_space=True)
+    table = start_state.emission(log_space=True)
     assert len(table) == 1
     assert table[0][0] == ""
-    assert table[0][1] == nlog(1.0)
+    assert table[0][1] == LOG(1.0)
 
     end_state = SilentState("E", "ACGU", True)
     assert end_state.name == "E"
@@ -34,7 +34,7 @@ def test_states():
     assert end_state.emit(RandomState(0)) == ""
     assert start_state.alphabet == "ACGU"
 
-    normal_state = NormalState("M1", {"A": -log(0.99), "B": -log(0.01)})
+    normal_state = NormalState("M1", {"A": log(0.99), "B": log(0.01)})
     assert normal_state.name == "M1"
     assert normal_state.end_state is False
     assert normal_state.emit(RandomState(0)) == "A"
@@ -47,14 +47,14 @@ def test_states():
     assert str(normal_state) == "<M1>"
     assert repr(normal_state) == "<NormalState:M1>"
 
-    table = normal_state.emission(nlog_space=False)
+    table = normal_state.emission(log_space=False)
     assert table[0][0] == "A"
     assert_allclose(table[0][1], 0.99)
     assert table[1][0] == "B"
     assert_allclose(table[1][1], 0.01)
 
     alphabet = "ACGU"
-    triplet_state = TripletState("M2", alphabet, {"AUG": -log(0.8), "AUU": -log(0.8)})
+    triplet_state = TripletState("M2", alphabet, {"AUG": log(0.8), "AUU": log(0.8)})
     assert triplet_state.name == "M2"
     assert triplet_state.end_state is False
     assert triplet_state.emit(RandomState(0)) == "AUU"
@@ -66,7 +66,7 @@ def test_states():
     assert str(triplet_state) == "<M2>"
     assert repr(triplet_state) == "<TripletState:M2>"
 
-    table = triplet_state.emission(nlog_space=False)
+    table = triplet_state.emission(log_space=False)
     assert table[0][0] == "AUG"
     assert_allclose(table[0][1], 0.5)
     assert table[1][0] == "AUU"
@@ -75,8 +75,8 @@ def test_states():
     assert triplet_state.min_len == 3
     assert triplet_state.max_len == 3
 
-    base_emission = {"A": -log(0.25), "C": -log(0.25), "G": -log(0.25), "U": -log(0.25)}
-    codon_emission = {"AUG": -log(0.8), "AUU": -log(0.1)}
+    base_emission = {"A": log(0.25), "C": log(0.25), "G": log(0.25), "U": log(0.25)}
+    codon_emission = {"AUG": log(0.8), "AUU": log(0.1)}
     epsilon = 0.1
     frame_state = FrameState("M3", base_emission, codon_emission, epsilon)
     assert_allclose(frame_state._codon_prob("A", "U", "G"), 0.8888888888888888)
@@ -88,13 +88,13 @@ def test_states():
     assert_allclose(frame_state._codon_prob(None, None, "U"), 0.11111111111111115)
     assert_allclose(frame_state._codon_prob(None, None, None), 1.0)
 
-    table = frame_state.emission(nlog_space=True)
+    table = frame_state.emission(log_space=True)
     assert table[0][0] == "AUG"
-    assert_allclose(table[0][1], 0.5347732882047063)
+    assert_allclose(table[0][1], -0.5347732882047063)
     assert table[1][0] == "AUU"
-    assert_allclose(table[1][1], 2.590237330499946)
+    assert_allclose(table[1][1], -2.590237330499946)
     assert table[2][0] == "AU"
-    assert_allclose(table[2][1], 2.915843423869834)
+    assert_allclose(table[2][1], -2.915843423869834)
 
     epsilon = 0.0
     frame_state = FrameState("M4", base_emission, codon_emission, epsilon)

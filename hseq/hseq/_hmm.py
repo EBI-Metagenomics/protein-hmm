@@ -1,26 +1,26 @@
 from math import log, exp, isinf
-from ._nlog import nlog
+from ._log import LOG
 from ._state import State
 
 
 class HMM:
     def __init__(self, alphabet: str):
-        self._init_nlogps = {}
+        self._init_logps = {}
         self._states = {}
         self._trans = {}
         self._alphabet = alphabet
 
-    def init_prob(self, name, nlog_space=False):
-        v = self._init_nlogps.get(name, nlog(0.0))
-        if not nlog_space:
-            v = exp(-v)
+    def init_prob(self, name, log_space=False):
+        v = self._init_logps.get(name, LOG(0.0))
+        if not log_space:
+            v = exp(v)
         return v
 
     @property
     def states(self):
         return self._states
 
-    def trans(self, name_a: str, name_b: str, nlog_space: bool = False):
+    def trans(self, name_a: str, name_b: str, log_space: bool = False):
         """
         Parameters
         ----------
@@ -28,15 +28,15 @@ class HMM:
             Source state name.
         name_b : str
             Destination state name.
-        nlog_space : bool
-            ``True`` to return in negative log space. Defaults to ``False``.
+        log_space : bool
+            ``True`` to return in log space. Defaults to ``False``.
         """
-        v = self._trans.get(name_a, {}).get(name_b, nlog(0.0))
-        if not nlog_space:
-            v = exp(-v)
+        v = self._trans.get(name_a, {}).get(name_b, LOG(0.0))
+        if not log_space:
+            v = exp(v)
         return v
 
-    def set_trans(self, name_a: str, name_b: str, nlogp: float):
+    def set_trans(self, name_a: str, name_b: str, logp: float):
         """
         Parameters
         ----------
@@ -44,23 +44,23 @@ class HMM:
             Source state name.
         name_b : str
             Destination state name.
-        nlogp : bool
-            Transition probability in negative log space.
+        logp : bool
+            Transition probability in log space.
         """
-        self._trans[name_a][name_b] = nlogp
+        self._trans[name_a][name_b] = logp
 
     @property
     def alphabet(self):
         return self._alphabet
 
-    def add_state(self, state: State, init_nlogp: float = nlog(0.0)):
+    def add_state(self, state: State, init_logp: float = LOG(0.0)):
         """
         Parameters
         ----------
         state
             Add state.
-        init_nlogp : bool
-            Probability, in negative log space, of being the initial state.
+        init_logp : bool
+            Probability, in log space, of being the initial state.
         """
         if state.name in self._states:
             raise ValueError(f"State {state.name} already exists.")
@@ -70,7 +70,7 @@ class HMM:
 
         self._states[state.name] = state
         self._trans[state.name] = {}
-        self._init_nlogps[state.name] = init_nlogp
+        self._init_logps[state.name] = init_logp
 
         return state
 
@@ -83,7 +83,7 @@ class HMM:
 
         self._states[new_name] = self._states.pop(old_name)
         self._states[new_name].name = new_name
-        self._init_nlogps[new_name] = self._init_nlogps.pop(old_name)
+        self._init_logps[new_name] = self._init_logps.pop(old_name)
 
         for k, v in self._trans.items():
             if old_name in v:
@@ -95,7 +95,7 @@ class HMM:
             raise ValueError(f"State name `{name}` does not exist.")
 
         del self._states[name]
-        del self._init_nlogps[name]
+        del self._init_logps[name]
         del self._trans[name]
         for v in self._trans.values():
             if name in v:
@@ -103,7 +103,7 @@ class HMM:
 
     def normalize(self):
         self._normalize_trans()
-        self._normalize_init_nlogps()
+        self._normalize_init_logps()
 
     def emit(self, random):
         curr_state = self._draw_initial_state(random)
@@ -152,7 +152,7 @@ class HMM:
                 shape = "circle"
 
             if init_prob:
-                p = self.init_prob(state.name, nlog_space=False)
+                p = self.init_prob(state.name, log_space=False)
                 p = round(p, digits)
                 if p > 0:
                     state_label = f"{state.name}: {p}"
@@ -162,7 +162,7 @@ class HMM:
                 state_label = f"{state.name}"
 
             if emissions > 0:
-                emission = state.emission(nlog_space=False)
+                emission = state.emission(log_space=False)
                 emission = emission[:emissions]
                 label = _format_emission_table(emission, state_label, digits)
             else:
@@ -171,8 +171,8 @@ class HMM:
             graph.node(state.name, label, shape=shape)
 
         for state0, trans in self._trans.items():
-            for state1, nlogp in trans.items():
-                p = exp(-nlogp)
+            for state1, logp in trans.items():
+                p = exp(logp)
                 p = round(p, digits)
                 if p > 0:
                     graph.edge(state0, state1, label=f"{p}")
@@ -185,12 +185,14 @@ class HMM:
         end_states = [q for q in self._states.values() if q.end_state]
         if len(end_states) == 0:
             raise ValueError("There is no ending state to perform Viterbi.")
+
         for qt in end_states:
             for ft in range(qt.min_len, qt.max_len + 1):
                 tup = self._viterbi(seq, qt, ft)
                 if tup[0] > max_prob:
                     max_prob = tup[0]
                     best_path = tup[1] + [(qt, ft)]
+
         best_path = [(qt.name, ft) for qt, ft in best_path]
         return max_prob, best_path
 
@@ -227,8 +229,8 @@ class HMM:
         return max_prob, best_path
 
     def _draw_initial_state(self, random):
-        names = self._init_nlogps.keys()
-        probs = [exp(-v) for v in self._init_nlogps.values()]
+        names = self._init_logps.keys()
+        probs = [exp(v) for v in self._init_logps.values()]
 
         name = random.choice(list(names), p=probs)
         return self._states[name]
@@ -236,7 +238,7 @@ class HMM:
     def _transition(self, state: State, random):
         trans = self._trans[state.name]
         names = trans.keys()
-        probs = [exp(-v) for v in trans.values()]
+        probs = [exp(v) for v in trans.values()]
 
         name = random.choice(list(names), p=probs)
         return self._states[name]
@@ -249,19 +251,19 @@ class HMM:
         names = self._states.keys()
         nstates = len(names)
         for a in names:
-            probs = [-v for v in self._trans[a].values()]
+            logprobs = [v for v in self._trans[a].values()]
 
-            if len(probs) == 0:
+            if len(logprobs) == 0:
                 for b in names:
-                    self._trans[a][b] = log(nstates)
+                    self._trans[a][b] = -log(nstates)
             else:
-                prob_sum = logsumexp(probs)
-                if isinf(prob_sum):
+                logprob_norm = logsumexp(logprobs)
+                if isinf(logprob_norm):
                     for b in names:
-                        self._trans[a][b] = log(nstates)
+                        self._trans[a][b] = -log(nstates)
                 else:
                     for b in self._trans[a].keys():
-                        self._trans[a][b] += prob_sum
+                        self._trans[a][b] -= logprob_norm
 
     def _normalize_trans_end_states(self):
         state_names = self._states.keys()
@@ -269,23 +271,23 @@ class HMM:
             if state.end_state:
                 end_state_name = state.name
                 for state_name in state_names:
-                    self._trans[end_state_name][state_name] = nlog(0.0)
-                self._trans[end_state_name][end_state_name] = nlog(1.0)
+                    self._trans[end_state_name][state_name] = LOG(0.0)
+                self._trans[end_state_name][end_state_name] = LOG(1.0)
 
-    def _normalize_init_nlogps(self):
+    def _normalize_init_logps(self):
         from scipy.special import logsumexp
 
-        probs = [-v for v in self._init_nlogps.values()]
+        logprobs = [v for v in self._init_logps.values()]
         names = self._states.keys()
         nstates = len(names)
 
-        prob_sum = logsumexp(probs)
-        if isinf(prob_sum):
+        logp_norm = logsumexp(logprobs)
+        if isinf(logp_norm):
             for a in names:
-                self._init_nlogps[a] = log(nstates)
+                self._init_logps[a] = -log(nstates)
         else:
-            for a in self._init_nlogps.keys():
-                self._init_nlogps[a] += prob_sum
+            for a in self._init_logps.keys():
+                self._init_logps[a] -= logp_norm
 
     def _assure_states_exist(self, states):
         for state in states:
