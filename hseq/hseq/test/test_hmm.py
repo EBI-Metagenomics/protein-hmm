@@ -370,6 +370,8 @@ def test_hmm_viterbi_1():
 
     p = hmm.likelihood("AC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.3)
+    logp = hmm.likelihood("AC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)], True)
+    assert_allclose(logp, LOG(0.3))
 
 
 def test_hmm_viterbi_2():

@@ -1,4 +1,4 @@
-from math import log, exp, isinf
+from math import exp, isinf
 from ._log import LOG
 from ._state import State
 
@@ -115,10 +115,15 @@ class HMM:
         path += [(curr_state, curr_state.emit(random))]
         return [(p[0].name, p[1]) for p in path]
 
-    def likelihood(self, seq: str, state_path: list):
+    def likelihood(self, seq: str, state_path: list, log_space: bool = False):
         if len(state_path) == 0:
             if len(seq) == 0:
+                if log_space:
+                    return LOG(1.0)
                 return 1.0
+
+            if log_space:
+                return LOG(0.0)
             return 0.0
 
         self._assure_states_exist([i[0] for i in state_path])
@@ -127,18 +132,20 @@ class HMM:
         ft = head[1]
         if ft > len(seq):
             return 0.0
-        p = self.init_prob(qt.name) * qt.prob(seq[:ft])
+        logp = self.init_prob(qt.name, True) + qt.prob(seq[:ft], True)
 
         seq = seq[ft:]
         qt_1 = qt
         for head in state_path[1:]:
             qt = self._states[head[0]]
             ft = head[1]
-            p *= qt.prob(seq[:ft]) * self.trans(qt_1.name, qt.name)
+            logp += qt.prob(seq[:ft], True) + self.trans(qt_1.name, qt.name, True)
             seq = seq[ft:]
             qt_1 = qt
 
-        return p
+        if log_space:
+            return logp
+        return exp(logp)
 
     def draw(self, filepath, emissions=0, init_prob=True, digits=3, view=False):
         from graphviz import Digraph
@@ -255,12 +262,12 @@ class HMM:
 
             if len(logprobs) == 0:
                 for b in names:
-                    self._trans[a][b] = -log(nstates)
+                    self._trans[a][b] = -LOG(nstates)
             else:
                 logprob_norm = logsumexp(logprobs)
                 if isinf(logprob_norm):
                     for b in names:
-                        self._trans[a][b] = -log(nstates)
+                        self._trans[a][b] = -LOG(nstates)
                 else:
                     for b in self._trans[a].keys():
                         self._trans[a][b] -= logprob_norm
@@ -284,7 +291,7 @@ class HMM:
         logp_norm = logsumexp(logprobs)
         if isinf(logp_norm):
             for a in names:
-                self._init_logps[a] = -log(nstates)
+                self._init_logps[a] = -LOG(nstates)
         else:
             for a in self._init_logps.keys():
                 self._init_logps[a] -= logp_norm
