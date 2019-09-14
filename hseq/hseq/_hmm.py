@@ -186,8 +186,8 @@ class HMM:
 
         graph.render(filepath, view=view)
 
-    def viterbi(self, seq: str):
-        max_prob = 0.0
+    def viterbi(self, seq: str, log_space: bool = False):
+        max_logp = LOG(0.0)
         best_path = []
         end_states = [q for q in self._states.values() if q.end_state]
         if len(end_states) == 0:
@@ -196,49 +196,50 @@ class HMM:
         for qt in end_states:
             for ft in range(qt.min_len, qt.max_len + 1):
                 tup = self._viterbi(seq, qt, ft)
-                if tup[0] > max_prob:
-                    max_prob = tup[0]
+                if tup[0] > max_logp:
+                    max_logp = tup[0]
                     best_path = tup[1] + [(qt, ft)]
 
         best_path = [(qt.name, ft) for qt, ft in best_path]
-        return max_prob, best_path
+        if log_space:
+            return max_logp, best_path
+        return exp(max_logp), best_path
 
     def _viterbi(self, seq: str, qt: State, ft: int):
-        max_prob = 0.0
+        max_logp = LOG(0.0)
         best_path = []
-        emission_prob = qt.prob(seq[len(seq) - ft :])
-        if emission_prob == 0.0:
-            return max_prob, best_path
+        emission_prob = qt.prob(seq[len(seq) - ft :], True)
+        if emission_prob == LOG(0.0):
+            return max_logp, best_path
 
         for qt_1 in self._states.values():
             if qt_1.end_state:
                 continue
 
-            T = self.trans(qt_1.name, qt.name)
-            if T == 0.0:
+            T = self.trans(qt_1.name, qt.name, True)
+            if T == LOG(0.0):
                 continue
 
             for ft_1 in range(qt_1.min_len, qt_1.max_len + 1):
                 seq_end = len(seq) - ft
                 tup = self._viterbi(seq[:seq_end], qt_1, ft_1)
-                tup = (tup[0] * T * emission_prob, tup[1] + [(qt_1, ft_1)])
+                tup = (tup[0] + T + emission_prob, tup[1] + [(qt_1, ft_1)])
 
-                if tup[0] > max_prob:
-                    max_prob = tup[0]
+                if tup[0] > max_logp:
+                    max_logp = tup[0]
                     best_path = tup[1]
 
         if len(seq) - ft == 0:
-            v = emission_prob * self.init_prob(qt.name)
-            if v > max_prob:
-                max_prob = v
+            v = emission_prob + self.init_prob(qt.name, True)
+            if v > max_logp:
+                max_logp = v
                 best_path = []
 
-        return max_prob, best_path
+        return max_logp, best_path
 
     def _draw_initial_state(self, random):
         names = self._init_logps.keys()
         probs = [exp(v) for v in self._init_logps.values()]
-
         name = random.choice(list(names), p=probs)
         return self._states[name]
 
@@ -246,7 +247,6 @@ class HMM:
         trans = self._trans[state.name]
         names = trans.keys()
         probs = [exp(v) for v in trans.values()]
-
         name = random.choice(list(names), p=probs)
         return self._states[name]
 
@@ -258,7 +258,7 @@ class HMM:
         names = self._states.keys()
         nstates = len(names)
         for a in names:
-            logprobs = [v for v in self._trans[a].values()]
+            logprobs = list(self._trans[a].values())
 
             if len(logprobs) == 0:
                 for b in names:
@@ -284,7 +284,7 @@ class HMM:
     def _normalize_init_logps(self):
         from scipy.special import logsumexp
 
-        logprobs = [v for v in self._init_logps.values()]
+        logprobs = list(self._init_logps.values())
         names = self._states.keys()
         nstates = len(names)
 
