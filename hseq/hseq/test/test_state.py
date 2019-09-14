@@ -1,5 +1,5 @@
 from itertools import product
-from math import log
+from math import log, exp
 
 from numpy.random import RandomState
 from numpy.testing import assert_allclose
@@ -79,14 +79,14 @@ def test_states():
     codon_emission = {"AUG": log(0.8), "AUU": log(0.1)}
     epsilon = 0.1
     frame_state = FrameState("M3", base_emission, codon_emission, epsilon)
-    assert_allclose(frame_state._codon_prob("A", "U", "G"), 0.8888888888888888)
-    assert_allclose(frame_state._codon_prob("A", "U", "U"), 0.11111111111111115)
-    assert_allclose(frame_state._codon_prob("A", "U", None), 1.0)
-    assert_allclose(frame_state._codon_prob("A", None, "U"), 0.11111111111111115)
-    assert_allclose(frame_state._codon_prob(None, "G", "U"), 0.0)
-    assert_allclose(frame_state._codon_prob(None, "U", "U"), 0.11111111111111115)
-    assert_allclose(frame_state._codon_prob(None, None, "U"), 0.11111111111111115)
-    assert_allclose(frame_state._codon_prob(None, None, None), 1.0)
+    assert_allclose(frame_state._codon_prob("A", "U", "G"), LOG(0.8888888888888888))
+    assert_allclose(frame_state._codon_prob("A", "U", "U"), LOG(0.11111111111111115))
+    assert_allclose(frame_state._codon_prob("A", "U", None), LOG(1.0))
+    assert_allclose(frame_state._codon_prob("A", None, "U"), LOG(0.11111111111111115))
+    assert_allclose(frame_state._codon_prob(None, "G", "U"), LOG(0.0))
+    assert_allclose(frame_state._codon_prob(None, "U", "U"), LOG(0.11111111111111115))
+    assert_allclose(frame_state._codon_prob(None, None, "U"), LOG(0.11111111111111115))
+    assert_allclose(frame_state._codon_prob(None, None, None), LOG(1.0))
 
     table = frame_state.emission(log_space=True)
     assert table[0][0] == "AUG"
@@ -122,7 +122,7 @@ def test_states():
     p = frame_state._prob_z_given_f
     abc = "ACGU"
     for f in range(1, 6):
-        assert_allclose(sum(p(x) for x in product(*[abc] * f)), 1.0)
+        assert_allclose(sum(exp(p(x)) for x in product(*[abc] * f)), 1.0)
 
     random = RandomState(0)
     assert frame_state.emit(random) == "AUG"
