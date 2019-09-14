@@ -121,7 +121,6 @@ class HMM:
                 if log_space:
                     return LOG(1.0)
                 return 1.0
-
             if log_space:
                 return LOG(0.0)
             return 0.0

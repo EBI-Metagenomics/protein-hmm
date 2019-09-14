@@ -1,3 +1,4 @@
+from math import isinf
 import pytest
 from numpy.testing import assert_allclose
 from numpy.random import RandomState
@@ -165,6 +166,9 @@ def test_hmm_emit_path():
     path = hmm.emit(random)
     assert [p[0] for p in path] == ["S", "M1", "M2", "M3", "E"]
     assert "".join(s[1] for s in path) == "AAGGAGU"
+    states_path = [("S", 0), ("M1", 1), ("M2", 3), ("M3", 3), ("E", 0)]
+    loglik = hmm.likelihood("AAGGAGU", states_path, True)
+    assert abs(loglik + 2.472373518623133) < 1e-7
 
 
 def test_hmm_lik_1():
@@ -213,6 +217,9 @@ def test_hmm_lik_1():
 
     p = hmm.likelihood("CG", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.0, atol=1e-7)
+
+    logp = hmm.likelihood("CG", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)], True)
+    assert isinf(logp)
 
     p = hmm.likelihood("CU", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.075)
@@ -282,8 +289,14 @@ def test_hmm_lik_2():
     p = hmm.likelihood("", [])
     assert_allclose(p, 1.0)
 
+    logp = hmm.likelihood("", [], True)
+    assert_allclose(logp, 0.0, atol=1e-7)
+
     p = hmm.likelihood("A", [])
     assert_allclose(p, 0.0)
+
+    logp = hmm.likelihood("A", [], True)
+    assert isinf(logp)
 
 
 def test_hmm_lik_3():
@@ -367,6 +380,9 @@ def test_hmm_viterbi_1():
     assert path[1][1] == 1
     assert path[2][1] == 1
     assert path[3][1] == 0
+
+    lik = hmm.viterbi("AC", True)[0]
+    assert_allclose(lik, LOG(0.3))
 
     p = hmm.likelihood("AC", [("S", 0), ("M1", 1), ("M2", 1), ("E", 0)])
     assert_allclose(p, 0.3)

@@ -25,7 +25,7 @@ class FrameState(State):
         self._log1e = LOG(1 - epsilon)
         super(FrameState, self).__init__(name, alphabet, False)
 
-    def prob(self, z, log_space=False):
+    def prob(self, z, log_space: bool = False):
         """ p(Z=z1z2...zf, F=f). """
         f = len(z)
         p: float = 0.0
