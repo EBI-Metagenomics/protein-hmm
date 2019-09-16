@@ -60,3 +60,57 @@ def create_hmmer_profile(hmmfile: hmmer_reader.HMMEReader):
     hmm.rename_state("M0", "B")
     hmm.normalize()
     return hmm
+
+
+def create_bg_hmmer_profile(hmmfile: hmmer_reader.HMMEReader):
+    import hseq
+
+    hmm = hseq.HMM(hmmfile.alphabet)
+    hmm.add_state(hseq.NormalState("I", hmmfile.insert(1, True)), LOG(1.0))
+    hmm.normalize()
+    return hmm
+
+
+def estimate_gumbel_r_params(hmm, bg_hmm, nsamples=1000):
+    from tqdm import tqdm
+    from math import floor
+    from numpy.random import RandomState
+
+    seqs = [hmm.emit(RandomState(seed)) for seed in range(10)]
+    assert seqs[0][0][0] == "B"
+    assert seqs[0][-1][0] == "E"
+
+    lengths = 0
+    for seq in seqs:
+        lengths += sum([1 for v in seqs[0] if v[0].startswith("M")])
+    length = floor(lengths / len(seqs))
+
+    max_logps = []
+    bg_max_logps = []
+    for seed in tqdm(range(nsamples)):
+        random = RandomState(seed)
+        path = bg_hmm.emit(random, max_nstates=length)
+        seq = "".join(p[1] for p in path)
+        max_logps += [hmm.viterbi(seq, True)[0]]
+        bg_max_logps += [bg_hmm.viterbi(seq, True)[0]]
+
+    scores = [a - b for (a, b) in zip(max_logps, bg_max_logps)]
+    loc, scale = _find_gumbel_params(scores)
+    return loc, scale
+
+
+def gumbel_r_pvalue(seq, hmm, bg_hmm, loc, scale):
+    import scipy.stats as st
+
+    V = hmm.viterbi(seq, True)[0] - bg_hmm.viterbi(seq, True)[0]
+    return 1 - st.gumbel_r(loc=loc, scale=scale).cdf(V)
+
+
+def _find_gumbel_params(scores):
+    import scipy.stats as st
+
+    params = st.gumbel_r.fit(scores)
+    loc = params[-2]
+    scale = params[-1]
+
+    return loc, scale

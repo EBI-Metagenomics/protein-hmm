@@ -50,6 +50,26 @@ def test_read_hmmer_2(tmp_path):
     assert len(states) == 10
 
 
+def test_hmmer_statistic_1(tmp_path):
+    text = pkg_resources.read_text(gwt.test, "PF03373.hmm")
+    with open(tmp_path / "PF03373.hmm", "w") as f:
+        f.write(text)
+
+    hmmfile = gwt.read_hmmer_file(str(tmp_path / "PF03373.hmm"))
+    hmm = gwt.create_hmmer_profile(hmmfile)
+    bg_hmm = gwt.create_bg_hmmer_profile(hmmfile)
+
+    random = RandomState(0)
+    path = hmm.emit(random)
+    seq = "".join(p[1] for p in path)
+    max_logp, best_path = hmm.viterbi(seq, True)
+    bg_max_logp, bg_best_path = bg_hmm.viterbi(seq, True)
+    loc, scale = (-11.570078552677991, 2.579038545186777)
+
+    pv = gwt.gumbel_r_pvalue(seq, hmm, bg_hmm, loc, scale)
+    assert abs(pv - 0.0010735530254418757) < 1e-7
+
+
 def test_create_frame_hmm(tmp_path):
     text = pkg_resources.read_text(gwt.test, "PF03373.hmm")
     with open(tmp_path / "PF03373.hmm", "w") as f:

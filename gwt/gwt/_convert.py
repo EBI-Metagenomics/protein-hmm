@@ -126,6 +126,26 @@ def create_frame_hmm(
     return hmm
 
 
+def create_bg_frame_hmm(
+    hmmfile: HMMEReader, phmm: HMM, epsilon: float, gencode="standard"
+):
+    molecule = RNA()
+    alphabet = molecule.bases
+    hmm = HMM(alphabet)
+
+    gcode = GENCODE[gencode].copy()
+    _convert_gencode_alphabet(gcode, molecule)
+    base_compo = _infer_base_compo(_infer_codon_compo(hmmfile.compo, gcode), molecule)
+
+    def aa2codon(state):
+        convert = AA2Codon(dict(phmm.states[state].emission(True)), molecule)
+        return convert.codon_emission(True)
+
+    hmm.add_state(FrameState("I", base_compo, aa2codon("I1"), epsilon), LOG(1.0))
+    hmm.normalize()
+    return hmm
+
+
 def _infer_codon_compo(aa_compo, gencode):
     codon_compo = []
     for aa, logp in aa_compo.items():
