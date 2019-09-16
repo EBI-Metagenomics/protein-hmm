@@ -5,18 +5,19 @@ import hmmer_reader
 from ._log import LOG
 
 
-def read_hmmer_file(filepath: Path):
+def read_hmmer_file(file):
 
-    if not isinstance(filepath, Path):
-        filepath = Path(filepath)
+    if not hasattr(file, "read"):
+        if not isinstance(file, Path):
+            file = Path(file)
 
-    if not filepath.exists():
-        raise ValueError(f"`{filepath}` does not exist.")
+        if not file.exists():
+            raise ValueError(f"`{file}` does not exist.")
 
-    if not filepath.is_file():
-        raise ValueError(f"`{filepath}` is not a file.")
+        if not file.is_file():
+            raise ValueError(f"`{file}` is not a file.")
 
-    return hmmer_reader.read(filepath)
+    return hmmer_reader.read(file)
 
 
 def create_hmmer_profile(hmmfile: hmmer_reader.HMMEReader):

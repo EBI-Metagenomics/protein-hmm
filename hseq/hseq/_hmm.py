@@ -1,4 +1,4 @@
-from math import exp, isinf
+from math import exp, isinf, inf
 from ._log import LOG
 from ._state import State
 
@@ -105,13 +105,15 @@ class HMM:
         self._normalize_trans()
         self._normalize_init_logps()
 
-    def emit(self, random):
+    def emit(self, random, max_nstates=inf):
         curr_state = self._draw_initial_state(random)
         path = []
-        while not curr_state.end_state:
+        nstates = 1
+        while not curr_state.end_state and nstates < max_nstates:
             seq = curr_state.emit(random)
             path.append((curr_state, seq))
             curr_state = self._transition(curr_state, random)
+            nstates += 1
         path += [(curr_state, curr_state.emit(random))]
         return [(p[0].name, p[1]) for p in path]
 
@@ -190,7 +192,8 @@ class HMM:
         best_path = []
         end_states = [q for q in self._states.values() if q.end_state]
         if len(end_states) == 0:
-            raise ValueError("There is no ending state to perform Viterbi.")
+            end_states = list(self._states.values())
+        #     raise ValueError("There is no ending state to perform Viterbi.")
 
         for qt in end_states:
             for ft in range(qt.min_len, qt.max_len + 1):

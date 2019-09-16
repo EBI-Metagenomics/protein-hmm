@@ -4,3 +4,4 @@ include version.py
 include gwt/test/emission.txt
 include gwt/test/PF02545.hmm
 include gwt/test/PF03373.hmm
+include gwt/test/PF03373.seq

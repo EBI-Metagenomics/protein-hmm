@@ -71,6 +71,49 @@ def gencode(aa_or_codon, gencode):
         raise click.UsageError(str(err))
 
 
+@click.command()
+@click.argument("input", type=click.File("r"))
+@click.option("--n", "-n", type=int, default=1000, help="Sample size.")
+def estimate_gumbel(input, n):
+    from gwt import (
+        read_hmmer_file,
+        create_hmmer_profile,
+        create_bg_hmmer_profile,
+        estimate_gumbel_r_params,
+    )
+
+    hmmfile = read_hmmer_file(input)
+    hmm = create_hmmer_profile(hmmfile)
+    bg_hmm = create_bg_hmmer_profile(hmmfile)
+
+    loc, scale = estimate_gumbel_r_params(hmm, bg_hmm, nsamples=n)
+    print(f"gumbel_r(loc={loc}, scale={scale})")
+
+
+@click.command()
+@click.argument("hmm-input", type=click.File("r"))
+@click.argument("seq-input", type=click.File("r"))
+@click.argument("loc", type=float)
+@click.argument("scale", type=float)
+def pvalue(hmm_input, seq_input, loc, scale):
+    from gwt import (
+        read_hmmer_file,
+        create_hmmer_profile,
+        create_bg_hmmer_profile,
+        gumbel_r_pvalue,
+    )
+
+    hmmfile = read_hmmer_file(hmm_input)
+    hmm = create_hmmer_profile(hmmfile)
+    bg_hmm = create_bg_hmmer_profile(hmmfile)
+
+    seq_input.readline()
+    seq = seq_input.readline().strip()
+
+    pv = gumbel_r_pvalue(seq, hmm, bg_hmm, loc, scale)
+    print(pv)
+
+
 def sort_emission(emission):
     return list(sorted(emission, key=lambda x: x[1], reverse=True))
 
@@ -83,3 +126,5 @@ def show_tuples(d, length):
 
 cli.add_command(frame)
 cli.add_command(gencode)
+cli.add_command(estimate_gumbel)
+cli.add_command(pvalue)
