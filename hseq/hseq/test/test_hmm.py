@@ -528,18 +528,6 @@ def test_hmm_viterbi_3():
     assert_allclose(p, 0.128)
 
 
-def test_hmm_viterbi_no_end():
-    alphabet = "AC"
-
-    hmm = HMM(alphabet)
-    start_state = SilentState("S", alphabet, False)
-    hmm.add_state(start_state, LOG(1.0))
-    hmm.normalize()
-
-    with pytest.raises(ValueError):
-        hmm.viterbi("AC")
-
-
 def test_hmm_draw(tmp_path):
     hmm = _create_hmm()
 
@@ -587,6 +575,20 @@ def test_hmm_delete_state():
     assert "D2" not in hmm.states
 
 
+def test_hmm_single_state():
+    alphabet = "ACGU"
+    hmm = HMM(alphabet)
+    state = NormalState(
+        "I", {"A": LOG(0.8), "C": LOG(0.2), "G": LOG(0.0), "U": LOG(0.0)}
+    )
+    hmm.add_state(state)
+
+    hmm.normalize()
+    lik, path = hmm.viterbi("ACC")
+    assert abs(lik - 0.032) < 1e-7
+    assert path == [('I', 1), ('I', 1), ('I', 1)]
+
+
 def _create_hmm():
     alphabet = "AC"
 
@@ -622,3 +624,4 @@ def _create_hmm():
     hmm.set_trans("M2", "E", LOG(1.0))
 
     return hmm
+

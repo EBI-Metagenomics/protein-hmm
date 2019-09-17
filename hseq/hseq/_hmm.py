@@ -193,7 +193,6 @@ class HMM:
         end_states = [q for q in self._states.values() if q.end_state]
         if len(end_states) == 0:
             end_states = list(self._states.values())
-        #     raise ValueError("There is no ending state to perform Viterbi.")
 
         for qt in end_states:
             for ft in range(qt.min_len, qt.max_len + 1):

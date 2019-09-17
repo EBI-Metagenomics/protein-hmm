@@ -73,6 +73,14 @@ class FrameState(State):
         emission = {a: LOG(b) for a, b in emission.items()}
         return emission_table(emission, log_space)
 
+    @property
+    def min_len(self):
+        return 1
+
+    @property
+    def max_len(self):
+        return 5
+
     def _codon_prob(self, x1, x2, x3):
 
         if x1 is None:

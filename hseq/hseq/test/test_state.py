@@ -118,6 +118,8 @@ def test_states():
     assert_allclose(frame_state.prob("AUUAAA"), 0.0, atol=1e-7)
     assert str(frame_state) == "<M5>"
     assert repr(frame_state) == "<FrameState:M5>"
+    assert frame_state.min_len == 1
+    assert frame_state.max_len == 5
 
     p = frame_state._prob_z_given_f
     abc = "ACGU"
