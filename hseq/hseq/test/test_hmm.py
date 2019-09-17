@@ -586,7 +586,7 @@ def test_hmm_single_state():
     hmm.normalize()
     lik, path = hmm.viterbi("ACC")
     assert abs(lik - 0.032) < 1e-7
-    assert path == [('I', 1), ('I', 1), ('I', 1)]
+    assert path == [("I", 1), ("I", 1), ("I", 1)]
 
 
 def _create_hmm():
