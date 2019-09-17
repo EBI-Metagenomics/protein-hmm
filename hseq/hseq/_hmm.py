@@ -211,20 +211,21 @@ class HMM:
         best_path = []
         if ft > len(seq):
             return max_logp, best_path
+
         emission_prob = qt.prob(seq[len(seq) - ft :], True)
-        if emission_prob == LOG(0.0):
+        if emission_prob <= max_logp:
             return max_logp, best_path
 
+        seq_end = len(seq) - ft
         for qt_1 in self._states.values():
             if qt_1.end_state:
                 continue
 
             T = self.trans(qt_1.name, qt.name, True)
-            if T == LOG(0.0):
+            if T + emission_prob <= max_logp:
                 continue
 
             for ft_1 in range(qt_1.min_len, qt_1.max_len + 1):
-                seq_end = len(seq) - ft
                 tup = self._viterbi(seq[:seq_end], qt_1, ft_1)
                 tup = (tup[0] + T + emission_prob, tup[1] + [(qt_1, ft_1)])
 
