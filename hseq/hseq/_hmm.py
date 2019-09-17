@@ -209,6 +209,8 @@ class HMM:
     def _viterbi(self, seq: str, qt: State, ft: int):
         max_logp = LOG(0.0)
         best_path = []
+        if ft > len(seq):
+            return max_logp, best_path
         emission_prob = qt.prob(seq[len(seq) - ft :], True)
         if emission_prob == LOG(0.0):
             return max_logp, best_path
