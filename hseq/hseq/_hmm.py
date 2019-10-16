@@ -1,6 +1,7 @@
 from math import exp, isinf, inf
 from ._log import LOG
 from ._state import State
+import functools
 
 
 class HMM:
@@ -9,6 +10,7 @@ class HMM:
         self._states = {}
         self._trans = {}
         self._alphabet = alphabet
+        self._vcache = {}
 
     def init_prob(self, name, log_space=False):
         v = self._init_logps.get(name, LOG(0.0))
@@ -187,26 +189,25 @@ class HMM:
 
         graph.render(filepath, view=view)
 
-    def viterbi(self, seq: str, log_space: bool = False):
+    def viterbi(self, seq: str, end_state: str, log_space: bool = False):
+        self._vcache = {}
         max_logp = LOG(0.0)
         best_path = []
-        end_states = [q for q in self._states.values() if q.end_state]
-        if len(end_states) == 0:
-            end_states = list(self._states.values())
 
-        for qt in end_states:
-            for ft in range(qt.min_len, qt.max_len + 1):
-                tup = self._viterbi(seq, qt, ft)
-                if tup[0] > max_logp:
-                    max_logp = tup[0]
-                    best_path = tup[1] + [(qt, ft)]
+        end_state = self._states[end_state]
+        for ft in range(end_state.min_len, end_state.max_len + 1):
+            tup = self._viterbi(seq, end_state, ft)
+            if tup[0] > max_logp:
+                max_logp = tup[0]
+                best_path = tup[1] + [(end_state, ft)]
 
         best_path = [(qt.name, ft) for qt, ft in best_path]
         if log_space:
             return max_logp, best_path
         return exp(max_logp), best_path
 
-    def _viterbi(self, seq: str, qt: State, ft: int):
+    @functools.lru_cache(maxsize=65536)
+    def _viterbi(self, seq: str, qt: str, ft: int):
         max_logp = LOG(0.0)
         best_path = []
         if ft > len(seq):
@@ -217,8 +218,9 @@ class HMM:
             return max_logp, best_path
 
         seq_end = len(seq) - ft
+        prefix = seq[:seq_end]
         for qt_1 in self._states.values():
-            if qt_1.end_state:
+            if qt_1.end_state or qt_1.min_len > len(prefix):
                 continue
 
             T = self.trans(qt_1.name, qt.name, True)
@@ -226,7 +228,7 @@ class HMM:
                 continue
 
             for ft_1 in range(qt_1.min_len, qt_1.max_len + 1):
-                tup = self._viterbi(seq[:seq_end], qt_1, ft_1)
+                tup = self._viterbi(prefix, qt_1, ft_1)
                 tup = (tup[0] + T + emission_prob, tup[1] + [(qt_1, ft_1)])
 
                 if tup[0] > max_logp:

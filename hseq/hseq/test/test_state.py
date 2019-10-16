@@ -136,3 +136,47 @@ def test_states():
     assert frame_state.emit(random) == "AUU"
     assert frame_state.emit(random) == "AG"
     assert frame_state.emit(random) == "UG"
+
+
+def test_state_frame_base_emiss1():
+    base_emission = {"A": log(0.1), "C": log(0.2), "G": log(0.3), "U": log(0.4)}
+    codon_emission = {"AUG": log(0.8), "AUU": log(0.1)}
+    epsilon = 0.1
+    frame_state = FrameState("M5", base_emission, codon_emission, epsilon)
+    assert_allclose(frame_state.prob("A", True), -5.914503505971854)
+    assert_allclose(frame_state.prob("C"), 0.0)
+    assert_allclose(frame_state.prob("G", True), -6.032286541628237)
+    assert_allclose(frame_state.prob("U", True), -5.809142990314027)
+    assert_allclose(frame_state.prob("AU", True), -2.9159357500274385)
+    assert_allclose(frame_state.prob("AUA", True), -7.821518343902165)
+    assert_allclose(frame_state.prob("AUG", True), -0.5344319079005616)
+    assert_allclose(frame_state.prob("AUU", True), -2.57514520832882)
+    assert_allclose(frame_state.prob("AUC", True), -7.129480084106424)
+    assert_allclose(frame_state.prob("AUUA", True), -7.789644584138959)
+    assert_allclose(frame_state.prob("ACUG", True), -5.036637096635257)
+    assert_allclose(frame_state.prob("AUUAA", True), -13.920871073622099)
+    assert_allclose(frame_state.prob("AUUAAA"), 0.0)
+
+
+def test_state_frame_base_emiss2():
+    base_emission = {"A": log(0.1), "C": log(0.2), "G": log(0.3), "T": log(0.4)}
+    codon_emission = {"ATG": log(0.8), "ATT": log(0.1), "GTC": log(0.4)}
+    epsilon = 0.1
+    frame_state = FrameState("M5", base_emission, codon_emission, epsilon)
+    assert_allclose(frame_state.prob("A", True), -6.282228286097171)
+    assert_allclose(frame_state.prob("C", True), -7.0931585023135)
+    assert_allclose(frame_state.prob("G", True), -5.99454621364539)
+    assert_allclose(frame_state.prob("T", True), -5.840395533818132)
+    assert_allclose(frame_state.prob("AT", True), -3.283414346005771)
+    assert_allclose(frame_state.prob("CG", True), -9.395743595307545)
+    assert_allclose(frame_state.prob("ATA", True), -8.18911998648269)
+    assert_allclose(frame_state.prob("ATG", True), -0.9021560981322401)
+    assert_allclose(frame_state.prob("ATT", True), -2.9428648000333952)
+    assert_allclose(frame_state.prob("ATC", True), -7.314811395663229)
+    assert_allclose(frame_state.prob("GTC", True), -1.5951613351178675)
+    assert_allclose(frame_state.prob("ATTA", True), -8.157369364264277)
+    assert_allclose(frame_state.prob("GTTC", True), -4.711642430498609)
+    assert_allclose(frame_state.prob("ACTG", True), -5.404361876760574)
+    assert_allclose(frame_state.prob("ATTAA", True), -14.288595853747417)
+    assert_allclose(frame_state.prob("GTCAA", True), -12.902301492627526)
+    assert_allclose(frame_state.prob("ATTAAA"), 0.0)
