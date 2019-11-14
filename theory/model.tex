@@ -17,6 +17,12 @@
   The pair $(Q_t, S_t)$ is a hidden Markov model (HMM) with alphabet $\set{A}$.
 \end{definition}
 
+Let $\arr{z}=z_1 .. z_L$ be a sequence emitted by an HMM.
+The marginal likelihood of $\arr{z}$ is defined by
+\begin{align}\label{eq:hml}
+  \mathrm{ML}(\arr{z}) \eqdef p(S_1=z_1, S_2=z_2, \dots, S_L=z_L).
+\end{align}
+
 The standard HMM definition is often extended to include states that do not emit symbols. Those
 states are referred to as silent states and are useful to describe a missing alignment position, for
 example. This section goes a step further by defining a more general hidden Markov model that
@@ -36,25 +42,16 @@ sequences.
   limit $k$.
 \end{definition}
 
-Let $\arr{z}=z_1 .. z_L$ be a sequence emitted from an IMM.
-The marginal likelihood of $\arr{s}$ is given by
+Let $\arr{z}=z_1 .. z_L$ be a sequence emitted by an IMM.
+The marginal likelihood of $\arr{s}$ cannot be written as in Eq. \eqref{eq:hml} since
+we've lost the the order association between symbols and states.
+Instead, the marginal likelihood is given by
 \begin{align}\label{eq:ml}
-  \mathrm{ML}(\arr{z}) = p(V_1=\arr{z}) + p(V_1\neq\arr{z}, V_1||V_2=\arr{z}) +
-  p(V_1\neq\arr{z}, V_1||V_2\neq\arr{z}, V_1||V_2||V_3=\arr{z}) + \dots,
+  \mathrm{ML}(\arr{z}) \eqdef \sum_{t=1}^{\infty} p(S_{1..t}=\arr{z}, S_{t+1}\neq \emptyset),
 \end{align}
-where $||$ denotes sequence concatenation.
-
-Let $F_t$ be the sequence length emitted by $S_t$, $L_t = 0+F_1+\dots+F_{t-1}$,
-and $V_{1..t} = V_1||V_2||\dots||V_t$.
-We have
-\begin{align*}
-  p(V_{1..1} \neq \arr{z}, V_{1..2} \neq \arr{z}, \dots, V_{1..{t-1}} \neq \arr{z}, V_{1..t}=\arr{z})
-  = p(V_{1..t}=\arr{z}, L_t<L).
-\end{align*}
-Therefore, the marginal likelihood is also given by
-\begin{align*}
-  \mathrm{ML}(\arr{z}) = \sum_{t=1}^{\infty} p(V_{1..t}=\arr{z}, L_t<L).
-\end{align*}
+where $S_{1..t}$ denotes the concatenation of the random variables $S_1$, $S_2$,
+$\dots$, and $S_t$.\footnote{For example, let $a$ be a symbol. We have
+$p(S_{1..2}=a) = p(S_1=a, S_2=\emptyset) + p(S_1=\emptyset, S_2=a)$.}
 
 \subsection{Viterbi}
 
