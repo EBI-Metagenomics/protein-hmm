@@ -2,26 +2,26 @@
 
 \begin{definition}\label{def:mp}
   A Markov process is a stochastic process $Q_1, \dots$ for which
-  \begin{align*}
+  \begin{equation*}
     p(Q_t=q_t \gv Q_1=q_1, Q_2=q_2, \dots, Q_{t-1}=q_{t-1}) = p(Q_t=q_t \gv Q_{t-1}=q_{t-1}).
-  \end{align*}
+  \end{equation*}
   The possible values of $Q_t$ form a finite set $\set{Q}$ called the state space.
 \end{definition}
 
 \begin{definition}\label{def:hmm}
   Let $\set{A}$ be a non-empty finite set of symbols. Let $Q_1, Q_2, \dots$ be a Markov process and
   let $S_1, S_2, \dots$ be a stochastic process for which
-  \begin{align*}
+  \begin{equation*}
     p(S_t\in\set{A} \gv Q_1=q_1, Q_2=q_2, \dots, Q_t=q_t) = p(S_t\in\set{A} \gv Q_t=q_t).
-  \end{align*}
+  \end{equation*}
   The pair $(Q_t, S_t)$ is a hidden Markov model (HMM) with alphabet $\set{A}$.
 \end{definition}
 
-Let $\arr{z}=z_1 .. z_L$ be a sequence emitted by an HMM.
+Let $\arr{z}=z_1 .. z_L$ be a sequence emitted by an HMM.\@
 The marginal likelihood of $\arr{z}$ is defined by
-\begin{align}\label{eq:hml}
+\begin{equation}\label{eq:hml}
   \mathrm{ML}(\arr{z}) \eqdef p(S_1=z_1, S_2=z_2, \dots, S_L=z_L).
-\end{align}
+\end{equation}
 
 The standard HMM definition is often extended to include states that do not emit symbols. Those
 states are referred to as silent states and are useful to describe a missing alignment position, for
@@ -42,13 +42,13 @@ sequences.
   limit $k$.
 \end{definition}
 
-Let $\arr{z}=z_1 .. z_L$ be a sequence emitted by an IMM.
-The marginal likelihood of $\arr{s}$ cannot be written as in Eq. \eqref{eq:hml} since
+Let $\arr{z}=z_1 .. z_L$ be a sequence emitted by an IMM.\@
+The marginal likelihood of $\arr{s}$ cannot be written as in Eq.~\eqref{eq:hml} since
 we've lost the the order association between symbols and states.
 Instead, the marginal likelihood is given by
-\begin{align}\label{eq:ml}
+\begin{equation}\label{eq:ml}
   \mathrm{ML}(\arr{z}) \eqdef \sum_{t=1}^{\infty} p(S_{1..t}=\arr{z}, S_{t+1}\neq \emptyset),
-\end{align}
+\end{equation}
 where $S_{1..t}$ denotes the concatenation of the random variables $S_1$, $S_2$,
 $\dots$, and $S_t$.\footnote{For example, let $a$ be a symbol. We have
 $p(S_{1..2}=a) = p(S_1=a, S_2=\emptyset) + p(S_1=\emptyset, S_2=a)$.}
@@ -57,24 +57,26 @@ $p(S_{1..2}=a) = p(S_1=a, S_2=\emptyset) + p(S_1=\emptyset, S_2=a)$.}
 
 Let us consider first the Viterbi method applied to HMMs.
 Let
-\begin{align*}
+\begin{equation*}
   \viterbi(q_t) \eqdef \umax{q_{1..t-1}} \{ p(S_{1..t}=z_{1..t}, Q_{1..t}=q_{1..t}) \}
-\end{align*}
+\end{equation*}
 the so-called Viterbi score.
 It is the maximum probability among all state paths that ends in $q_t$ and generates
 the sequence $z_{1..t}$.
 
 The Viterbi score can be defined in a recursive way as follows:
-\begin{align*}
+\begin{equation*}
+\begin{split}
   \viterbi(q_t)
   &= p(S_t=z_t \gv Q_t=q_t) \umax{q_{1..t-1}}
-    \{ p(Q_t=q_t \gv Q_{t-1}=q_{t-1}) p(S_{1..t-1}=z_{1..t-1}, Q_{1..t-1}=q_{1..t-1}) \} &\\
+    \{ p(Q_t=q_t \gv Q_{t-1}=q_{t-1}) p(S_{1..t-1}=z_{1..t-1}, Q_{1..t-1}=q_{1..t-1}) \} \\
   &= p(S_t=z_t \gv Q_t=q_t) \umax{q_{t-1}}
     \{ p(Q_t=q_t \gv Q_{t-1}=q_{t-1})
-    \umax{q_{1..t-2}} \{ p(S_{1..t}=z_{1..t-1}, Q_{1..t}=q_{1..t-1}) \} \} &\\
+    \umax{q_{1..t-2}} \{ p(S_{1..t}=z_{1..t-1}, Q_{1..t}=q_{1..t-1}) \} \} \\
   &= p(S_t=z_t \gv Q_t=q_t) \umax{q_{t-1}} \{ p(Q_t=q_t \gv Q_{t-1}=q_{t-1})
-    \viterbi(q_{t-1}) \} &
-\end{align*}
+    \viterbi(q_{t-1}) \}
+\end{split}
+\end{equation*}
 
 Let $i \leq L$ indicate the prefix $z_{1:i}$.
 We define
@@ -161,11 +163,11 @@ We will define a type of IMM that has such a feature.
 \end{definition}
 
 \begin{corollary}
-  Let $M$ be the number of states of the IMM. If it has no quiet cycles, any sequence of $M$ states
+  Let $M$ be the number of states of the IMM.\@ If it has no quiet cycles, any sequence of $M$ states
   will have emitted at least one symbol.
 \end{corollary}
 
 If IMM has no quiet cycles, there is always a $N \leq L\cdot M$ such that
-\begin{align*}
+\begin{equation*}
   \mathrm{ML}(\arr{z}) = \sum_{t=1}^{L\cdot M} p(V_{1..t}=\arr{z}, L_t<L).
-\end{align*}
+\end{equation*}

@@ -6,23 +6,25 @@ For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 
 \subsection{Sequences of length 1}
 
-\begin{align*}
-    p(Z^1=z_1,F=1)
-        &= \eps^2(1-\eps)^2(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1)) / 3
-\end{align*}
+\begin{equation*}
+  p(Z^1=z_1,F=1) = \eps^2(1-\eps)^2(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1)) / 3
+\end{equation*}
 
 \subsection{Sequences of length 2}
 
-\begin{align*}
+\begin{equation*}
+  \begin{split}
     p(Z^2=z_1z_2,F=2)
         &= 2\eps(1-\eps)^3(p(X=\s z_1z_2) + p(X=z_1\s z_2) + p(X=z_1z_2\s))/3\\
         &+ \eps^3(1-\eps)(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1))p(z_2)/3\\
         &+ \eps^3(1-\eps)(p(X=z_2\s\s) + p(X=\s z_2\s) + p(X=\s\s z_2))p(z_1)/3
-\end{align*}
+  \end{split}
+\end{equation*}
 
 \subsection{Sequences of length 3}
 
-\begin{align*}
+\begin{equation*}
+  \begin{split}
     p(Z^3=z_1z_2z_3,F=3) &= (1-\eps)^4 p(X=z_1z_2z_3)\\
         &+ 4\eps^2(1-\eps)^2 (p(X=\s z_2 z_3) + p(X=z_2\s z_3) + p(X=z_2 z_3\s))p(z_1)/9\\
         &+ 4\eps^2(1-\eps)^2 (p(X=\s z_1 z_3) + p(X=z_1\s z_3) + p(X=z_1 z_3\s))p(z_2)/9\\
@@ -30,11 +32,13 @@ For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
         &+ \eps^4 (p(X=z_3\s\s) + p(X=\s z_3\s) + p(X=\s\s z_3))p(z_1)p(z_2)/9\\
         &+ \eps^4 (p(X=z_2\s\s) + p(X=\s z_2\s) + p(X=\s\s z_2))p(z_1)p(z_3)/9\\
         &+ \eps^4 (p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1))p(z_2)p(z_3)/9
-\end{align*}
+  \end{split}
+\end{equation*}
 
 \subsection{Sequences of length 4}
 
-\begin{align*}
+\begin{equation*}
+  \begin{split}
     p(Z^4=z_1z_2z_3z_4,F=4) &= \eps(1-\eps)^3 (p(X=z_2z_3z_4)p(z_1)+p(X=z_1z_3z_4)p(z_2)\\
         &+p(X=z_1z_2z_4)p(z_3)+p(X=z_1z_2z_3)p(z_4))/2\\
         &+\eps^3(1-\eps)(\\
@@ -47,11 +51,13 @@ For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
         &+ p(X=z_3z_4\s)p(z_1)p(z_2) + p(X=z_2z_4\s)p(z_1)p(z_3)\\
         &+ p(X=z_2z_3\s)p(z_1)p(z_4) + p(X=z_1z_4\s)p(z_2)p(z_3)\\
         &+ p(X=z_1z_3\s)p(z_2)p(z_4) + p(X=z_1z_2\s)p(z_3)p(z_4))/9
-\end{align*}
+  \end{split}
+\end{equation*}
 
 \subsection{Sequences of length 5}
 
-\begin{align*}
+\begin{equation*}
+  \begin{split}
     p(Z^5=z_1z_2z_3z_4z_5,F=5)
         &= \eps^2(1-\eps)^2(\\
         &+p(z_1)p(z_2)p(X=z_3z_4z_5)+p(z_1)p(z_3)p(X=z_2z_4z_5)\\
@@ -59,4 +65,5 @@ For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
         &+p(z_2)p(z_3)p(X=z_1z_4z_5)+p(z_2)p(z_4)p(X=z_1z_3z_5)\\
         &+p(z_2)p(z_5)p(X=z_1z_3z_4)+p(z_3)p(z_4)p(X=z_1z_2z_5)\\
         &+p(z_3)p(z_5)p(X=z_1z_2z_4)+p(z_4)p(z_5)p(X=z_1z_2z_3))/10
-\end{align*}
+  \end{split}
+\end{equation*}
