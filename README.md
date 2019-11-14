@@ -5,7 +5,7 @@ We want to annotate error-prone nucleotide sequences in terms of proteins.
 ## Documents
 
 The paper describing the theory can be found at [theory/](theory/).
-We host the discussions at [trans-hmmer basecamp](https://3.basecamp.com/3983891/projects/14390790). The remaining documents and files are kept at the `Google-Drive:/Finn Team/Research/Translated search` folder.
+We host the discussions at [trans-hmmer basecamp](https://3.basecamp.com/3983891/projects/14390790). The remaining documents and files are kept at the [Google-Drive:/Finn Team/Research/Translated search](https://drive.google.com/drive/u/1/folders/1VOSIZ7be9bUkqAG5ER-uaHM94vTj8G6_?ths=true) folder.
 
 ## Implementation
 
