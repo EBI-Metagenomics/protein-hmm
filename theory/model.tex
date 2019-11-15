@@ -60,11 +60,11 @@ Let
 \begin{equation*}
   \viterbi(q_t) \eqdef \umax{q_{1..t-1}} \{ p(S_{1..t}=z_{1..t}, Q_{1..t}=q_{1..t}) \}
 \end{equation*}
-the so-called Viterbi score.
+be the so-called Viterbi score.
 It is the maximum probability among all state paths that ends in $q_t$ and generates
 the sequence $z_{1..t}$.
 
-The Viterbi score can be defined in a recursive way as follows:
+Viterbi score can also be defined in a recursive fashion as follows:
 \begin{equation*}
 \begin{split}
   \viterbi(q_t)
