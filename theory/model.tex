@@ -62,13 +62,19 @@ $\dots$, and $S_t$.
 
 \subsection{Viterbi}
 
-Let us consider first the Viterbi method applied to HMMs.
+Let us consider first the Viterbi method applied to HMMs for a given sequence $\arr{z}$ of length
+$L$.
 Let
 \begin{equation*}
-  \viterbi(q_t) \eqdef \umax{q_{1..t-1}} \{ p(S_{1..t}=z_{1..t}, Q_{1..t}=q_{1..t}) \}
+  \viterbi(q_t) \eqdef
+  \begin{dcases*}
+    \umax{q_{1..t-1}} \{ p(S_{1..t}=z_{1..t}, Q_{1..t}=q_{1..t}) \} & if $t>1$ \\
+    p(S_1=z_1 \gv Q_1=q_1) p(Q_1=q_t)                               & if $t=1$
+  \end{dcases*}
 \end{equation*}
 be the so-called Viterbi score. It is the maximum probability among all state paths that ends in
 $q_t$ and generates the prefix $z_{1..t}$ from sequence $\arr{z}$.
+The function domain of $\viterbi(q_t)$ is such that $t \in \{1, 2, \dots, L\}$.
 
 Viterbi score can also be defined in a recursive fashion as follows:
 \begin{equation*}
@@ -80,9 +86,10 @@ Viterbi score can also be defined in a recursive fashion as follows:
     \{ p(Q_t=q_t \gv Q_{t-1}=q_{t-1})
     \umax{q_{1..t-2}} \{ p(S_{1..t}=z_{1..t-1}, Q_{1..t}=q_{1..t-1}) \} \} \\
   &= p(S_t=z_t \gv Q_t=q_t) \umax{q_{t-1}} \{ p(Q_t=q_t \gv Q_{t-1}=q_{t-1})
-    \viterbi(q_{t-1}) \}
+    \viterbi(q_{t-1}) \},
 \end{split}
 \end{equation*}
+for $t>1$.
 
 The notation $\viterbi(q_t)$ under the HMM context conveys three crucial information: (i) we are at
 step $t$ of the HMM process; (ii) we are querying something about some state $q_t \in \set{Q}$
@@ -103,13 +110,21 @@ information:
 For the sake of notation clarity, let us denote $z_{i(f_t)..i} \eqdef z_{i-f_t+1..i}$ as the
 $f_t$-length tail of a sequence $z_{1..i}$.
 
-The Viterbi score of an IMM regarding a sequence $\arr{z}$ is defined by
+The Viterbi score of an IMM regarding a sequence $\arr{z}$ of length $L$ is defined by
 \begin{equation*}
-  \viterbi_{i}(q_t,f_t) \eqdef \umax{\substack{q_{1..t-1}\\f_{1..t-1}}}
-    \{ p(S_{1..t}=z_{1..i}, Q_{1..t}=q_{1..t} ~;~ F_{1..t}=f_{1..t}) \}.
+  \viterbi_{i}(q_t,f_t) \eqdef
+  \begin{dcases*}
+    \umax{\substack{q_{1..t-1}\\f_{1..t-1}}}
+    \{
+      p(S_{1..t}=z_{1..i}, Q_{1..t}=q_{1..t} ~;~ F_{1..t}=f_{1..t})
+    \}                                                                  & if $t>1$\\
+    p(S_1=z_{1..f_1} \gv Q_1=q_t) p(Q_1=q_1)                            & if $t=1$
+  \end{dcases*}
 \end{equation*}
 It is the maximum probability among all state paths that ends in
 $q_t$ emitting $z_{i(f_t)..i}$ and generates the prefix $z_{1..i}$ from sequence $\arr{z}$.
+The function domain of $\viterbi_{i}(q_t,f_t)$ is such that $t \in \{1, 2, \dots\}$, $i \in \{0, 1,
+\dots, L\}$, $f_t \in \{0, 1, \dots, i\}$, and $q_t \in \set{Q}$.
 
 Viterbi score for IMM can also be defined in a recursive way as follows:
 \begin{equation*}
@@ -128,9 +143,10 @@ Viterbi score for IMM can also be defined in a recursive way as follows:
       \uumax{q_{t-1}}{f_{t-1}}
       \{
         p(q_t \gv q_{t-1}) \viterbi_{i-f_t}(q_{t-1},f_{t-1})
-      \}
+      \},
   \end{split}
 \end{equation*}
+for $t>1$.
 
 \subsection{Not sure}
 
