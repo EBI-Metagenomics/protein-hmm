@@ -1,7 +1,7 @@
 \section{Model}
 
 \begin{definition}\label{def:mp}
-  A Markov process is a stochastic process $Q_1, \dots$ for which
+  A Markov process is a stochastic process $Q_1, Q_2, \dots$ for which
   \begin{equation*}
     p(Q_t=q_t \gv Q_1=q_1, Q_2=q_2, \dots, Q_{t-1}=q_{t-1}) = p(Q_t=q_t \gv Q_{t-1}=q_{t-1}).
   \end{equation*}
@@ -17,10 +17,10 @@
   The pair $(Q_t, S_t)$ is a hidden Markov model (HMM) with alphabet $\set{A}$.
 \end{definition}
 
-Let $\arr{z}=z_1z_2 \dots z_L$ be a sequence emitted by an HMM.\@
+Let $\arr{z}=z_1z_2 \dots z_\ell$ be a sequence of symbols from alphabet $\set{A}$ of a given HMM.\@
 The marginal likelihood of $\arr{z}$ is defined by
 \begin{equation}\label{eq:hml}
-  \mathrm{ML}(\arr{z}) \eqdef p(S_1=z_1, S_2=z_2, \dots, S_L=z_L).
+  \mathrm{ML}(\arr{z}) \eqdef p(S_1=z_1, S_2=z_2, \dots, S_\ell=z_\ell).
 \end{equation}
 
 The standard HMM definition is often extended to include states that do not emit symbols. Those
@@ -42,8 +42,8 @@ sequences.
   limit $k$.
 \end{definition}
 
-Let $\arr{z}=z_1 .. z_L$ be a sequence emitted by an IMM.\@
-The marginal likelihood of $\arr{s}$ cannot be written as in Eq.~\eqref{eq:hml} since
+Let $\arr{z}=z_1 .. z_\ell$ be a sequence of symbols from alphabet $\set{A}$ of a given IMM.\@
+The marginal likelihood of $\arr{z}$ cannot be written as in Eq.~\eqref{eq:hml} since
 we've lost the the order association between symbols and states.
 Instead, the marginal likelihood is given by
 \begin{equation}\label{eq:ml}
@@ -55,15 +55,15 @@ $\dots$, and $S_t$.
 \begin{remark}
   The notation $p(S_{1..t}=\arr{z})$ is equal to the summation of the probabilities of every valid
   association between the random variables $S_1, S_2, \dots, S_t$ and the subsequences of $\arr{z}$,
-  including the possibility of a random variable emitting an empty sequence. For example, let $a$ be
-  sequence composed of a single symbol $a$. We have $p(S_{1..2}=a) = p(S_1=a, S_2=\emptyset) +
-  p(S_1=\emptyset, S_2=a)$.
+  including empty subsequences\footnote{An empty sequence is denoted by $\emptyset$.}. For example,
+  let $a$ be a sequence composed of a single symbol. We have $p(S_{1..2}=a) = p(S_1=a,
+  S_2=\emptyset) + p(S_1=\emptyset, S_2=a)$.
 \end{remark}
 
 \subsection{Viterbi}
 
 Let us consider first the Viterbi method applied to HMMs for a given sequence $\arr{z}$ of length
-$L$.
+$\ell$.
 Let
 \begin{equation*}
   \viterbi(q_t) \eqdef
@@ -74,7 +74,7 @@ Let
 \end{equation*}
 be the so-called Viterbi score. It is the maximum probability among all state paths that ends in
 $q_t$ and generates the prefix $z_{1..t}$ from sequence $\arr{z}$.
-The function domain of $\viterbi(q_t)$ is such that $t \in \{1, 2, \dots, L\}$.
+The function domain of $\viterbi(q_t)$ is such that $t \in \{1, 2, \dots, \ell\}$.
 
 Viterbi score can also be defined in a recursive fashion as follows:
 \begin{equation*}
@@ -110,7 +110,7 @@ information:
 For the sake of notation clarity, let us denote $z_{i(f_t)..i} \eqdef z_{i-f_t+1..i}$ as the
 $f_t$-length tail of a sequence $z_{1..i}$.
 
-The Viterbi score of an IMM regarding a sequence $\arr{z}$ of length $L$ is defined by
+The Viterbi score of an IMM regarding a sequence $\arr{z}$ of length $\ell$ is defined by
 \begin{equation*}
   \viterbi_{i}(q_t,f_t) \eqdef
   \begin{dcases*}
@@ -124,7 +124,7 @@ The Viterbi score of an IMM regarding a sequence $\arr{z}$ of length $L$ is defi
 It is the maximum probability among all state paths that ends in
 $q_t$ emitting $z_{i(f_t)..i}$ and generates the prefix $z_{1..i}$ from sequence $\arr{z}$.
 The function domain of $\viterbi_{i}(q_t,f_t)$ is such that $t \in \{1, 2, \dots\}$, $i \in \{0, 1,
-\dots, L\}$, $f_t \in \{0, 1, \dots, i\}$, and $q_t \in \set{Q}$.
+\dots, \ell\}$, $f_t \in \{0, 1, \dots, i\}$, and $q_t \in \set{Q}$.
 
 Viterbi score for IMM can also be defined in a recursive way as follows:
 \begin{equation*}
@@ -147,40 +147,6 @@ Viterbi score for IMM can also be defined in a recursive way as follows:
   \end{split}
 \end{equation*}
 for $t>1$.
-
-\subsection{Not sure}
-
-Let $q_{1..t}$ be a sequence of states (also known as state path).
-The likelihood of sequence $\arr{z}$ for state path $q_{1..t}$ is given by
-\begin{align*}
-  \mathrm{L}(\arr{z}, q_{1..t}) = p(V_{1..t}=\arr{z}, Q_{1..t}=q_{1..t}).
-\end{align*}
-Note that
-\begin{align*}
-  \mathrm{L}(\arr{z}, q_{1..t}) &= \sum_{l_t=0}^L p(V_{1..t}=\arr{z}, L_t=l_t,
-  Q_{1..t}=q_{1..t})\\
-  &= \sum_{l_t=0}^L p(V_{1..t-1}=z_{1..l_t}, V_t=z_{l_t+1..L}, Q_{1..t-1}=q_{1..t-1}, Q_t=q_t)\\
-  &= \sum_{l_t=0}^L p(V_t=z_{l_t+1..L} \gv Q_t=q_t) p(Q_t=q_t \gv Q_{t-1}=q_{t-1})
-  \mathrm{L}(z_{1..l_t}, q_{1..t-1})
-\end{align*}
-
-% Let
-% \begin{align*}
-%   \mathrm{L}(z_{1..l_t}, z_{l_t+1..l_t+f_t}, q_{1..t})
-%   &= p(V_t=z_{l_t+1..l_t+f_t} \gv Q_t=q_t) p(Q_t=q_t \gv Q_{t-1}=q_{t-1})\\
-%   &p(V_{1..t-1} = z_{1..l_t}, Q_{1..t-1}=q_{1..t-1}).
-% \end{align*}
-% Let
-% \begin{align*}
-%   g_t(z_{1..l_t}, z_{l_t+1..l_t+f_t}, q_t)
-%   &= \max_{q_{t-1}, f_{t-1}}
-%   \Big\{
-%     p(V_t=z_{l_t+1..l_t+f_t} \gv Q_t=q_t) p(Q_t=q_t \gv Q_{t-1}=q_{t-1}) \\
-%     &g_{t-1}(z_{1..l_{t-1}}, z_{l_{t-1}+1..l_{t-1}+f_{t-1}}, q_{t-1})
-%   \Big\}.\\
-%   g_1(\emptyset, z_{1..f_1}, q_1)
-%   &= p(V_1=z_{1..f_1} \gv Q_1=q_1) p(Q_1=q_1)
-% \end{align*}
 
 \subsection{Discussion}
 
@@ -205,7 +171,4 @@ We will define a type of IMM that has such a feature.
   will have emitted at least one symbol.
 \end{corollary}
 
-If IMM has no quiet cycles, there is always a $N \leq L\cdot M$ such that
-\begin{equation*}
-  \mathrm{ML}(\arr{z}) = \sum_{t=1}^{L\cdot M} p(V_{1..t}=\arr{z}, L_t<L).
-\end{equation*}
+If IMM has no quiet cycles, there is a finite limit for the marginal likelihood summation.
