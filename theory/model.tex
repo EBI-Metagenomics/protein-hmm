@@ -60,9 +60,8 @@ Let
 \begin{equation*}
   \viterbi(q_t) \eqdef \umax{q_{1..t-1}} \{ p(S_{1..t}=z_{1..t}, Q_{1..t}=q_{1..t}) \}
 \end{equation*}
-be the so-called Viterbi score.
-It is the maximum probability among all state paths that ends in $q_t$ and generates
-the sequence $z_{1..t}$.
+be the so-called Viterbi score. It is the maximum probability among all state paths that ends in
+$q_t$ and generates the prefix $z_{1..t}$ from sequence $\arr{z}$.
 
 Viterbi score can also be defined in a recursive fashion as follows:
 \begin{equation*}
@@ -77,6 +76,14 @@ Viterbi score can also be defined in a recursive fashion as follows:
     \viterbi(q_{t-1}) \}
 \end{split}
 \end{equation*}
+
+The notation $\viterbi(q_t)$ under the HMM context conveys three crucial information: (i) we are at
+step $t$ of the HMM process; (ii) we are querying something about some state $q_t \in \set{Q}$
+regarding (iii) the prefix $z_{1..t}$. The same notation under the IMM context loses the information
+(iii): the index $t$ no longer unambigously defines a prefix. We will instead use
+$\viterbi_{q_t,f_t}(i)$ to define the Viterbi score, for which $i$ defines the prefix $z_{1..i}$. We
+also make use of index $f_t$, which determines the sequence length that state $q_t \in \set{Q}$ is
+being queried about.
 
 Let $i \leq L$ indicate the prefix $z_{1:i}$.
 We define
