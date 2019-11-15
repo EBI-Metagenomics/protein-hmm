@@ -17,7 +17,7 @@
   The pair $(Q_t, S_t)$ is a hidden Markov model (HMM) with alphabet $\set{A}$.
 \end{definition}
 
-Let $\arr{z}=z_1 .. z_L$ be a sequence emitted by an HMM.\@
+Let $\arr{z}=z_1z_2 \dots z_L$ be a sequence emitted by an HMM.\@
 The marginal likelihood of $\arr{z}$ is defined by
 \begin{equation}\label{eq:hml}
   \mathrm{ML}(\arr{z}) \eqdef p(S_1=z_1, S_2=z_2, \dots, S_L=z_L).
@@ -50,8 +50,15 @@ Instead, the marginal likelihood is given by
   \mathrm{ML}(\arr{z}) \eqdef \sum_{t=1}^{\infty} p(S_{1..t}=\arr{z}, S_{t+1}\neq \emptyset),
 \end{equation}
 where $S_{1..t}$ denotes the concatenation of the random variables $S_1$, $S_2$,
-$\dots$, and $S_t$.\footnote{For example, let $a$ be a symbol. We have
-$p(S_{1..2}=a) = p(S_1=a, S_2=\emptyset) + p(S_1=\emptyset, S_2=a)$.}
+$\dots$, and $S_t$.
+
+\begin{remark}
+  The notation $p(S_{1..t}=\arr{z})$ is equal to the summation of the probabilities of every valid
+  association between the random variables $S_1, S_2, \dots, S_t$ and the subsequences of $\arr{z}$,
+  including the possibility of a random variable emitting an empty sequence. For example, let $a$ be
+  sequence composed of a single symbol $a$. We have $p(S_{1..2}=a) = p(S_1=a, S_2=\emptyset) +
+  p(S_1=\emptyset, S_2=a)$.
+\end{remark}
 
 \subsection{Viterbi}
 
@@ -84,6 +91,25 @@ regarding (iii) the prefix $z_{1..t}$. The same notation under the IMM context l
 $\viterbi_{q_t,f_t}(i)$ to define the Viterbi score, for which $i$ defines the prefix $z_{1..i}$. We
 also make use of index $f_t$, which determines the sequence length that state $q_t \in \set{Q}$ is
 being queried about.
+In summary, the notation $\viterbi_{q_t,f_t}(i)$ under the IMM context will convey four crucial
+information:
+\begin{itemize}
+  \item We are at step $t$ of the IMM process;
+  \item We query something about some state $q_t \in \set{Q}$;
+  \item The query regards the prefix $z_{1..i}$;
+  \item And we conjecture that the last $f_t$ symbols of $z_{1..i}$ have been emitted at step $t$ by
+    state $q_t$.
+\end{itemize}
+For the sake of notation clarity, let us denote $z_{i(f_t)..i} \eqdef z_{i-f_t+1..i}$ as the
+$f_t$-length tail of a sequence $z_{1..i}$.
+
+The Viterbi score of an IMM regarding a sequence $\arr{z}$ is defined by
+\begin{equation*}
+  \viterbi_{i}(q_t,f_t) \eqdef \umax{q_{1..t-1}} \{ p(S_{1..{t-1}}=z_{1..{i-f_t}},
+                                                    S_t=z_{i(f_t)..i}, Q_{1..t}=q_{1..t}) \}.
+\end{equation*}
+It is the maximum probability among all state paths that ends in
+$q_t$ emitting $z_{i(f_t)..i}$ and generates the prefix $z_{1..i}$ from sequence $\arr{z}$.
 
 Let $i \leq L$ indicate the prefix $z_{1:i}$.
 We define
