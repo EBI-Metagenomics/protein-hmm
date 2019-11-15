@@ -105,43 +105,32 @@ $f_t$-length tail of a sequence $z_{1..i}$.
 
 The Viterbi score of an IMM regarding a sequence $\arr{z}$ is defined by
 \begin{equation*}
-  \viterbi_{i}(q_t,f_t) \eqdef \umax{q_{1..t-1}} \{ p(S_{1..{t-1}}=z_{1..{i-f_t}},
-                                                    S_t=z_{i(f_t)..i}, Q_{1..t}=q_{1..t}) \}.
+  \viterbi_{i}(q_t,f_t) \eqdef \umax{\substack{q_{1..t-1}\\f_{1..t-1}}}
+    \{ p(S_{1..t}=z_{1..i}, Q_{1..t}=q_{1..t} ~;~ F_{1..t}=f_{1..t}) \}.
 \end{equation*}
 It is the maximum probability among all state paths that ends in
 $q_t$ emitting $z_{i(f_t)..i}$ and generates the prefix $z_{1..i}$ from sequence $\arr{z}$.
 
-Let $i \leq L$ indicate the prefix $z_{1:i}$.
-We define
-\begin{align*}
-  \mathcal{V}_{q_t,f_t}(i) =
-  \max_{q_{t-1}, f_{t-1}}
-  \big\{
-    \mathcal{V}_{q_{t-1},f_{t-1}}(i-f_t) p(V_t=z_{i-f_t+1:i} \gv Q_t=q_t) p(Q_t=q_t \gv
-    Q_{t-1}=q_{t-1})
-  \big\},
-\end{align*}
-for $0 < i - f_t$,
-and
-\begin{align*}
-  \mathcal{V}_{q_t,f_t}(i) =
-  \max
-  \Big\{
-    &\max_{q_{t-1}}
-    \big\{
-      \mathcal{V}_{q_{t-1}}(0) p(V_t=z_{1:i} \gv Q_t=q_t) p(Q_t=q_t \gv
-      Q_{t-1}=q_{t-1})
-    \big\},\\
-    &p(V_t=z_{1:i} \gv Q_t=q_t) p(Q_t=q_t)
-  \Big\},
-\end{align*}
-for $0 = i - f_t$.
-
-The maximal probability over all state paths $q_1, q_2, \dots$ and emission lengths $f_1, f_2,
-\dots$ is given by
-\begin{align*}
-  \max_{q_t, f_t}\mathcal{V}_{q_t,f_t}(L).
-\end{align*}
+Viterbi score for IMM can also be defined in a recursive way as follows:
+\begin{equation*}
+  \begin{split}
+    \viterbi_{i}(q_t,f_t)
+    &= p(S_t=z_{i(f_t)..i} \gv q_t)
+      \uumax{q_{t-1}}{f_{t-1}}
+      \{
+        p(q_t \gv q_{t-1})
+        \uumax{q_{1..t-2}}{f_{1..t-2}}
+        \{
+          p(S_{1..t-1}=z_{1..i-f_t}, q_{1..t-1} ~;~ f_{1..t-1})
+        \}
+      \}\\
+    &= p(S_t=z_{i(f_t)..i} \gv q_t)
+      \uumax{q_{t-1}}{f_{t-1}}
+      \{
+        p(q_t \gv q_{t-1}) \viterbi_{i-f_t}(q_{t-1},f_{t-1})
+      \}
+  \end{split}
+\end{equation*}
 
 \subsection{Not sure}
 
