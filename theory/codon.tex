@@ -1,9 +1,15 @@
-\section{Codon HMM}
+\section{Codon IMM}
 
-A protein can be modelled by a HMM whose states emit amino acids.
-For example, Fig.~\ref{fig:core-model} shows a possible HMM architecture for aligning sequences of
-amino-acids, for which indels are modelled by insert ($\state{I}$) and delete ($\state{D}$) states
-and matched positions are modelled by match ($\state{M}$) states.
+A protein can be modelled by a HMM whose states emit amino acids. For example,
+Fig.~\ref{fig:core-model} shows a possible HMM architecture for aligning sequences of amino-acids,
+for which indels are modelled by insert ($\state{I}$) and delete ($\state{D}$) states and matched
+positions are modelled by match ($\state{M}$) states. Each match state defines a potentially
+distinct probability distribution over amino acids so as to model position-specific amino acid
+frequencies. Insert states might instead define the same background probability distribution over
+amino acids. Delete states are silent states and therefore do not emit any amino acid: it represents
+position-specific missing amino acids. $\state{B}$ and $\state{E}$ are special states that represent
+end start and end of alignment. In particular, the probability of $\state{B}$ being the first state
+is one: $p(Q_1=\state{B})=1$.
 
 \begin{figure}[htbp]
   \centering
@@ -13,17 +19,50 @@ and matched positions are modelled by match ($\state{M}$) states.
   indels.}\label{fig:core-model}
 \end{figure}
 
+HMMs are widely used to model proteins and are used to search for homologous subsequences in target
+sequences made of amino acids. However, the researcher ocasionally do not have a ready-to-use amido
+acid sequence but instead a sequence of nucleotides that might contain homologous subsequences that
+code for proteins. Some residues of those homologous subsquences might be missing or might have been
+inserted by whatever reason. Still, one should be able to uncover error-prone subsequences when
+compared against to their homologous protein HMMs.
 
-Let $(Q_t, S_t)$ be a HMM with the amino acid alphabet $\set{A}$.
+Let $(Q_t, S_t)$ be a HMM with the amino acid alphabet $\set{A}$. We want to replace it by an IMM
+that preserves the model architecture (i.e., same set of states, state transitions and initial state
+probabilities) but instead have states that emit sequences of nucleotides instead of amino acids
+symbols. In particular, the new match and insert states will emit nucleotide sequences that varies
+in length from a single nucleotide to five nucleotides. The emission distribution of silent states
+(e.g., delete states) will stay the same: probability one of emitting an empty sequence in the IMM
+parlance.
 
-We want to replace it with an IMM
+Let $\set{B}$ be a nucleotides alphabet (e.g., $\set{B} \eqdef \{\res{A}, \res{C}, \res{G},
+\res{T}\}$), and let $\state{M}$ be a state that in the protein HMM would emit an amino acid. From
+its amino acid distribution and any other relevant source of information (codon usage bias, for
+instance), one can define the probability $p(X_t=x_1x_2x_3 \gv Q_t=\state{M})$ of $\state{M}$
+emitting the codon $(x_1, x_2, x_3) \in \set{B}^3$.
+
+\begin{example}
+  Suppose that a state $\state{M}$ has the amino acid distribution defined by
+  \begin{equation*}
+    p(S_t=\res{Y} \gv Q_t=\state{M}) = 0.8 ~~\text{and}~~ p(S_t=\res{C} \gv Q_t=\state{M}) = 0.2,
+  \end{equation*}
+  where $\res{Y}$ and $\res{C}$ are Tyrosine and Cysteine.
+  Based on the canonical genetic code alone, we could define codon distribution as follows:
+  \begin{equation*}
+    \begin{split}
+      p(X_t=\res{TAT}\gv Q_t=\state{M})= 0.8/2, &\quad p(S_t=\res{TAC}\gv Q_t=\state{M})=0.8/2\\
+      p(X_t=\res{TGT}\gv Q_t=\state{M})= 0.2/2, &\quad p(S_t=\res{TGC}\gv Q_t=\state{M})=0.2/2,
+    \end{split}
+  \end{equation*}
+  where $\res{A}$, $\res{C}$, $\res{T}$, and $\res{G}$ are nucleotides.
+\end{example}
+
+The first step to replace a protein HMM by a Codon IMM is to define
+
 that generates sequences of symbols from the alphabet $\set{B} = \{\res{A}, \res{C}, \res{G},
 \res{T}\}$ of DNA bases and that is able to account for base-indels and frame-shifting. Let
-$\state{M}_j$ be the so-called match state of an amino acid HMM and let $Q_t=\state{M}_j$. From the
-amino acid emission probabilities and any other relevant source of information (codon usage bias,
-for instance), one can define the probability $\cprob{X_1=x_1, X_2=x_2, X_3=x_3}{Q_t=\state{M}_j}$
-of $\state{M}_j$ emitting the codon $(x_1, x_2, x_3) \in \mathcal B^3$ --- one can also write
-$\cprob{X=x_1x_2x_3}{Q_t=\state{M}_j}$, for short. We will replace the codon emission process by one
+$\state{M}_j$ be the so-called match state of an amino acid HMM and let $Q_t=\state{M}_j$.
+
+We will replace the codon emission process by one
 that instead produces base sequences of different lengths to account for errors and frame-shifting.
 
 Node $\state{M}_j$ in Fig.~\ref{fig:codon-hmm-tree} represents the modified match state.
