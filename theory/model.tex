@@ -146,28 +146,3 @@ for $t>1$; and
 \begin{equation*}
   \viterbi_{f_1}(q_1,f_1) = p(S_1=z_{1..i} \gv Q_1=q_1) p(Q_1=q_1).
 \end{equation*}
-
-\subsection{Discussion}
-
-For computational reasons, it would be useful to have an upper bound on the summation of the
-marginal likelihood.
-We will define a type of IMM that has such a feature.
-
-\begin{definition}
-  A cycle is any probable sequence of states that starts and ends with the same state.
-\end{definition}
-
-\begin{definition}
-  A quiet state is a state that has a non-zero probability of emitting an empty sequence.
-\end{definition}
-
-\begin{definition}
-  A quiet cycle is any cycle having only quiet states.
-\end{definition}
-
-\begin{corollary}
-  Let $M$ be the number of states of the IMM.\@ If it has no quiet cycles, any sequence of $M$ states
-  will have emitted at least one symbol.
-\end{corollary}
-
-If IMM has no quiet cycles, there is a finite limit for the marginal likelihood summation.
