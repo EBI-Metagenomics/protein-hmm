@@ -77,14 +77,14 @@ each of those steps, there is a probability $\epsilon$ of a modification happeni
   codons: variable-length sequences having from one to five nucleotides.}\label{fig:hmm-to-imm}
 \end{figure}
 
-We will replace the codon emission process by one
-that instead produces base sequences of different lengths to account for errors and frame-shifting.
+The base-indel steps of our proposed mofication is graphically detailed in \Cref{fig:codon-hmm-tree}
+and is further explained here. The deletion can happen in any of the three codon positions with
+equal probability. If a deletion has already happened (i.e., the first deletion step has indeed
+modified the emitted codon), the next deletion can happen in any of the remaining two positions with
+equal probability. The insertion can happen between any two bases, before the first base or after
+the last base with equal probability.
 
-Node $\state{M}_j$ in Fig.~\ref{fig:codon-hmm-tree} represents the modified match state.
-The generated codon will go through four transitions, each one representing one of three possibilities: (i) delete a base; (ii) insert a base; or (iii) do nothing.
-The deletion can happen in any of the three codon positions with equal probability.
-If a deletion has already happened, the next deletion can happen in any of the remaining two positions with equal probability.
-The insertion can happen between any two bases, before the first base or after the last base with equal probability.
+\subsection{Analysis}
 
 The codon emitted at node $\state{M}_j$ can go under $m\in\{0, 1, 2, 3, 4\}$ base indels during
 the state transitions that end at some leaf-node state.
