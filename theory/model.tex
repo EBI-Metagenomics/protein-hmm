@@ -43,7 +43,7 @@ sequences.
 \end{definition}
 
 Let $\arr{z}=z_1z_2 \dots z_\ell$ be a sequence of symbols from alphabet $\set{A}$ of a given IMM.\@
-The marginal likelihood of $\arr{z}$ cannot be written as in Eq.~\eqref{eq:hml} since
+The marginal likelihood of $\arr{z}$ cannot be written as in \Cref{eq:hml} since
 we've lost the the order association between symbols and steps.
 Instead, the marginal likelihood is given by
 \begin{equation}\label{eq:ml}
@@ -115,7 +115,7 @@ regarding a sequence $\arr{z}$ of length $\ell$ is defined by
     \}.
 \end{equation}
 
-The $\max$ operator in Eq.~\eqref{eq:viterbi} is the maximum across all possible associations
+The $\max$ operator in \Cref{eq:viterbi} is the maximum across all possible associations
 $Q_1=q_1, Q_2=q_2, \dots, Q_{t-1}=q_{t-1}$ and $F_1=f_1, F_2=f_2, \dots, F_{t-1}=f_{t-1}$. Viterbi
 score is therefore the maximum probability among all state paths that ends in $q_t$ emitting
 $z_{i(f_t)..i}$ and generates the prefix $z_{1..i}$ from sequence $\arr{z}$. The function domain of
