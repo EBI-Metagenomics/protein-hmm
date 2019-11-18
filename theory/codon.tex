@@ -13,7 +13,8 @@ is one: $p(Q_1=\state{B})=1$.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.7\linewidth]{figure/core-model}
+  \captionsetup{width=.5\linewidth}
+  \includegraphics[width=.5\linewidth]{figure/core-model}
   \caption{$\state{B}$ and $\state{E}$ are silent states that denote the start and the end of an
   aligment. States $\state{M}$ represent matches while states $\state{I}$ and $\state{D}$ model
   indels.}\label{fig:core-model}
@@ -56,11 +57,25 @@ emitting the codon $(x_1, x_2, x_3) \in \set{B}^3$.
   where $\res{A}$, $\res{C}$, $\res{T}$, and $\res{G}$ are nucleotides.
 \end{example}
 
-The first step to replace a protein HMM by a Codon IMM is to define
+Defining $p(X_t=x_1x_2x_3 \gv Q_t=q_t)$ for every state $q_t \in \set{Q}$ produces an IMM $(Q_t,
+X_t)$ that emits codon sequences and, therefore, could in principle be used to evaluate sequences of
+nucleotides. However, such model would fail to match sequences that present indels at the base
+level: a match state that mainly emits Tyrosine (codons $\res{TAT}$ and $\res{TAC}$ in the canonical
+genetic code) should be able to consider the sequence $\res{TAAT}$ as a possible Tyrosine codon that
+happens to have a base insertion. We therefore propose an additional modification: the emitted codon
+has to go through two steps of (possible) base deletions and two steps of (possible) base insertions. In
+each of those steps, there is a probability $\epsilon$ of a modification happening.
+\Cref{fig:hmm-to-imm} summarizes the proposed modifications.
 
-that generates sequences of symbols from the alphabet $\set{B} = \{\res{A}, \res{C}, \res{G},
-\res{T}\}$ of DNA bases and that is able to account for base-indels and frame-shifting. Let
-$\state{M}_j$ be the so-called match state of an amino acid HMM and let $Q_t=\state{M}_j$.
+\begin{figure}[htbp]
+  \centering
+  \captionsetup{width=.6\linewidth}
+  \includegraphics[width=.6\linewidth]{figure/hmm-to-imm}
+  \caption{Conversion of protein HMM into codon IMM.\@ Amino acid distributions are first converted
+  into codon distributions. Generated codons go through four indels steps, each of which has a
+  probability $\epsilon$ of actually happening. At the end, we have a distribution of error-prone
+  codons: variable-length sequences having from one to five nucleotides.}\label{fig:hmm-to-imm}
+\end{figure}
 
 We will replace the codon emission process by one
 that instead produces base sequences of different lengths to account for errors and frame-shifting.

@@ -1,19 +1,16 @@
 \documentclass[a4paper]{article}
 
-\title{Protein HMM}
-\author{Danilo Horta}
-\date{August 2019}
-
-\usepackage{natbib}
-\usepackage{graphicx}
+\usepackage[a4paper, margin=0.5in]{geometry}
+\usepackage{graphicx, caption}
+\usepackage[T1]{fontenc}
 \usepackage{amsmath}
-\usepackage{amsthm}
 \usepackage{amssymb}
-\usepackage[margin=0.5in]{geometry}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{natbib}
 \usepackage{rotating}
 \usepackage{subcaption}
-\usepackage[T1]{fontenc}
-\usepackage{mathtools}
+\usepackage{cleveref}
 
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
@@ -40,8 +37,12 @@
 \newcommand*{\umax}[1]{\underset{#1}{\max}}%
 \newcommand*{\uumax}[2]{\underset{\substack{#1\\#2}}{\max}}%
 
-\newcommand*{\res}[1]{\mathrm{#1}}%
+\newcommand*{\res}[1]{\mathtt{#1}}%
 \newcommand*{\state}[1]{\mathrm{#1}}%
+
+\title{Protein HMM}
+\author{Danilo Horta}
+\date{August 2019}
 
 \begin{document}
 
