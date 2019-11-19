@@ -1,70 +1,73 @@
 \section{Codon IMM}
 
-A protein can be modelled by a HMM whose states emit amino acids. For example,
-\Cref{fig:core-model} shows a possible HMM architecture for aligning sequences of amino-acids,
-for which indels are modelled by insert ($\state{I}$) and delete ($\state{D}$) states and matched
+A protein can be modelled by a HMM with states that emit amino acids. For example,
+\Cref{fig:core-model} shows a possible HMM architecture for aligning sequences of amino acids, for
+which indels are modelled by insert ($\state{I}$) and delete ($\state{D}$) states and matched
 positions are modelled by match ($\state{M}$) states. Each match state defines a potentially
 distinct probability distribution over amino acids so as to model position-specific amino acid
 frequencies. Insert states might instead define the same background probability distribution over
 amino acids. Delete states are silent states and therefore do not emit any amino acid: it represents
 position-specific missing amino acids. $\state{B}$ and $\state{E}$ are special states that represent
-end start and end of alignment. In particular, the probability of $\state{B}$ being the first state
-is one: $p(Q_1=\state{B})=1$.
+the end and start positions of an alignment. In particular, the probability of $\state{B}$ being the
+first state is one: $p(Q_1=\state{B})=1$.
 
 \begin{figure}[htbp]
   \centering
   \captionsetup{width=.5\linewidth}
   \includegraphics[width=.5\linewidth]{figure/core-model}
-  \caption{$\state{B}$ and $\state{E}$ are silent states that denote the start and the end of an
-  aligment. States $\state{M}$ represent matches while states $\state{I}$ and $\state{D}$ model
-  indels.}\label{fig:core-model}
+  \caption{HMM architecture for aligning sequences of four positions. $\state{B}$ and $\state{E}$
+  are silent states denoting the start and the end positions of an aligment. States $\state{M}$
+  represent matches while states $\state{I}$ and $\state{D}$ model indels.}\label{fig:core-model}
 \end{figure}
 
 HMMs are widely used to model proteins and are used to search for homologous subsequences in target
 sequences made of amino acids. However, the researcher ocasionally do not have a ready-to-use amido
 acid sequence but instead a sequence of nucleotides that might contain homologous subsequences that
-code for proteins. Some residues of those homologous subsquences might be missing or might have been
-inserted by whatever reason. Still, one should be able to uncover error-prone subsequences when
-compared against to their homologous protein HMMs.
+code for proteins. Some nucleotides of those homologous subsquences might be missing or might have
+been inserted by whatever reason. Still, one should be able to uncover error-prone subsequences when
+compared against their homologous protein HMMs.
 
-Let $(Q_t, S_t)$ be a HMM with the amino acid alphabet $\set{A}$. We want to replace it by an IMM
-that preserves the model architecture (i.e., same set of states, state transitions and initial state
-probabilities) but instead have states that emit sequences of nucleotides instead of amino acids
-symbols. In particular, the new match and insert states will emit nucleotide sequences that varies
-in length from a single nucleotide to five nucleotides. The emission distribution of silent states
-(e.g., delete states) will stay the same: probability one of emitting an empty sequence in the IMM
-parlance.
+Let $(Q_t, S_t)$ be a HMM with the amino acid alphabet $\set{A}$ representing a protein profile. We
+want to replace it by an IMM that preserves the model architecture (i.e., same set of states, state
+transitions and initial state probabilities) but instead have states that emit sequences of
+nucleotides instead of amino acid symbols. In particular, the new match and insert states will emit
+nucleotide sequences that varies in length: from one to five nucleotides. The emission distribution
+of silent states (e.g., delete states and special ones) will stay the same: probability one of
+emitting an empty sequence in the IMM parlance. With such model, we hope to uncover error-prone
+sequences of nucleotides that are homologous to protein profiles.
 
-Let $\set{B}$ be a nucleotides alphabet (e.g., $\set{B} \eqdef \{\res{A}, \res{C}, \res{G},
+Let $\set{B}$ be a nucleotide alphabet (e.g., $\set{B} \eqdef \{\res{A}, \res{C}, \res{G},
 \res{T}\}$), and let $\state{M}$ be a state that in the protein HMM would emit an amino acid. From
-its amino acid distribution and any other relevant source of information (codon usage bias, for
-instance), one can define the probability $p(X_t=x_1x_2x_3 \gv Q_t=\state{M})$ of $\state{M}$
-emitting the codon $(x_1, x_2, x_3) \in \set{B}^3$.
+its amino acid distribution together with any other relevant source of information (codon usage
+bias, for instance), one can define the probability $p(X_t=x_1x_2x_3 \gv Q_t=\state{M})$ of
+$\state{M}$ emitting the codon $(x_1, x_2, x_3) \in \set{B}^3$.
 
 \begin{example}
   Suppose that a state $\state{M}$ has the amino acid distribution defined by
   \begin{equation*}
     p(S_t=\res{Y} \gv Q_t=\state{M}) = 0.8 ~~\text{and}~~ p(S_t=\res{C} \gv Q_t=\state{M}) = 0.2,
   \end{equation*}
-  where $\res{Y}$ and $\res{C}$ are Tyrosine and Cysteine.
-  Based on the canonical genetic code alone, we could define codon distribution as follows:
+  where $\res{Y}$ and $\res{C}$ are the Tyrosine and Cysteine amino acids from the original alphabet
+  $\set{A}$. Based on the canonical genetic code alone, we could define the codon distribution as
+  follows:
   \begin{equation*}
     \begin{split}
       p(X_t=\res{TAT}\gv Q_t=\state{M})= 0.8/2, &\quad p(S_t=\res{TAC}\gv Q_t=\state{M})=0.8/2\\
       p(X_t=\res{TGT}\gv Q_t=\state{M})= 0.2/2, &\quad p(S_t=\res{TGC}\gv Q_t=\state{M})=0.2/2,
     \end{split}
   \end{equation*}
-  where $\res{A}$, $\res{C}$, $\res{T}$, and $\res{G}$ are nucleotides.
+  where $\res{A}$, $\res{C}$, $\res{T}$, and $\res{G}$ are nucleotides from $\set{B}$.
 \end{example}
 
-Defining $p(X_t=x_1x_2x_3 \gv Q_t=q_t)$ for every state $q_t \in \set{Q}$ produces an IMM $(Q_t,
-X_t)$ that emits codon sequences and, therefore, could in principle be used to evaluate sequences of
-nucleotides. However, such model would fail to match sequences that present indels at the base
-level: a match state that mainly emits Tyrosine (codons $\res{TAT}$ and $\res{TAC}$ in the canonical
+Defining $p(X_t=x_1x_2x_3 \gv Q_t=q_t)$ as we did in the previous example for every state $q_t \in
+\set{Q}$ of a given protein HMM produces an IMM $(Q_t, X_t)$ that instead emits codon sequences.
+This model could in principle be used to evaluate sequences of nucleotides against the modelled
+protein. However, such a model would fail to match sequences that present indels at the base level:
+a match state that mainly emits Tyrosine (codons $\res{TAT}$ and $\res{TAC}$ in the canonical
 genetic code) should be able to consider the sequence $\res{TAAT}$ as a possible Tyrosine codon that
-happens to have a base insertion. We therefore propose an additional modification: the emitted codon
-has to go through two steps of (possible) base deletions and two steps of (possible) base insertions. In
-each of those steps, there is a probability $\eps$ of a modification happening.
+happens to have a base insertion. We therefore propose an additional, and crucial, modification: the
+emitted codon has to go through two steps of base deletions and two steps of base insertions. In
+each of those steps, there will be a (small) probability $\eps$ of a modification happening.
 \Cref{fig:hmm-to-imm} summarizes the proposed modifications.
 
 \begin{figure}[htbp]
@@ -72,17 +75,18 @@ each of those steps, there is a probability $\eps$ of a modification happening.
   \captionsetup{width=.6\linewidth}
   \includegraphics[width=.6\linewidth]{figure/hmm-to-imm}
   \caption{Conversion of protein HMM into codon IMM.\@ Amino acid distributions are first converted
-  into codon distributions. Generated codons go through four indels steps, each of which has a
-  probability $\eps$ of actually happening. At the end, we have a distribution of error-prone
-  codons: variable-length sequences having from one to five nucleotides.}\label{fig:hmm-to-imm}
+  into codon distributions. Generated codons go through four indel steps, each of which has a
+  probability $\eps$ of actually modifiying the current sequence. At the end, we have a distribution
+  of error-prone codons: variable-length sequences of one, two, three, four, or five
+  nucleotides.}\label{fig:hmm-to-imm}
 \end{figure}
 
 The base-indel steps of our proposed mofication is graphically detailed in \Cref{fig:codon-hmm-tree}
-and is further explained here. The deletion can happen in any of the three codon positions with
-equal probability. If a deletion has already happened (i.e., the first deletion step has indeed
-modified the emitted codon), the next deletion can happen in any of the remaining two positions with
-equal probability. The insertion can happen between any two bases, before the first base or after
-the last base with equal probability.
+and is further explained in the following. The deletion can happen in any of the three codon
+positions with equal probability. If a deletion has already happened (i.e., the first deletion step
+has indeed modified the emitted codon), the next deletion can happen in any of the remaining two
+positions with equal probability. The insertion can happen between any two bases, before the first
+base, or after the last base with equal probability.
 
 \subsection{Analysis}
 
