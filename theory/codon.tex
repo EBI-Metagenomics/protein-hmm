@@ -65,15 +65,15 @@ This model could in principle be used to evaluate sequences of nucleotides again
 protein. However, such a model would fail to match sequences that present indels at the base level:
 a match state that mainly emits Tyrosine (codons $\res{TAT}$ and $\res{TAC}$ in the canonical
 genetic code) should be able to consider the sequence $\res{TAAT}$ as a possible Tyrosine codon that
-happens to have a base insertion. We therefore propose an additional, and crucial, modification: the
+happens to have a base insertion. We therefore propose an additional, crucial modification: the
 emitted codon has to go through two steps of base deletions and two steps of base insertions. In
 each of those steps, there will be a (small) probability $\eps$ of a modification happening.
 \Cref{fig:hmm-to-imm} summarizes the proposed modifications.
 
 \begin{figure}[htbp]
   \centering
-  \captionsetup{width=.6\linewidth}
-  \includegraphics[width=.6\linewidth]{figure/hmm-to-imm}
+  \captionsetup{width=.5\linewidth}
+  \includegraphics[width=.5\linewidth]{figure/hmm-to-imm}
   \caption{Conversion of protein HMM into codon IMM.\@ Amino acid distributions are first converted
   into codon distributions. Generated codons go through four indel steps, each of which has a
   probability $\eps$ of actually modifiying the current sequence. At the end, we have a distribution
@@ -86,7 +86,8 @@ and is further explained in the following. The deletion can happen in any of the
 positions with equal probability. If a deletion has already happened (i.e., the first deletion step
 has indeed modified the emitted codon), the next deletion can happen in any of the remaining two
 positions with equal probability. The insertion can happen between any two bases, before the first
-base, or after the last base with equal probability.
+base, or after the last base with equal probability. One remains to define the nucleotide
+distribution of the insertion process, which we shall assume to have been established for now.
 
 \subsection{Analysis}
 
