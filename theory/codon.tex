@@ -130,21 +130,26 @@ illustrated in \Cref{fig:len-dist} over different values of $\eps$.
 
 \subsection{Sequence distribution}
 
-We will write $p(X=x_1x_2x_3) = p(X=x_1x_2x_3 \gv Q_t = \mathrm M_j)$ for brevity.
-Underscore $\s$ denotes a summation over the corresponding random variables.
-For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
+Let us assume that we already have established the error-free codon distribution $p(X_t=x_1x_2x_3
+\gv Q_t=q_t)$ from the amino acid distribution of state $q_t$. This section will formally define the
+error-prone codon distribution $p(Z_t=z_1z_2\dots \gv Q_t=q_t)$ from distribution $p(X_t=x_1x_2x_3
+\gv Q_t = q_t)$ and parameter $\eps$ based on the outlined method.
+
+We will omit the index $t$ and the conditional part of the probability for simplicity. The next
+sections will also use an underscore $\s$ to denote a summation over the corresponding sequence
+positions. For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 
 \subsubsection{Sequences of length 1}
 
 \begin{equation*}
-  p(Z^1=z_1,F=1) = \eps^2(1-\eps)^2(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1)) / 3
+  p(Z=z_1) = \eps^2(1-\eps)^2(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1)) / 3
 \end{equation*}
 
 \subsubsection{Sequences of length 2}
 
 \begin{equation*}
   \begin{split}
-    p(Z^2=z_1z_2,F=2)
+    p(Z=z_1z_2)
         &= 2\eps(1-\eps)^3(p(X=\s z_1z_2) + p(X=z_1\s z_2) + p(X=z_1z_2\s))/3\\
         &+ \eps^3(1-\eps)(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1))p(z_2)/3\\
         &+ \eps^3(1-\eps)(p(X=z_2\s\s) + p(X=\s z_2\s) + p(X=\s\s z_2))p(z_1)/3
@@ -155,7 +160,7 @@ For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 
 \begin{equation*}
   \begin{split}
-    p(Z^3=z_1z_2z_3,F=3) &= (1-\eps)^4 p(X=z_1z_2z_3)\\
+    p(Z=z_1z_2z_3) &= (1-\eps)^4 p(X=z_1z_2z_3)\\
         &+ 4\eps^2(1-\eps)^2 (p(X=\s z_2 z_3) + p(X=z_2\s z_3) + p(X=z_2 z_3\s))p(z_1)/9\\
         &+ 4\eps^2(1-\eps)^2 (p(X=\s z_1 z_3) + p(X=z_1\s z_3) + p(X=z_1 z_3\s))p(z_2)/9\\
         &+ 4\eps^2(1-\eps)^2 (p(X=\s z_1 z_2) + p(X=z_1\s z_2) + p(X=z_1 z_2\s))p(z_3)/9\\
@@ -169,7 +174,7 @@ For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 
 \begin{equation*}
   \begin{split}
-    p(Z^4=z_1z_2z_3z_4,F=4) &= \eps(1-\eps)^3 (p(X=z_2z_3z_4)p(z_1)+p(X=z_1z_3z_4)p(z_2)\\
+    p(Z=z_1z_2z_3z_4) &= \eps(1-\eps)^3 (p(X=z_2z_3z_4)p(z_1)+p(X=z_1z_3z_4)p(z_2)\\
         &+p(X=z_1z_2z_4)p(z_3)+p(X=z_1z_2z_3)p(z_4))/2\\
         &+\eps^3(1-\eps)(\\
         &+ p(X=\s z_3z_4)p(z_1)p(z_2) + p(X=\s z_2z_4)p(z_1)p(z_3)\\
@@ -188,7 +193,7 @@ For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 
 \begin{equation*}
   \begin{split}
-    p(Z^5=z_1z_2z_3z_4z_5,F=5)
+    p(Z=z_1z_2z_3z_4z_5)
         &= \eps^2(1-\eps)^2(\\
         &+p(z_1)p(z_2)p(X=z_3z_4z_5)+p(z_1)p(z_3)p(X=z_2z_4z_5)\\
         &+p(z_1)p(z_4)p(X=z_2z_3z_5)+p(z_1)p(z_5)p(X=z_2z_3z_4)\\
@@ -199,7 +204,6 @@ For example, $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 \end{equation*}
 
 \newpage
-
 \begin{sidewaysfigure}[ht]
     \centering
     \includegraphics[scale=0.9]{figure/codon-hmm-tree}
