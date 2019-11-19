@@ -94,12 +94,6 @@ for $t>1$; and
   \viterbi(q_1) = p(S_1=z_1 \gv Q_1=q_1) p(Q_1=q_1).
 \end{equation*}
 
-
-% The notation $\viterbi(q_t)$ under the HMM context, and for a given sequence $\arr{z}$, conveys
-% three crucial information: (i) we are at step $t$ of the HMM process; (ii) the score is
-% about some state $q_t \in \set{Q}$; (iii) regarding (iii) the prefix $z_{1..t}$. The same notation under
-% the IMM context loses the information (iii): the index $t$ no longer unambigously defines a prefix.
-
 The simplicity of the notation $\viterbi(q_t)$ is no longer enough to define the Viterbi score for
 IMMs as the index $t$ does not unambigously defines a prefix of $\arr{z}$. We will also make use of
 an additional parameter $F_t\in \{0, 1, \dots, k\}$: $F_t=f_t$ means that $f_t$ is the length of the
