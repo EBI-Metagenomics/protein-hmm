@@ -67,7 +67,7 @@ a match state that mainly emits Tyrosine (codons $\res{TAT}$ and $\res{TAC}$ in 
 genetic code) should be able to consider the sequence $\res{TAAT}$ as a possible Tyrosine codon that
 happens to have a base insertion. We therefore propose an additional, crucial modification: the
 emitted codon has to go through two steps of base deletions and two steps of base insertions. In
-each of those steps, there will be a (small) probability $\eps$ of a modification happening.
+each of those steps, there will be a (small) probability $\e$ of a modification happening.
 \Cref{fig:hmm-to-imm} summarizes the proposed modifications.
 
 \begin{figure}[htbp]
@@ -76,7 +76,7 @@ each of those steps, there will be a (small) probability $\eps$ of a modificatio
   \includegraphics[width=.5\linewidth]{figure/hmm-to-imm}
   \caption{Conversion of protein HMM into codon IMM.\@ Amino acid distributions are first converted
   into codon distributions. Generated codons go through four indel steps, each of which has a
-  probability $\eps$ of actually modifiying the current sequence. At the end, we have a distribution
+  probability $\e$ of actually modifiying the current sequence. At the end, we have a distribution
   of error-prone codons: variable-length sequences of one, two, three, four, or five
   nucleotides.}\label{fig:hmm-to-imm}
 \end{figure}
@@ -95,7 +95,7 @@ Let us assume that we already have the error-free codon distribution $p(X_t=x_1x
 from the amino acid distribution of state $q_t$. Given that a base insertion occurs, let $p(x)$
 denote the probability of $x \in \set{B}$ being the inserted base. This section will formally define
 the error-prone codon distribution $p(Z_t=z_1z_2\dots \gv Q_t=q_t)$ from distribution
-$p(X_t=x_1x_2x_3 \gv Q_t = q_t)$ and parameter $\eps$ based on the outlined method. We will omit the
+$p(X_t=x_1x_2x_3 \gv Q_t = q_t)$ and parameter $\e$ based on the outlined method. We will omit the
 index $t$ and the conditional part of the probability for simplicity. The next sections will also
 use an underscore $\s$ to denote a summation over the corresponding sequence positions. For example,
 $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
@@ -103,7 +103,7 @@ $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 \subsubsection{Sequences of length 1}
 
 \begin{equation*}
-  p(Z=z_1) = \eps^2(1-\eps)^2(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1)) / 3
+  p(Z=z_1) = \e^2(1-\e)^2(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1)) / 3
 \end{equation*}
 
 \subsubsection{Sequences of length 2}
@@ -111,9 +111,9 @@ $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 \begin{equation*}
   \begin{split}
     p(Z=z_1z_2)
-        &= 2\eps(1-\eps)^3(p(X=\s z_1z_2) + p(X=z_1\s z_2) + p(X=z_1z_2\s))/3\\
-        &+ \eps^3(1-\eps)(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1))p(z_2)/3\\
-        &+ \eps^3(1-\eps)(p(X=z_2\s\s) + p(X=\s z_2\s) + p(X=\s\s z_2))p(z_1)/3
+        &= 2\e(1-\e)^3(p(X=\s z_1z_2) + p(X=z_1\s z_2) + p(X=z_1z_2\s))/3\\
+        &+ \e^3(1-\e)(p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1))p(z_2)/3\\
+        &+ \e^3(1-\e)(p(X=z_2\s\s) + p(X=\s z_2\s) + p(X=\s\s z_2))p(z_1)/3
   \end{split}
 \end{equation*}
 
@@ -121,13 +121,13 @@ $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 
 \begin{equation*}
   \begin{split}
-    p(Z=z_1z_2z_3) &= (1-\eps)^4 p(X=z_1z_2z_3)\\
-        &+ 4\eps^2(1-\eps)^2 (p(X=\s z_2 z_3) + p(X=z_2\s z_3) + p(X=z_2 z_3\s))p(z_1)/9\\
-        &+ 4\eps^2(1-\eps)^2 (p(X=\s z_1 z_3) + p(X=z_1\s z_3) + p(X=z_1 z_3\s))p(z_2)/9\\
-        &+ 4\eps^2(1-\eps)^2 (p(X=\s z_1 z_2) + p(X=z_1\s z_2) + p(X=z_1 z_2\s))p(z_3)/9\\
-        &+ \eps^4 (p(X=z_3\s\s) + p(X=\s z_3\s) + p(X=\s\s z_3))p(z_1)p(z_2)/9\\
-        &+ \eps^4 (p(X=z_2\s\s) + p(X=\s z_2\s) + p(X=\s\s z_2))p(z_1)p(z_3)/9\\
-        &+ \eps^4 (p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1))p(z_2)p(z_3)/9
+    p(Z=z_1z_2z_3) &= (1-\e)^4 p(X=z_1z_2z_3)\\
+        &+ 4\e^2(1-\e)^2 (p(X=\s z_2 z_3) + p(X=z_2\s z_3) + p(X=z_2 z_3\s))p(z_1)/9\\
+        &+ 4\e^2(1-\e)^2 (p(X=\s z_1 z_3) + p(X=z_1\s z_3) + p(X=z_1 z_3\s))p(z_2)/9\\
+        &+ 4\e^2(1-\e)^2 (p(X=\s z_1 z_2) + p(X=z_1\s z_2) + p(X=z_1 z_2\s))p(z_3)/9\\
+        &+ \e^4 (p(X=z_3\s\s) + p(X=\s z_3\s) + p(X=\s\s z_3))p(z_1)p(z_2)/9\\
+        &+ \e^4 (p(X=z_2\s\s) + p(X=\s z_2\s) + p(X=\s\s z_2))p(z_1)p(z_3)/9\\
+        &+ \e^4 (p(X=z_1\s\s) + p(X=\s z_1\s) + p(X=\s\s z_1))p(z_2)p(z_3)/9
   \end{split}
 \end{equation*}
 
@@ -135,9 +135,9 @@ $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 
 \begin{equation*}
   \begin{split}
-    p(Z=z_1z_2z_3z_4) &= \eps(1-\eps)^3 (p(X=z_2z_3z_4)p(z_1)+p(X=z_1z_3z_4)p(z_2)\\
+    p(Z=z_1z_2z_3z_4) &= \e(1-\e)^3 (p(X=z_2z_3z_4)p(z_1)+p(X=z_1z_3z_4)p(z_2)\\
         &+p(X=z_1z_2z_4)p(z_3)+p(X=z_1z_2z_3)p(z_4))/2\\
-        &+\eps^3(1-\eps)(\\
+        &+\e^3(1-\e)(\\
         &+ p(X=\s z_3z_4)p(z_1)p(z_2) + p(X=\s z_2z_4)p(z_1)p(z_3)\\
         &+ p(X=\s z_2z_3)p(z_1)p(z_4) + p(X=\s z_1z_4)p(z_2)p(z_3)\\
         &+ p(X=\s z_1z_3)p(z_2)p(z_4) + p(X=\s z_1z_2)p(z_3)p(z_4)\\
@@ -155,7 +155,7 @@ $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 \begin{equation*}
   \begin{split}
     p(Z=z_1z_2z_3z_4z_5)
-        &= \eps^2(1-\eps)^2(\\
+        &= \e^2(1-\e)^2(\\
         &+p(z_1)p(z_2)p(X=z_3z_4z_5)+p(z_1)p(z_3)p(X=z_2z_4z_5)\\
         &+p(z_1)p(z_4)p(X=z_2z_3z_5)+p(z_1)p(z_5)p(X=z_2z_3z_4)\\
         &+p(z_2)p(z_3)p(X=z_1z_4z_5)+p(z_2)p(z_4)p(X=z_1z_3z_5)\\
@@ -177,9 +177,44 @@ It therefore remains to compute
 for which $\pi$ is a path of the base-indel process.
 
 We have
+
+\subsubsection{Sequences of length 1}
+
 \begin{equation*}
-  p(Z=z_1 \gv X=x_1x_2x_3) = \sum_{i=1,2,3}\ind_{z_1}(x_i) (\eps^2/3)(1-\eps)^2
+  p(Z=z_1 \gv X=x_1x_2x_3) = \e^2(1-\e)^2(\I(x_1, z_1) + \I(x_2, z_1) + \I(x_3, z_1))/3
 \end{equation*}
+
+\subsubsection{Sequences of length 2}
+
+\begin{equation*}
+  \begin{split}
+    p(Z=z_1z_2 \gv X=x_1x_2x_3)
+        &= 2\e(1-\e)^3(\I(x_2, z_1)\I(x_3, z_2) + \I(x_1, z_1)\I(x_3, z_2) + \I(x_1, z_1)\I(x_2, z_2))/3\\
+        &+ \e^3(1-\e)(\I(x_1, z_1) + \I(x_2, z_1) + \I(x_3, z_1))p(z_2)/3\\
+        &+ \e^3(1-\e)(\I(x_1, z_2) + \I(x_2, z_2) + \I(x_3, z_2))p(z_1)/3
+  \end{split}
+\end{equation*}
+
+\begin{equation*}
+  \begin{split}
+    p(Z=z_1z_2 \gv X=x_1x_2x_3)
+    &= (1-\e)\e(2(1-\e)^2\I(x_1, z_1)\I(x_2, z_2)
+      + 2(1-\e)^2\I(x_1, z_1)\I(x_3, z_2)\\
+    &+ 2(1-\e)^2\I(x_2, z_1)\I(x_3, z_2)
+      + \e^2p(z_1)\I(x_1, z_2)\\
+    &+ \e^2p(z_1)\I(x_2, z_2)
+      + \e^2p(z_1)\I(x_3, z_2)\\
+    &+ \e^2p(z_2)\I(x_1, z_1)
+      + \e^2p(z_2)\I(x_2, z_1)\\
+    &+ \e^2p(z_2)\I(x_3, z_1))/3
+  \end{split}
+\end{equation*}
+
+\subsubsection{Sequences of length 3}
+
+\subsubsection{Sequences of length 4}
+
+\subsubsection{Sequences of length 5}
 
 \subsection{Analysis}
 
@@ -187,21 +222,21 @@ The codon emitted at node $\state{M}$ in \Cref{fig:codon-hmm-tree} can go throug
 4\}$ base indels during the node transitions that end at some leaf-node. The probability of
 it undergoing $m$ indels is given by
 \begin{equation*}
-  p(M=m) = \binom{4}{4-m} (1 - \eps)^{4-m} \eps^m,
+  p(M=m) = \binom{4}{4-m} (1 - \e)^{4-m} \e^m,
 \end{equation*}
 where the coefficient $\binom{4}{m}$ counts the number of paths corresponding to $m$ base indels.
-\Cref{fig:indel-dist} shows the base indel distributions over different values of $\eps$.
+\Cref{fig:indel-dist} shows the base indel distributions over different values of $\e$.
 Let $F$ be a random variable representing the final sequence length generated by the model in
 \Cref{fig:codon-hmm-tree}.
 We have the probabilities
 \begin{equation*}
   \begin{split}
-    p(F=1) = p(F=5) &= \eps^2(1-\eps)^2, \\
-    p(F=2) = p(F=4) &= 2\eps^3(1-\eps) + 2\eps(1-\eps)^3,~\text{and} \\
-    p(F=3)          &= \eps^4 + 4\eps^2(1-\eps)^2 + (1-\eps)^4,
+    p(F=1) = p(F=5) &= \e^2(1-\e)^2, \\
+    p(F=2) = p(F=4) &= 2\e^3(1-\e) + 2\e(1-\e)^3,~\text{and} \\
+    p(F=3)          &= \e^4 + 4\e^2(1-\e)^2 + (1-\e)^4,
   \end{split}
 \end{equation*}
-illustrated in \Cref{fig:len-dist} over different values of $\eps$.
+illustrated in \Cref{fig:len-dist} over different values of $\e$.
 
 \begin{figure}[htbp]
   \centering
@@ -217,7 +252,7 @@ illustrated in \Cref{fig:len-dist} over different values of $\eps$.
     \caption{Sequence length distribution.}\label{fig:len-dist}
   \end{subfigure}
   \caption{ Distribution of base indels and sequence length over the modification probability
-  $\eps$. It seems reasonable to choose a $\eps$ value that is smaller than $1/5$ such that
+  $\e$. It seems reasonable to choose a $\e$ value that is smaller than $1/5$ such that
   $p(M=m)<p(M=m+1)$, as per \Cref{fig:indel-dist}. }\label{fig:dist}
 \end{figure}
 
@@ -226,6 +261,6 @@ illustrated in \Cref{fig:len-dist} over different values of $\eps$.
     \centering
     \includegraphics[scale=0.9]{figure/codon-hmm-tree}
     \caption{Matched codon HMM tree.
-        The $\eps$-transitions occur infrequently and exist to account for sequence errors.
+        The $\e$-transitions occur infrequently and exist to account for sequence errors.
         The most probably path ends at the first leaf-node from left to right.}\label{fig:codon-hmm-tree}
 \end{sidewaysfigure}

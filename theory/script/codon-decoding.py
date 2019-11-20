@@ -124,11 +124,9 @@ def show_probs(paths):
             z = vecz[i]
             if seq[i] == "I":
                 cond.append(p(z))
-                # cond.append(Symbol(f"p({str(z)})"))
             else:
                 x = seq[i]
                 cond.append(I(z, x))
-                # cond.append(Symbol(f"I({z}={x})"))
 
         cond_prob = Mul(*cond)
         expr.append(cond_prob * path_prob)
@@ -144,9 +142,32 @@ def show_probs(paths):
         print(f"    {p5}.")
 
     print()
-    print(f"p(Z={zstr}|X=x₁x₂x₃) = " + str(simplify(Add(*expr))))
+    fexpr = Add(*expr)
+    print(f"p(Z={zstr}|X=x₁x₂x₃) = " + str(simplify(fexpr)))
+    print(to_latex(f"p(Z={zstr}|X=x₁x₂x₃) = " + str(simplify(fexpr))))
 
     return Add(*expr)
+
+
+def to_latex(msg):
+    trans = {
+        "x₁": "x_1",
+        "x₂": "x_2",
+        "x₃": "x_3",
+        "z₁": "z_1",
+        "z₂": "z_2",
+        "z₃": "z_3",
+        "z₄": "z_4",
+        "z₅": "z_5",
+        "e": "\\e",
+        "I": "\\I",
+        "**": "^",
+        "*": "",
+        "|": " \\gv ",
+    }
+    for k, v in trans.items():
+        msg = msg.replace(k, v)
+    return msg
 
 
 goal = """Let 𝜋 denote a path through the base-indel process.
@@ -159,7 +180,6 @@ print(goal)
 
 paths = generate_all_indel_paths()
 
-# expr: List[Any] = []
 expr = dict()
 for i in range(1, 6):
     print(f"Paths that lead to |𝐳|={i}")
