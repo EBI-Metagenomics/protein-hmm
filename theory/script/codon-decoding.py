@@ -118,7 +118,7 @@ def show_probs(paths):
         xstr = "".join(str(x) for x in vecx)
         p3 = "p(𝛑=𝜋)={}".format(simplify(path_prob))
         p4 = f"p(Z={zstr}|X={xstr}, 𝛑=𝜋) = {simplify(cond_prob)}"
-        p5 = f"p(Z={zstr}|X={xstr}) = " + str(expr[-1])
+        p5 = f"p(Z={zstr}, 𝛑=𝜋|X={xstr}) = " + str(expr[-1])
         print(f"{p1} leads to {p2};")
         print(f"    {p3}; {p4};")
         print(f"    {p5}.")
