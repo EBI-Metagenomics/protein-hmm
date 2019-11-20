@@ -168,8 +168,6 @@ for i in range(1, 6):
     expr[f"|z|={i}"] = show_probs([path for path in paths if path_seq_len(path) == i])
     print()
 
-# sexpr = simplify(Add(*expr))
-# print(f"p(Z=𝐳|X=x₁x₂x₃) = " + str(sexpr))
 print()
 
 total = 0.0
@@ -187,20 +185,4 @@ for f in range(1, 6):
         for i in range(f):
             subs += [(zsyms[i], z[i])]
         total += expr[f"|z|={f}"].subs(subs).replace(p, p_eval)
-        # print(f"p(Z=z₁|X=x₁x₂x₃) = " + str(expr["|z|=1"].subs(subs).replace(p, p_eval)))
-        # print(
-        #     f"p(Z=z₁z₂|X=x₁x₂x₃) = " + str(expr["|z|=2"].subs(subs).replace(p, p_eval))
-        # )
-        # print(
-        #     f"p(Z=z₁z₂z₃|X=x₁x₂x₃) = "
-        #     + str(expr["|z|=3"].subs(subs).replace(p, p_eval))
-        # )
-        # print(
-        #     f"p(Z=z₁z₂z₃z₄|X=x₁x₂x₃) = "
-        #     + str(expr["|z|=4"].subs(subs).replace(p, p_eval))
-        # )
-        # print(
-        #     f"p(Z=z₁z₂z₃z₄z₅|X=x₁x₂x₃) = "
-        #     + str(expr["|z|=5"].subs(subs).replace(p, p_eval))
-        # )
 print(total)
