@@ -195,22 +195,19 @@ We have
   \end{split}
 \end{equation*}
 
+\subsubsection{Sequences of length 3}
+
 \begin{equation*}
   \begin{split}
-    p(Z=z_1z_2 \gv X=x_1x_2x_3)
-    &= (1-\e)\e(2(1-\e)^2\I(x_1, z_1)\I(x_2, z_2)
-      + 2(1-\e)^2\I(x_1, z_1)\I(x_3, z_2)\\
-    &+ 2(1-\e)^2\I(x_2, z_1)\I(x_3, z_2)
-      + \e^2p(z_1)\I(x_1, z_2)\\
-    &+ \e^2p(z_1)\I(x_2, z_2)
-      + \e^2p(z_1)\I(x_3, z_2)\\
-    &+ \e^2p(z_2)\I(x_1, z_1)
-      + \e^2p(z_2)\I(x_2, z_1)\\
-    &+ \e^2p(z_2)\I(x_3, z_1))/3
+    p(Z=z_1z_2z_3) &= (1-\e)^4 (1-\e)^4\I(x_1, z_1)\I(x_2, z_2)\I(x_3, z_3)\\
+        &+ 4\e^2(1-\e)^2 (\I(x_2, z_2)\I(x_3, z_3) + \I(x_1, z_2)\I(x_3, z_ 3) + \I(x_1, z_2)\I(x_2, z_3)) p(z_1)/9\\
+        &+ 4\e^2(1-\e)^2 (\I(x_2, z_1)\I(x_3, z_3) + \I(x_1, z_1)\I(x_3, z_3) + \I(x_1, z_1)\I(x_2, z_3))p(z_2)/9\\
+        &+ 4\e^2(1-\e)^2 (\I(x_2, z_1)\I(x_3, z_2) + \I(x_1, z_1)\I(x_3, z_2) + \I(x_1, z_1)\I(x_2, z_2))p(z_3)/9\\
+        &+ \e^4 (\I(x_1, z_3) + \I(x_2, z_3) + \I(x_3, z_3))p(z_1)p(z_2)/9\\
+        &+ \e^4 (\I(x_1, z_2) + \I(x_2, z_2) + \I(x_3, z_2))p(z_1)p(z_3)/9\\
+        &+ \e^4 (\I(x_1, z_1) + \I(x_2, z_1) + \I(x_3, z_1))p(z_2)p(z_3)/9
   \end{split}
 \end{equation*}
-
-\subsubsection{Sequences of length 3}
 
 \subsubsection{Sequences of length 4}
 
