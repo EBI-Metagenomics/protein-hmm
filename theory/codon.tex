@@ -166,7 +166,8 @@ $p(X=x_1\s\s)=\sum_{x_2,x_3}p(X=x_1x_2x_3)$.
 
 \subsection{Codon decoding}
 
-Note that
+The codon $x_1x_2x_3$ that maximizes the posterior $p(X=x_1x_2x_3 \gv Z=\arr{z})$ is the decoded
+codon for the given matched or inserted subsequence $\arr{z}$. Note that
 \begin{equation*}
   p(X=x_1x_2x_3 \gv Z=\arr{z}) \propto p(Z=\arr{z} \gv X=x_1x_2x_3) p(X=x_1x_2x_3).
 \end{equation*}
@@ -175,8 +176,6 @@ It therefore remains to compute
   p(Z=\arr{z} \gv X=x_1x_2x_3) = \sum_{\pi}p(Z=\arr{z} \gv \Pi=\pi, X=x_1x_2x_3) p(\Pi=\pi),
 \end{equation*}
 for which $\pi$ is a path of the base-indel process.
-
-We have
 
 \subsubsection{Sequences of length 1}
 
