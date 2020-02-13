@@ -9,9 +9,9 @@ We host the discussions at [trans-hmmer basecamp](https://3.basecamp.com/3983891
 
 ## Implementation
 
-- [IMM](https://github.com/EBI-Metagenomics/imm): Invisible Markov Model library. It is an implementation of Hidden Markov Model whose states are allowed to emmit  variable-length sequences.
+- [IMM](https://github.com/EBI-Metagenomics/imm): Invisible Markov Model library. It is an implementation of Hidden Markov Model whose states are allowed to emmit variable-length sequences.
 - [NMM](https://github.com/EBI-Metagenomics/nmm): Nucleotides Markov Model library. It defines IMMs with states that emmit sequences of nucleotides.
-- [NMM-py](https://github.com/EBI-Metagenomics/nmm-py): Python package that builds nucleotide-aware Protein profiles.
+- [NMM-py](https://github.com/EBI-Metagenomics/nmm-py): Python package that wraps the `imm` and `nmm` C libraries.
+- [ISEQ](https://github.com/EBI-Metagenomics/iseq): Python package that builds nucleotide-aware Protein profiles.
 - [Fasta reader](https://github.com/EBI-Metagenomics/fasta-reader-py)
 - [HMMER reader](https://github.com/EBI-Metagenomics/hmmer-reader-py)
-
